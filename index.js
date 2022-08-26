@@ -127,14 +127,16 @@ bot.action('sendNow', async (ctx) => {
     // 保存红包信息到数据库
     // 发送信息到target
     try {
-      await ctx.telegram.sendMessage(config.chatId, config.text, {
+      const res = await ctx.telegram.sendMessage(config.chatId, config.text, {
         protect_content: true,
         ...Markup.inlineKeyboard([
           [Markup.button.callback('Snatch!', 'snatch')],
         ])
       })
+      const message_id = res.message_id
+      const chat_id = res.chat.id
+      console.log(chat_id, message_id)
     } catch (e) {
-      console.log(e)
       ctx.reply('Sorry, I cannot send message to target chat.')
     }
   } else {
@@ -143,15 +145,12 @@ bot.action('sendNow', async (ctx) => {
 })
 
 bot.action('snatch', async (ctx) => {
-  console.log(ctx)
   await ctx.answerCbQuery()
   await ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got XX $NEST.
 
 Check your wallet address now!
 
-update_id: ${ctx.update.update_id}
-id: ${ctx.update.callback_query.id}
-chat_instance: ${ctx.update.callback_query.chat_instance}
+message_id: ${ctx.update.callback_query.message.message_id}
 `, {
     reply_to_message_id: ctx.update.callback_query.message.message_id,
   })
