@@ -1,0 +1,9 @@
+{
+  "name": "NESTRedEnvelopesBot",
+  "version": "1.0.0",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.154.0",
+    "@aws-sdk/lib-dynamodb": "^3.154.0",
+    "telegraf": "^4.8.6"
+  }
+}
