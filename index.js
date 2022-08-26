@@ -1,7 +1,6 @@
 const {Telegraf, Markup, session} = require('telegraf')
 const {PutCommand, DynamoDBDocumentClient, QueryCommand, UpdateCommand} = require('@aws-sdk/lib-dynamodb');
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
-const {ethers} = require("ethers")
 const {Snowflake} = require('nodejs-snowflake');
 const {isAddress} = require("ethers/lib/utils");
 
@@ -200,10 +199,9 @@ Please pay attention to the group news. Good luck next time.`, {
     amount = redEnvelop.balance
   } else {
     // get random amount
-    amount = Math.floor(Math.random() * (redEnvelop.config.max - redEnvelop.config.min + 1) + redEnvelop.config.min)
+    amount = Math.floor(Math.random() * (Math.min(redEnvelop.config.max, redEnvelop.balance) - redEnvelop.config.min + 1) + redEnvelop.config.min)
     // check if red envelope is enough
-    if (redEnvelop.balance < amount) {
-      amount = redEnvelop.balance
+    if (redEnvelop.balance === amount) {
       status = 'pending'
     }
   }
