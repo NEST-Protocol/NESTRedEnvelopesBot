@@ -1,8 +1,9 @@
 const {Telegraf, Markup, session} = require('telegraf')
-const {PutCommand, DynamoDBDocumentClient, GetCommand} = require('@aws-sdk/lib-dynamodb');
+const {PutCommand, DynamoDBDocumentClient, QueryCommand, UpdateCommand} = require('@aws-sdk/lib-dynamodb');
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
 const {ethers} = require("ethers")
-const { Snowflake } = require('nodejs-snowflake');
+const {Snowflake} = require('nodejs-snowflake');
+const {isAddress} = require("ethers/lib/utils");
 
 //
 //    #####
@@ -43,6 +44,10 @@ bot.use(session())
 //
 bot.start(async (ctx) => {
   // Todo: check user info in dynamodb
+  const chat_id = ctx.chat.id;
+  if (chat_id < 0) {
+    return
+  }
   await replyL1MenuContent(ctx)
 })
 
@@ -89,7 +94,7 @@ min: min amount of each red envelope
 text: best wishes
 chatId: target chatId
 
-For example: {"quantity": 10, "token": "NEST", "amount": 20, "max": 10, "min": 1, "text": "NEST Red Envelopes", "chatId": "@nesttestredenvelopes"}`, {
+For example: {"quantity": 10, "token": "NEST", "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Red Envelope. @NESTRedEnvelopsBot", "chatId": "@nesttestredenvelopes"}`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
@@ -98,41 +103,18 @@ For example: {"quantity": 10, "token": "NEST", "amount": 20, "max": 10, "min": 1
   ctx.session = {intent: 'config'}
 })
 
-bot.on('message', async (ctx) => {
-  const intent = ctx.session?.intent
-  if (intent === 'config') {
-    try {
-      const config = JSON.parse(ctx.message.text)
-      await ctx.reply(`Check it again:
-
-quantity: ${config.quantity},
-token: ${config.token},
-amount: ${config.amount},
-max: ${ config.max},
-min: ${config.min},
-text: ${config.text},
-chatId: ${config.chatId}
-`, Markup.inlineKeyboard([
-            [Markup.button.callback('Checked, Send Now!', 'send')],
-            [Markup.button.callback('« Back', 'backToL1MenuContent')],
-          ])
-      )
-      ctx.session = {intent: undefined, config: config}
-    } catch (e) {
-      ctx.reply('Sorry, I cannot understand your config. Please try again.')
-    }
-  } else {
-    ctx.reply('Hello!')
-  }
-})
-
 // L3 send
 bot.action('send', async (ctx) => {
   const config = ctx.session?.config
   if (config) {
     try {
       // send message to chat_id, record chat_id and message_id to dynamodb
-      const res = await ctx.telegram.sendMessage(config.chatId, config.text, {
+      const res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
+
+How to snatch this red envelope:
+1. ☝️ FIRST TIME: reply your wallet address in the group directly!
+2. 🚀 FASTER: click bottom Snatch button!
+3. 🤑 RECOMMEND: pay attention to this robot.`, {
         protect_content: true,
         ...Markup.inlineKeyboard([
           [Markup.button.callback('Snatch!', 'snatch')],
@@ -167,18 +149,149 @@ bot.action('send', async (ctx) => {
 })
 
 bot.action('snatch', async (ctx) => {
-  await ctx.answerCbQuery()
-  await ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got XX $NEST.
-
-Check your wallet address now!
-
-chat_id: ${ctx.update.callback_query.message.chat.id}
-message_id: ${ctx.update.callback_query.message.message_id}
-`, {
+  // check user info in dynamodb
+  const queryUserRes = await ddbDocClient.send(new QueryCommand({
+    ExpressionAttributeNames: {'#user': 'user_id'},
+    ProjectionExpression: 'id, #user, wallet',
+    TableName: 'nest-red-envelopes',
+    IndexName: 'user-index',
+    KeyConditionExpression: '#user = :user',
+    ExpressionAttributeValues: {
+      ':user': ctx.update.callback_query.from.id,
+    },
+  }));
+  // If no user info do nothing.
+  if (queryUserRes.Count === 0) {
+    await ctx.answerCbQuery('Please reply your wallet address in the group directly!')
+    return
+  }
+  const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
+    ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id'},
+    // ProjectionExpression: 'id, #user, wallet',
+    TableName: 'nest-red-envelopes',
+    IndexName: 'red-envelop-index',
+    KeyConditionExpression: '#chat_id = :chat_id AND #message_id = :message_id',
+    ExpressionAttributeValues: {
+      ':chat_id': ctx.update.callback_query.message.chat.id,
+      ':message_id': ctx.update.callback_query.message.message_id,
+    },
+  }))
+  if (queryUserRes.Count === 0) {
+    ctx.reply('I do not have this red envelope info. Please try again.')
+    return
+  }
+  const redEnvelop = queryRedEnvelopeRes.Items[0]
+  if (redEnvelop.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
+    await ctx.answerCbQuery('You have already snatched this red envelope!')
+    return
+  }
+  // check if red envelope is open
+  if (redEnvelop.status !== 'open') {
+    ctx.reply(`Sorry, you are late. XXX $NEST have been given away.
+Please pay attention to the group news. Good luck next time.`, {
+      reply_to_message_id: ctx.update.callback_query.message.message_id,
+    })
+    return
+  }
+  let status = 'open', amount
+  // check if red envelope is need empty
+  if (redEnvelop.record.length === redEnvelop.config.quantity - 1) {
+    status = 'pending'
+    amount = redEnvelop.balance
+  } else {
+    // get random amount
+    amount = Math.floor(Math.random() * (redEnvelop.config.max - redEnvelop.config.min + 1) + redEnvelop.config.min)
+    // check if red envelope is enough
+    if (redEnvelop.balance < amount) {
+      amount = redEnvelop.balance
+      status = 'pending'
+    }
+  }
+  // update red envelope info in dynamodb
+  await ddbDocClient.send(new UpdateCommand({
+    TableName: 'nest-red-envelopes',
+    Key: {id: redEnvelop.id},
+    UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
+    ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
+    ExpressionAttributeValues: {
+      ':amount': amount,
+      ':updated_at': new Date().getTime(),
+      ':record': [{
+        user_id: ctx.update.callback_query.from.id,
+        amount,
+        created_at: new Date().getTime(),
+      }],
+      ':status': status,
+    }
+  }))
+  
+  await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
+  ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`, {
     reply_to_message_id: ctx.update.callback_query.message.message_id,
   })
-  // Sorry, you are late. XXX $NEST have been given away.
-  // Please pay attention to the group news. Good luck next time.
+})
+
+bot.on('message', async (ctx) => {
+  const chat_id = ctx.message.chat.id
+  const input = ctx.message.text
+  // group message
+  if (chat_id < 0) {
+    if (isAddress(input)) {
+      // update wallet address in dynamodb
+      const queryUserRes = await ddbDocClient.send(new QueryCommand({
+        ExpressionAttributeNames: {'#user_id': 'user_id'},
+        ProjectionExpression: 'id, #user_id, wallet',
+        TableName: 'nest-red-envelopes',
+        IndexName: 'user-index',
+        KeyConditionExpression: '#user_id = :user_id',
+        ExpressionAttributeValues: {
+          ':user_id': ctx.message.from.id,
+        },
+      }));
+      if (queryUserRes.Count === 0) {
+        await ddbDocClient.send(new PutCommand({
+          TableName: 'nest-red-envelopes',
+          Item: {
+            id: uid.getUniqueID(),  // snowflake id
+            user_id: ctx.message.from.id,
+            wallet: input,
+            created_at: new Date().getTime(),
+            updated_at: new Date().getTime(),
+          },
+        })).then(() => {
+          ctx.reply(`Hello, ${ctx.from.username}. I have saved your wallet. You can snatch red envelope now.`)
+        }).catch(() => {
+          ctx.reply('Sorry, I cannot save your wallet. Please try again.')
+        })
+      }
+      // auto snatch red envelope
+      ctx.reply(`I will snatch red envelope for you. Please wait a moment.`)
+    }
+  } else {
+    const intent = ctx.session?.intent
+    if (intent === 'config') {
+      try {
+        const config = JSON.parse(ctx.message.text)
+        await ctx.reply(`Check it again:
+
+quantity: ${config.quantity},
+token: ${config.token},
+amount: ${config.amount},
+max: ${config.max},
+min: ${config.min},
+text: ${config.text},
+chatId: ${config.chatId}
+`, Markup.inlineKeyboard([
+              [Markup.button.callback('Checked, Send Now!', 'send')],
+              [Markup.button.callback('« Back', 'backToL1MenuContent')],
+            ])
+        )
+        ctx.session = {intent: undefined, config: config}
+      } catch (e) {
+        ctx.reply('Sorry, I cannot understand your config. Please try again.')
+      }
+    }
+  }
 })
 
 //
