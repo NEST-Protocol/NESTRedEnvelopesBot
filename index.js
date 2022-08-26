@@ -151,7 +151,6 @@ bot.action('snatch', async (ctx) => {
   // check user info in dynamodb
   const queryUserRes = await ddbDocClient.send(new QueryCommand({
     ExpressionAttributeNames: {'#user': 'user_id'},
-    ProjectionExpression: 'id, #user, wallet',
     TableName: 'nest-red-envelopes',
     IndexName: 'user-index',
     KeyConditionExpression: '#user = :user',
@@ -166,7 +165,6 @@ bot.action('snatch', async (ctx) => {
   }
   const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
     ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id'},
-    // ProjectionExpression: 'id, #user, wallet',
     TableName: 'nest-red-envelopes',
     IndexName: 'red-envelop-index',
     KeyConditionExpression: '#chat_id = :chat_id AND #message_id = :message_id',
@@ -186,12 +184,13 @@ bot.action('snatch', async (ctx) => {
   }
   // check if red envelope is open
   if (redEnvelop.status !== 'open') {
-    ctx.reply(`Sorry, you are late. XXX $NEST have been given away.
+    ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.
 Please pay attention to the group news. Good luck next time.`, {
       reply_to_message_id: ctx.update.callback_query.message.message_id,
     })
     return
   }
+  // can snatch
   let status = 'open', amount
   // check if red envelope is need empty
   if (redEnvelop.record.length === redEnvelop.config.quantity - 1) {
@@ -224,7 +223,9 @@ Please pay attention to the group news. Good luck next time.`, {
   }))
   
   await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
-  ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`, {
+  ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.
+
+Left ${redEnvelop.config.balance - amount} NEST!`, {
     reply_to_message_id: ctx.update.callback_query.message.message_id,
   })
 })
@@ -238,7 +239,6 @@ bot.on('message', async (ctx) => {
       // update wallet address in dynamodb
       const queryUserRes = await ddbDocClient.send(new QueryCommand({
         ExpressionAttributeNames: {'#user_id': 'user_id'},
-        ProjectionExpression: 'id, #user_id, wallet',
         TableName: 'nest-red-envelopes',
         IndexName: 'user-index',
         KeyConditionExpression: '#user_id = :user_id',
@@ -256,16 +256,79 @@ bot.on('message', async (ctx) => {
             created_at: new Date().getTime(),
             updated_at: new Date().getTime(),
           },
-        })).then(() => {
-          ctx.reply(`Hello, ${ctx.from.username}. I have saved your wallet. You can snatch red envelope now.`)
-        }).catch(() => {
+        })).catch(() => {
           ctx.reply('Sorry, I cannot save your wallet. Please try again.')
         })
       }
       // auto snatch red envelope
-      ctx.reply(`I will snatch red envelope for you. Please wait a moment.`)
+      const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
+        ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id'},
+        TableName: 'nest-red-envelopes',
+        IndexName: 'red-envelop-index',
+        KeyConditionExpression: '#chat_id = :chat_id AND #message_id = :message_id',
+        ExpressionAttributeValues: {
+          ':chat_id': ctx.message.chat.id,
+          ':message_id': ctx.message.message_id,
+        },
+      }))
+      if (queryUserRes.Count === 0) {
+        ctx.reply('I do not have this red envelope info. Please try again.')
+        return
+      }
+      const redEnvelop = queryRedEnvelopeRes.Items[0]
+      if (redEnvelop.record.some(record => record.user_id === ctx.from.id)) {
+        await ctx.answerCbQuery('You have already snatched this red envelope!')
+        return
+      }
+      // check if red envelope is open
+      if (redEnvelop.status !== 'open') {
+        ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.
+Please pay attention to the group news. Good luck next time.`, {
+          reply_to_message_id: ctx.message.message_id,
+        })
+        return
+      }
+      let status = 'open', amount
+      // check if red envelope is need empty
+      if (redEnvelop.record.length === redEnvelop.config.quantity - 1) {
+        status = 'pending'
+        amount = redEnvelop.balance
+      } else {
+        // get random amount
+        amount = Math.floor(Math.random() * (Math.min(redEnvelop.config.max, redEnvelop.balance) - redEnvelop.config.min + 1) + redEnvelop.config.min)
+        // check if red envelope is enough
+        if (redEnvelop.balance === amount) {
+          status = 'pending'
+        }
+      }
+      // update red envelope info in dynamodb
+      await ddbDocClient.send(new UpdateCommand({
+        TableName: 'nest-red-envelopes',
+        Key: {id: redEnvelop.id},
+        UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
+        ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
+        ExpressionAttributeValues: {
+          ':amount': amount,
+          ':updated_at': new Date().getTime(),
+          ':record': [{
+            user_id: ctx.from.id,
+            amount,
+            created_at: new Date().getTime(),
+          }],
+          ':status': status,
+        }
+      }))
+  
+      await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
+      ctx.reply(`Congratulations, ${ctx.from.username ?? ctx.from.id} have got ${amount} NEST.
+
+Left ${redEnvelop.config.balance - amount} NEST!`, {
+        reply_to_message_id: ctx.message.message_id,
+      })
     }
-  } else {
+  }
+  // DM message
+  else {
     const intent = ctx.session?.intent
     if (intent === 'config') {
       try {
