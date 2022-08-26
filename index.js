@@ -156,6 +156,7 @@ bot.action('send', async (ctx) => {
             record: [],
           },
         }))
+        await ctx.reply('Red Envelopes Sent Success!')
       }
     } catch (e) {
       ctx.reply('Sorry, I cannot send message to target chat.')
