@@ -166,7 +166,7 @@ bot.action('snatch', async (ctx) => {
   const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
     ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id'},
     TableName: 'nest-red-envelopes',
-    IndexName: 'red-envelop-index',
+    IndexName: 'red-envelope-index',
     KeyConditionExpression: '#chat_id = :chat_id AND #message_id = :message_id',
     ExpressionAttributeValues: {
       ':chat_id': ctx.update.callback_query.message.chat.id,
@@ -264,7 +264,7 @@ bot.on('message', async (ctx) => {
       const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
         ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id'},
         TableName: 'nest-red-envelopes',
-        IndexName: 'red-envelop-index',
+        IndexName: 'red-envelope-index',
         KeyConditionExpression: '#chat_id = :chat_id AND #message_id = :message_id',
         ExpressionAttributeValues: {
           ':chat_id': ctx.message.chat.id,
