@@ -150,6 +150,7 @@ bot.action('snatch', async (ctx) => {
 
 Check your wallet address now!
 
+chat_id: ${ctx.update.callback_query.message.chat.id}
 message_id: ${ctx.update.callback_query.message.message_id}
 `, {
     reply_to_message_id: ctx.update.callback_query.message.message_id,
