@@ -93,7 +93,7 @@ min: min amount of each red envelope
 text: best wishes
 chatId: target chatId
 
-For example: {"quantity": 10, "token": "NEST", "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Red Envelope. @NESTRedEnvelopsBot", "chatId": "@nesttestredenvelopes"}`, {
+For example: {"quantity": 10, "token": "NEST", "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Red Envelope. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes"}`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
