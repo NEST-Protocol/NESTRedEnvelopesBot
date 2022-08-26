@@ -4,6 +4,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.154.0",
     "@aws-sdk/lib-dynamodb": "^3.154.0",
+    "ethers": "^5.7.0",
     "telegraf": "^4.8.6"
   }
 }
