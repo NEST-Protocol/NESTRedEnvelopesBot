@@ -225,7 +225,7 @@ Please pay attention to the group news. Good luck next time.`, {
   await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
   ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.
 
-Left ${redEnvelop.config.balance - amount} NEST!`, {
+Left ${Number(redEnvelop.balance) - amount} NEST!`, {
     reply_to_message_id: ctx.update.callback_query.message.message_id,
   })
 })
@@ -322,7 +322,7 @@ Please pay attention to the group news. Good luck next time.`, {
       await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
       ctx.reply(`Congratulations, ${ctx.from.username ?? ctx.from.id} have got ${amount} NEST.
 
-Left ${redEnvelop.config.balance - amount} NEST!`, {
+Left ${redEnvelop.balance - amount} NEST!`, {
         reply_to_message_id: ctx.message.message_id,
       })
     }
