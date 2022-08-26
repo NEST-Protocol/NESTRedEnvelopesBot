@@ -2,6 +2,7 @@ const {Telegraf, Markup, session} = require('telegraf')
 const {PutCommand, DynamoDBDocumentClient, GetCommand} = require('@aws-sdk/lib-dynamodb');
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
 const {ethers} = require("ethers")
+const { Snowflake } = require('nodejs-snowflake');
 
 //
 //    #####
@@ -14,6 +15,11 @@ const {ethers} = require("ethers")
 //
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
+});
+
+const uid = new Snowflake({
+  custom_epoch: 1656604800000,
+  instance_id: 1,
 });
 
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
@@ -51,7 +57,7 @@ bot.start(async (ctx) => {
 //
 const replyL1MenuContent = async (ctx) => {
   ctx.reply(`Welcome to NEST Red Envelopes!`, Markup.inlineKeyboard([
-    [Markup.button.callback('Send Red Envelopes', 'send')],
+    [Markup.button.callback('Send Red Envelopes', 'config')],
     [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Wallet', 'wallet')],
   ]))
@@ -60,7 +66,7 @@ const replyL1MenuContent = async (ctx) => {
 const editReplyL1MenuContent = async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText('Welcome to NEST Red Envelopes Bot!', Markup.inlineKeyboard([
-    [Markup.button.callback('Send Red Envelopes', 'start')],
+    [Markup.button.callback('Send Red Envelopes', 'config')],
     [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Wallet', 'wallet')],
   ]))
@@ -69,8 +75,8 @@ const editReplyL1MenuContent = async (ctx) => {
 bot.command('menu', replyL1MenuContent)
 bot.action('backToL1MenuContent', editReplyL1MenuContent)
 
-// L2 Send
-bot.action('send', async (ctx) => {
+// L2 Config Red Envelope
+bot.action('config', async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText(`Enter red envelope config with json format.
   
@@ -107,7 +113,7 @@ min: ${config.min},
 text: ${config.text},
 chatId: ${config.chatId}
 `, Markup.inlineKeyboard([
-            [Markup.button.callback('Checked, Send Now!', 'sendNow')],
+            [Markup.button.callback('Checked, Send Now!', 'send')],
             [Markup.button.callback('« Back', 'backToL1MenuContent')],
           ])
       )
@@ -120,13 +126,12 @@ chatId: ${config.chatId}
   }
 })
 
-// L3 SendNow
-bot.action('sendNow', async (ctx) => {
+// L3 send
+bot.action('send', async (ctx) => {
   const config = ctx.session?.config
   if (config) {
-    // 保存红包信息到数据库
-    // 发送信息到target
     try {
+      // send message to chat_id, record chat_id and message_id to dynamodb
       const res = await ctx.telegram.sendMessage(config.chatId, config.text, {
         protect_content: true,
         ...Markup.inlineKeyboard([
@@ -135,7 +140,23 @@ bot.action('sendNow', async (ctx) => {
       })
       const message_id = res.message_id
       const chat_id = res.chat.id
-      console.log(chat_id, message_id)
+      if (message_id && chat_id) {
+        await ddbDocClient.send(new PutCommand({
+          TableName: 'nest-red-envelopes',
+          Item: {
+            id: uid.getUniqueID(),  // snowflake id
+            chat_id,
+            message_id,
+            config,
+            balance: config.amount, // left balance of red envelopes
+            status: 'open', // open, pending, closed
+            from: ctx.from,
+            created_at: new Date().getTime(),
+            updated_at: new Date().getTime(),
+            record: [],
+          },
+        }))
+      }
     } catch (e) {
       ctx.reply('Sorry, I cannot send message to target chat.')
     }
