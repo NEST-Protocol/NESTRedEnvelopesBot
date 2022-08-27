@@ -262,22 +262,24 @@ bot.on('message', async (ctx) => {
       }
       // auto snatch red envelope
       const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
-        ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id'},
+        ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id', '#status': 'status'},
         TableName: 'nest-red-envelopes',
         IndexName: 'red-envelope-index',
-        KeyConditionExpression: '#chat_id = :chat_id AND #message_id = :message_id',
+        KeyConditionExpression: '#chat_id = :chat_id AND #message_id < :message_id AND #status = :status',
+        ScanIndexForward: false,
         ExpressionAttributeValues: {
           ':chat_id': ctx.message.chat.id,
           ':message_id': ctx.message.message_id,
+          ':status': 'open',
         },
       }))
-      if (queryUserRes.Count === 0) {
-        ctx.reply('I do not have this red envelope info. Please try again.')
+      if (queryRedEnvelopeRes.Count === 0) {
+        ctx.reply('There is none red envelope in this group.')
         return
       }
       const redEnvelop = queryRedEnvelopeRes.Items[0]
       if (redEnvelop.record.some(record => record.user_id === ctx.from.id)) {
-        await ctx.answerCbQuery('You have already snatched this red envelope!')
+        await ctx.answerCbQuery('You have already snatched the latest red envelope!')
         return
       }
       // check if red envelope is open
