@@ -279,8 +279,8 @@ bot.on('message', async (ctx) => {
         return
       }
       const redEnvelop = queryRedEnvelopeRes.Items[0]
-      if (redEnvelop.record.some(record => record.user_id === ctx.from.id)) {
-        await ctx.answerCbQuery('You have already snatched the latest red envelope!')
+      if (redEnvelop.record.some(record => record.user_id === ctx.message.from.id)) {
+        ctx.reply(`Hello, ${ctx.message.from.username}. You have already snatched the latest red envelope!`)
         return
       }
       // check if red envelope is open
@@ -314,16 +314,14 @@ Please pay attention to the group news. Good luck next time.`, {
           ':amount': amount,
           ':updated_at': new Date().getTime(),
           ':record': [{
-            user_id: ctx.from.id,
+            user_id: ctx.message.from.id,
             amount,
             created_at: new Date().getTime(),
           }],
           ':status': status,
         }
       }))
-  
-      await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
-      ctx.reply(`Congratulations, ${ctx.from.username ?? ctx.from.id} have got ${amount} NEST.
+      ctx.reply(`Congratulations, ${ctx.message.from.username ?? ctx.message.from.id} have got ${amount} NEST.
 
 Left ${redEnvelop.balance - amount} NEST!`, {
         reply_to_message_id: ctx.message.message_id,
