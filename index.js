@@ -265,7 +265,8 @@ bot.on('message', async (ctx) => {
         ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id', '#status': 'status'},
         TableName: 'nest-red-envelopes',
         IndexName: 'red-envelope-index',
-        KeyConditionExpression: '#chat_id = :chat_id AND #message_id < :message_id AND #status = :status',
+        KeyConditionExpression: '#chat_id = :chat_id AND #message_id < :message_id',
+        FilterExpression: '#status = :status',
         ScanIndexForward: false,
         ExpressionAttributeValues: {
           ':chat_id': ctx.message.chat.id,
