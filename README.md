@@ -30,9 +30,9 @@ The id is snowflake id.
 - [x] Receive red envelope with 'Snatch!' button
 - [x] Receive red envelope with wallet address
 - [x] Receive red envelope with wallet address and async user wallet
-- [ ] Receive red envelope and async receive record in the group
+- [x] Receive red envelope and async receive record in the group
 - [ ] Send TX after receive all red envelope 
-- [ ] User send red envelope history
+- [x] User send red envelope history
 - [ ] User receive red envelope history
 - [ ] Wallet query 
 - [ ] Add red envelope cover 
