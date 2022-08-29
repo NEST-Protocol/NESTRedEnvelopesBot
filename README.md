@@ -1,6 +1,6 @@
 # NEST Red Envelopes Bot
 
-## Dynamo Design
+## DynamoDB Design
 
 ### Table 
 
