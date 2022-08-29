@@ -246,19 +246,6 @@ bot.action('snatch', async (ctx) => {
   const redEnvelop = queryRedEnvelopeRes.Items[0]
   if (redEnvelop.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
     await ctx.answerCbQuery('You have already snatched this red envelope!')
-    await ctx.editMessageText(`${redEnvelop.config.text}
-
-Click *Snatch* button or reply your *wallet*!
-
-*Snatch record:*
-${redEnvelop?.record.map(record => `${record.username ?? record.user_id} get ${record.amount} NEST!`).join('\n')}
-  `, {
-      parse_mode: 'Markdown',
-      protect_content: true,
-      ...Markup.inlineKeyboard([
-        [Markup.button.callback('Snatch!', 'snatch')],
-      ])
-    })
     return
   }
   // check if red envelope is open
@@ -369,7 +356,7 @@ bot.on('message', async (ctx) => {
       }
       const redEnvelop = queryRedEnvelopeRes.Items[0]
       if (redEnvelop.record.some(record => record.user_id === ctx.message.from.id)) {
-        ctx.reply(`Hello, ${ctx.message.from.username}. You have already snatched the latest red envelope!`)
+        await ctx.answerCbQuery('You have already snatched this red envelope!')
         return
       }
       // check if red envelope is open
