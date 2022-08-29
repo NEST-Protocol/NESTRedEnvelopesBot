@@ -164,10 +164,7 @@ bot.action('send', async (ctx) => {
       // send message to chat_id, record chat_id and message_id to dynamodb
       const res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
 
-How to snatch this red envelope:
-1. ☝️ FIRST TIME: reply your wallet address in the group directly!
-2. 🚀 FASTER: click bottom Snatch button!
-3. 🤑 RECOMMEND: pay attention to this robot.`, {
+Click snatch button or reply your wallet address!`, {
         protect_content: true,
         ...Markup.inlineKeyboard([
           [Markup.button.callback('Snatch!', 'snatch')],
@@ -249,6 +246,19 @@ bot.action('snatch', async (ctx) => {
   const redEnvelop = queryRedEnvelopeRes.Items[0]
   if (redEnvelop.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
     await ctx.answerCbQuery('You have already snatched this red envelope!')
+    await ctx.editMessageText(`${redEnvelop.config.text}
+
+Click *Snatch* button or reply your *wallet*!
+
+*Snatch record:*
+${redEnvelop?.record.map(record => `${record.username ?? record.user_id} get ${record.amount} NEST!`).join('\n')}
+  `, {
+      parse_mode: 'Markdown',
+      protect_content: true,
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('Snatch!', 'snatch')],
+      ])
+    })
     return
   }
   // check if red envelope is open
@@ -284,6 +294,7 @@ Please pay attention to the group news. Good luck next time.`, {
       ':updated_at': new Date().getTime(),
       ':record': [{
         user_id: ctx.update.callback_query.from.id,
+        username: ctx.update.callback_query.from.username,
         amount,
         created_at: new Date().getTime(),
       }],
@@ -294,11 +305,20 @@ Please pay attention to the group news. Good luck next time.`, {
   })
   
   await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
-  ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.
+  await ctx.editMessageText(`${redEnvelop.config.text}
 
-Left ${Number(redEnvelop.balance) - amount} NEST!`, {
-    reply_to_message_id: ctx.update.callback_query.message.message_id,
+Click *Snatch* button or reply your *wallet*!
+
+*Snatch record:*
+${redEnvelop?.record.map(record => `${record.username ?? record.user_id} get ${record.amount} NEST!`).join('\n')}
+  `, {
+    parse_mode: 'Markdown',
+    protect_content: true,
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('Snatch!', 'snatch')],
+    ])
   })
+  await ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
 })
 
 //
