@@ -412,6 +412,19 @@ Please pay attention to the group news. Good luck next time.`, {
       })).catch(() => {
         ctx.answerCbQuery("Some error occurred, please try again later.")
       })
+      await ctx.editMessageText(`${redEnvelop.config.text}
+
+Click *Snatch* button or reply your *wallet*!
+
+*Snatch record:*
+${redEnvelop?.record.map(record => `${record.username ?? record.user_id} get ${record.amount} NEST!`).join('\n')}
+  `, {
+        parse_mode: 'Markdown',
+        protect_content: true,
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback('Snatch!', 'snatch')],
+        ])
+      })
       ctx.reply(`Congratulations, ${ctx.message.from.username ?? ctx.message.from.id} have got ${amount} NEST.
 
 Left ${redEnvelop.balance - amount} NEST!`, {
