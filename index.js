@@ -1,5 +1,5 @@
 const {Telegraf, Markup, session} = require('telegraf')
-const {PutCommand, DynamoDBDocumentClient, QueryCommand, UpdateCommand} = require('@aws-sdk/lib-dynamodb');
+const {PutCommand, DynamoDBDocumentClient, QueryCommand, UpdateCommand, ScanCommand} = require('@aws-sdk/lib-dynamodb');
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
 const {Snowflake} = require('nodejs-snowflake');
 const {isAddress} = require("ethers/lib/utils");
@@ -89,17 +89,23 @@ bot.action('backToL1MenuContent', editReplyL1MenuContent)
 //   ####### #######    #     # #  ####    #    ####  #    #   #
 //
 const editReplyL2HistoryContent = async (ctx) => {
+  const result = await ddbDocClient.send(new ScanCommand({
+    TableName: 'nest-red-envelopes',
+    FilterExpression: 'creator = :creator',
+    ExpressionAttributeValues: {
+      ':creator': ctx.update.callback_query.from.id,
+    }
+  })).catch(() => {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  })
   await ctx.answerCbQuery()
+  const total = result.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
   await ctx.editMessageText(`*NEST Red Envelopes History*
 
-Send 0 Red Envelopes, total 0 NEST.
-Receive 0 Red Envelopes, total 0 NEST.
-`,
+Send ${result.Count} red envelopes, total ${total} NEST.`,
       {
         parse_mode: "Markdown",
         ...Markup.inlineKeyboard([
-          [Markup.button.callback('My Send', 'my-send')],
-          [Markup.button.callback('My Receive', 'my-receive')],
           [Markup.button.callback('« Back', 'backToL1MenuContent')],
         ])
       })
@@ -110,46 +116,6 @@ bot.action('history', async (ctx) => {
 })
 
 bot.action('backToL2HistoryContent', editReplyL2HistoryContent)
-
-//
-//   #        #####     #     #           #####
-//   #       #     #    ##   ## #   #    #     # ###### #    # #####
-//   #             #    # # # #  # #     #       #      ##   # #    #
-//   #        #####     #  #  #   #       #####  #####  # #  # #    #
-//   #             #    #     #   #            # #      #  # # #    #
-//   #       #     #    #     #   #      #     # #      #   ## #    #
-//   #######  #####     #     #   #       #####  ###### #    # #####
-//
-bot.action('my-send', async (ctx) => {
-  ctx.editMessageText(`*My Send Red Envelopes*
-
-  `, {
-    parse_mode: 'Markdown',
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('« Back', 'backToL2HistoryContent')],
-    ])
-  })
-})
-
-//
-//   #        #####     #     #          ######
-//   #       #     #    ##   ## #   #    #     # ######  ####  ###### # #    # ######
-//   #             #    # # # #  # #     #     # #      #    # #      # #    # #
-//   #        #####     #  #  #   #      ######  #####  #      #####  # #    # #####
-//   #             #    #     #   #      #   #   #      #      #      # #    # #
-//   #       #     #    #     #   #      #    #  #      #    # #      #  #  #  #
-//   #######  #####     #     #   #      #     # ######  ####  ###### #   ##   ######
-//
-bot.action('my-receive', async (ctx) => {
-  ctx.editMessageText(`*My Receive Red Envelopes*
-
-  `, {
-    parse_mode: 'Markdown',
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('« Back', 'backToL2HistoryContent')],
-    ])
-  })
-})
 
 //
 //   #        #####      #####
@@ -219,12 +185,14 @@ How to snatch this red envelope:
             config,
             balance: config.amount, // left balance of red envelopes
             status: 'open', // open, pending, closed
-            from: ctx.from,
+            creator: ctx.from.id,
             created_at: new Date().getTime(),
             updated_at: new Date().getTime(),
             record: [],
           },
-        }))
+        })).catch(() => {
+          ctx.answerCbQuery("Some error occurred, please try again later.")
+        })
         await ctx.reply('Red Envelopes Sent Success!')
       }
     } catch (e) {
@@ -254,7 +222,9 @@ bot.action('snatch', async (ctx) => {
     ExpressionAttributeValues: {
       ':user': ctx.update.callback_query.from.id,
     },
-  }));
+  })).catch(() => {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  });
   // If no user info do nothing.
   if (queryUserRes.Count === 0) {
     await ctx.answerCbQuery('Please reply your wallet address in the group directly!')
@@ -269,9 +239,11 @@ bot.action('snatch', async (ctx) => {
       ':chat_id': ctx.update.callback_query.message.chat.id,
       ':message_id': ctx.update.callback_query.message.message_id,
     },
-  }))
-  if (queryUserRes.Count === 0) {
-    ctx.reply('I do not have this red envelope info. Please try again.')
+  })).catch(() => {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  })
+  if (queryRedEnvelopeRes.Count === 0) {
+    ctx.answerCbQuery("This red envelope is not found.")
     return
   }
   const redEnvelop = queryRedEnvelopeRes.Items[0]
@@ -317,7 +289,9 @@ Please pay attention to the group news. Good luck next time.`, {
       }],
       ':status': status,
     }
-  }))
+  })).catch(() => {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  })
   
   await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
   ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.
@@ -353,7 +327,7 @@ bot.on('message', async (ctx) => {
           updated_at: new Date().getTime(),
         },
       })).catch(() => {
-        ctx.reply('Sorry, I cannot save your wallet. Please try again.')
+        ctx.answerCbQuery("Some error occurred, please try again later.")
       })
       // auto snatch red envelope
       const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
@@ -415,7 +389,9 @@ Please pay attention to the group news. Good luck next time.`, {
           }],
           ':status': status,
         }
-      }))
+      })).catch(() => {
+        ctx.answerCbQuery("Some error occurred, please try again later.")
+      })
       ctx.reply(`Congratulations, ${ctx.message.from.username ?? ctx.message.from.id} have got ${amount} NEST.
 
 Left ${redEnvelop.balance - amount} NEST!`, {
