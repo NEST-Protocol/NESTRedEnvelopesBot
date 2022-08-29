@@ -79,7 +79,15 @@ const editReplyL1MenuContent = async (ctx) => {
 bot.command('menu', replyL1MenuContent)
 bot.action('backToL1MenuContent', editReplyL1MenuContent)
 
-// L2 History
+//
+//   #        #####     #     #
+//   #       #     #    #     # #  ####  #####  ####  #####  #   #
+//   #             #    #     # # #        #   #    # #    #  # #
+//   #        #####     ####### #  ####    #   #    # #    #   #
+//   #       #          #     # #      #   #   #    # #####    #
+//   #       #          #     # # #    #   #   #    # #   #    #
+//   ####### #######    #     # #  ####    #    ####  #    #   #
+//
 const editReplyL2HistoryContent = async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText(`*NEST Red Envelopes History*
@@ -103,7 +111,15 @@ bot.action('history', async (ctx) => {
 
 bot.action('backToL2HistoryContent', editReplyL2HistoryContent)
 
-// L3 My Send
+//
+//   #        #####     #     #           #####
+//   #       #     #    ##   ## #   #    #     # ###### #    # #####
+//   #             #    # # # #  # #     #       #      ##   # #    #
+//   #        #####     #  #  #   #       #####  #####  # #  # #    #
+//   #             #    #     #   #            # #      #  # # #    #
+//   #       #     #    #     #   #      #     # #      #   ## #    #
+//   #######  #####     #     #   #       #####  ###### #    # #####
+//
 bot.action('my-send', async (ctx) => {
   ctx.editMessageText(`*My Send Red Envelopes*
 
@@ -115,7 +131,15 @@ bot.action('my-send', async (ctx) => {
   })
 })
 
-// L3 My Receive
+//
+//   #        #####     #     #          ######
+//   #       #     #    ##   ## #   #    #     # ######  ####  ###### # #    # ######
+//   #             #    # # # #  # #     #     # #      #    # #      # #    # #
+//   #        #####     #  #  #   #      ######  #####  #      #####  # #    # #####
+//   #             #    #     #   #      #   #   #      #      #      # #    # #
+//   #       #     #    #     #   #      #    #  #      #    # #      #  #  #  #
+//   #######  #####     #     #   #      #     # ######  ####  ###### #   ##   ######
+//
 bot.action('my-receive', async (ctx) => {
   ctx.editMessageText(`*My Receive Red Envelopes*
 
@@ -127,7 +151,15 @@ bot.action('my-receive', async (ctx) => {
   })
 })
 
-// L2 Config Red Envelope
+//
+//   #        #####      #####
+//   #       #     #    #     #  ####  #    # ###### #  ####
+//   #             #    #       #    # ##   # #      # #    #
+//   #        #####     #       #    # # #  # #####  # #
+//   #       #          #       #    # #  # # #      # #  ###
+//   #       #          #     # #    # #   ## #      # #    #
+//   ####### #######     #####   ####  #    # #      #  ####
+//
 bot.action('config', async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText(`Enter red envelope config with json format.
@@ -150,7 +182,15 @@ For example: {"quantity": 10, "token": "NEST", "amount": 20, "max": 10, "min": 1
   ctx.session = {intent: 'config'}
 })
 
-// L3 send
+//
+//   #        #####      #####
+//   #       #     #    #     # ###### #    # #####
+//   #             #    #       #      ##   # #    #
+//   #        #####      #####  #####  # #  # #    #
+//   #             #          # #      #  # # #    #
+//   #       #     #    #     # #      #   ## #    #
+//   #######  #####      #####  ###### #    # #####
+//
 bot.action('send', async (ctx) => {
   const config = ctx.session?.config
   if (config) {
@@ -195,7 +235,15 @@ How to snatch this red envelope:
   }
 })
 
-// Snatch Red Envelope
+//
+//     #####
+//   #     # #    #   ##   #####  ####  #    #
+//   #       ##   #  #  #    #   #    # #    #
+//    #####  # #  # #    #   #   #      ######
+//         # #  # # ######   #   #      #    #
+//   #     # #   ## #    #   #   #    # #    #
+//    #####  #    # #    #   #    ####  #    #
+//
 bot.action('snatch', async (ctx) => {
   // check user info in dynamodb
   const queryUserRes = await ddbDocClient.send(new QueryCommand({
@@ -279,7 +327,15 @@ Left ${Number(redEnvelop.balance) - amount} NEST!`, {
   })
 })
 
-// Receive Message
+//
+//   #######           #     #
+//   #     # #    #    ##   ## ######  ####   ####    ##    ####  ######
+//   #     # ##   #    # # # # #      #      #       #  #  #    # #
+//   #     # # #  #    #  #  # #####   ####   ####  #    # #      #####
+//   #     # #  # #    #     # #           #      # ###### #  ### #
+//   #     # #   ##    #     # #      #    # #    # #    # #    # #
+//   ####### #    #    #     # ######  ####   ####  #    #  ####  ######
+//
 bot.on('message', async (ctx) => {
   const chat_id = ctx.message.chat.id
   const input = ctx.message.text
