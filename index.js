@@ -287,29 +287,18 @@ bot.on('message', async (ctx) => {
   if (chat_id < 0) {
     if (isAddress(input)) {
       // update wallet address in dynamodb
-      const queryUserRes = await ddbDocClient.send(new QueryCommand({
-        ExpressionAttributeNames: {'#user_id': 'user_id'},
+      await ddbDocClient.send(new PutCommand({
         TableName: 'nest-red-envelopes',
-        IndexName: 'user-index',
-        KeyConditionExpression: '#user_id = :user_id',
-        ExpressionAttributeValues: {
-          ':user_id': ctx.message.from.id,
+        Item: {
+          id: uid.getUniqueID(),  // snowflake id
+          user_id: ctx.message.from.id,
+          wallet: input,
+          created_at: new Date().getTime(),
+          updated_at: new Date().getTime(),
         },
-      }));
-      if (queryUserRes.Count === 0) {
-        await ddbDocClient.send(new PutCommand({
-          TableName: 'nest-red-envelopes',
-          Item: {
-            id: uid.getUniqueID(),  // snowflake id
-            user_id: ctx.message.from.id,
-            wallet: input,
-            created_at: new Date().getTime(),
-            updated_at: new Date().getTime(),
-          },
-        })).catch(() => {
-          ctx.reply('Sorry, I cannot save your wallet. Please try again.')
-        })
-      }
+      })).catch(() => {
+        ctx.reply('Sorry, I cannot save your wallet. Please try again.')
+      })
       // auto snatch red envelope
       const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
         ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id', '#status': 'status'},
