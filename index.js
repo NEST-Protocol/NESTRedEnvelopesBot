@@ -344,15 +344,15 @@ bot.action('set-config', async (ctx) => {
   await ctx.editMessageText(`Enter red envelope config with json format.
   
 *parameters:*
-quantity: number of red envelopes
 token: token address
+quantity: number of red envelopes
 amount: amount of all red envelopes
 max: max amount of each red envelope
 min: min amount of each red envelope
 text: best wishes
 chatId: target chatId
 
-For example: {"quantity": 10, "token": "NEST", "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Red Envelope. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes"}`, {
+For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Red Envelope. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes"}`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
@@ -613,8 +613,8 @@ Left ${redEnvelop.balance - amount} NEST!`, {
         const config = JSON.parse(ctx.message.text)
         await ctx.reply(`Check it again:
 
-quantity: ${config.quantity},
 token: ${config.token},
+quantity: ${config.quantity},
 amount: ${config.amount},
 max: ${config.max},
 min: ${config.min},
