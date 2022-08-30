@@ -157,7 +157,6 @@ Remaining available: ${left} NEST`,
       {
         parse_mode: "Markdown",
         ...Markup.inlineKeyboard([
-          [Markup.button.callback('Export', 'export')],
           [Markup.button.callback('« Back', 'backToL1MenuContent')],
         ])
       })
@@ -298,7 +297,15 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
 
 bot.action('liquidate', editReplyL2DoLiquidateContent)
 
-// L3 Close
+//
+//    #        #####      #####
+//    #       #     #    #     # #       ####   ####  ######
+//    #             #    #       #      #    # #      #
+//    #        #####     #       #      #    #  ####  #####
+//    #             #    #       #      #    #      # #
+//    #       #     #    #     # #      #    # #    # #
+//    #######  #####      #####  ######  ####   ####  ######
+//
 const editReplyL3CloseContent = async (ctx) => {
   const result = await ddbDocClient.send(new ScanCommand({
     TableName: 'nest-red-envelopes',
@@ -334,7 +341,6 @@ const editReplyL3CloseContent = async (ctx) => {
 }
 
 bot.action('close', editReplyL3CloseContent)
-
 
 //
 //    #        #####      #####                   #####
@@ -658,13 +664,13 @@ chatId: ${config.chatId}
 })
 
 //
-//   #     #
-//   #     #   ##   #    # #####  #      ######
-//   #     #  #  #  ##   # #    # #      #
-//   ####### #    # # #  # #    # #      #####
-//   #     # ###### #  # # #    # #      #
-//   #     # #    # #   ## #    # #      #
-//   #     # #    # #    # #####  ###### ######
+//    #     #
+//    #     #   ##   #    # #####  #      ###### #####
+//    #     #  #  #  ##   # #    # #      #      #    #
+//    ####### #    # # #  # #    # #      #####  #    #
+//    #     # ###### #  # # #    # #      #      #####
+//    #     # #    # #   ## #    # #      #      #   #
+//    #     # #    # #    # #####  ###### ###### #    #
 //
 exports.handler = async (event, context, callback) => {
   const tmp = JSON.parse(event.body);
