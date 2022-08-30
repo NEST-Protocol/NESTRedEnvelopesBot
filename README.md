@@ -34,7 +34,6 @@ The id is snowflake id.
 - [x] Send TX after receive all red envelope 
 - [x] User send red envelope history
 - [x] Bot admin auth whitelist
-- [ ] User receive red envelope history
-- [ ] Wallet query 
+- [x] Wallet query 
 - [ ] Add red envelope cover 
 
