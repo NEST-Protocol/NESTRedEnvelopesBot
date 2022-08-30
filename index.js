@@ -44,9 +44,9 @@ const mnemonic = process.env.MNEMONIC
 
 const walletMnemonic = ethers.Wallet.fromMnemonic(mnemonic)
 
-const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC]);
+// const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC]);
 const BSCTestProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC_TEST]);
-const BSCProviderWithSinger = walletMnemonic.connect(BSCProvider)
+// const BSCProviderWithSinger = walletMnemonic.connect(BSCProvider)
 const BSCTestProviderWithSinger = walletMnemonic.connect(BSCTestProvider)
 
 const ddbClient = new DynamoDBClient({
@@ -344,7 +344,7 @@ bot.action('set-config', async (ctx) => {
   await ctx.editMessageText(`Enter red envelope config with json format.
   
 *parameters:*
-token: token address
+token: token symbol
 quantity: number of red envelopes
 amount: amount of all red envelopes
 max: max amount of each red envelope
@@ -611,6 +611,18 @@ Left ${redEnvelop.balance - amount} NEST!`, {
     if (intent === 'config') {
       try {
         const config = JSON.parse(ctx.message.text)
+        if (config.token !== 'NEST') {
+          ctx.reply('Token must be NEST.')
+          return
+        }
+        if (config.min > config.max) {
+          ctx.reply('Min amount must be less than max amount.')
+          return
+        }
+        if (config.quantity < 1) {
+          ctx.reply('Quantity must be greater than 0.')
+          return
+        }
         await ctx.reply(`Check it again:
 
 token: ${config.token},
