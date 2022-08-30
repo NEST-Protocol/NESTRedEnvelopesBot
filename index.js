@@ -5,6 +5,7 @@ const {Snowflake} = require('nodejs-snowflake');
 const {isAddress} = require("ethers/lib/utils");
 const {ethers} = require("ethers");
 const freeTransferAbi = require("./abis/FreeTransfer.json");
+const erc20abi = require("./abis/erc20.json");
 
 //
 //    #####
@@ -48,6 +49,9 @@ const walletMnemonic = ethers.Wallet.fromMnemonic(mnemonic)
 const BSCTestProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC_TEST]);
 // const BSCProviderWithSinger = walletMnemonic.connect(BSCProvider)
 const BSCTestProviderWithSinger = walletMnemonic.connect(BSCTestProvider)
+
+const BSCTestFreeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[SupportedChainId.BSC_TEST], freeTransferAbi, BSCTestProviderWithSinger)
+const NESTTestContract = new ethers.Contract(NEST_ADDRESS[SupportedChainId.BSC_TEST], erc20abi, BSCTestProviderWithSinger)
 
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
@@ -197,14 +201,18 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
         },
       }))
     ])
+    const balance = Number(ethers.utils.formatEther(await NESTTestContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
+    const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
     await ctx.answerCbQuery()
     await ctx.editMessageText(`*NEST Red Envelopes Liquidate*
   
-Number of pending red envelopes: ${pendingResult.Count}
-Number of processing red envelopes: ${processingResult.Count}`, {
+Number of pending red envelopes: ${pendingResult.Count}, total amount: ${pendingAmount} NEST.
+Bot wallet balance: ${balance} NEST.
+
+Number of processing red envelopes: ${processingResult.Count}. Please check out TX and close that.`, {
       parse_mode: "Markdown",
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('Liquidate All', 'liquidate', pendingResult.Count === 0)],
+        [Markup.button.callback('Liquidate All', 'liquidate', pendingResult.Count === 0 || balance < pendingAmount)],
         [Markup.button.callback('Close All', 'close', processingResult.Count === 0)],
         [Markup.button.callback('« Back', 'backToL1MenuContent')],
       ])
@@ -251,13 +259,11 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
   // send tx
   const addressList = pendingList.map(item => item.wallet)
   const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
-  const tokenAddress = NEST_ADDRESS[SupportedChainId.BSC_TEST]
-  const freeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[SupportedChainId.BSC_TEST], freeTransferAbi, BSCTestProviderWithSinger)
   try {
-    const res = await freeTransferContract.transfer(
+    const res = await BSCTestFreeTransferContract.transfer(
         addressList,
         tokenAmountList,
-        tokenAddress,
+        NEST_ADDRESS[SupportedChainId.BSC_TEST],
     )
     // set them to processing, and record tx hash
     for (const item of result.Items) {
@@ -621,6 +627,11 @@ Left ${redEnvelop.balance - amount} NEST!`, {
         }
         if (config.quantity < 1) {
           ctx.reply('Quantity must be greater than 0.')
+          return
+        }
+        const balance = Number(ethers.utils.formatEther(await NESTTestContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
+        if (config.amount > balance) {
+          ctx.reply(`Amount must be less than ${balance} NEST.`)
           return
         }
         await ctx.reply(`Check it again:
