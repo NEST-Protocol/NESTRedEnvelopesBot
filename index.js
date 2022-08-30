@@ -409,13 +409,13 @@ Click snatch button or reply your wallet address!`, {
         })).catch(() => {
           ctx.answerCbQuery("Some error occurred, please try again later.")
         })
-        await ctx.reply('Red Envelopes Sent Success!')
+        await ctx.answerCbQuery('Red Envelopes Sent Success!')
       }
     } catch (e) {
-      ctx.reply('Sorry, I cannot send message to target chat.')
+      ctx.answerCbQuery('Sorry, I cannot send message to target chat.')
     }
   } else {
-    ctx.reply('Sorry, I cannot understand your config. Please try again.')
+    ctx.answerCbQuery('Sorry, I cannot understand your config. Please try again.')
   }
 })
 
