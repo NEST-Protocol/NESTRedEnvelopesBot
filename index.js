@@ -284,13 +284,10 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       }));
     }
     await ctx.answerCbQuery('Liquidate Success!')
-    await ctx.editMessageText(`TX hash: ${res.hash}`, Markup.inlineKeyboard([
+    await ctx.editMessageText(`TX hash: ${TX_URL[SupportedChainId.BSC_TEST]}${res.hash}`, Markup.inlineKeyboard([
       [Markup.button.callback('Close All', 'close')],
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
     ]))
-    for (const item of result.Items) {
-      await ctx.telegram.sendMessage(item.id, `Your red envelope has been liquidated, TX hash: ${TX_URL[SupportedChainId.BSC_TEST]}${res.hash}`)
-    }
   } catch (e) {
     await ctx.answerCbQuery("Some error occurred, please try again later.")
   }
@@ -618,20 +615,20 @@ Left ${redEnvelop.balance - amount} NEST!`, {
       try {
         const config = JSON.parse(ctx.message.text)
         if (config.token !== 'NEST') {
-          ctx.reply('Token must be NEST.')
+          ctx.answerCbQuery('Token must be NEST. Please try again later.')
           return
         }
         if (config.min > config.max) {
-          ctx.reply('Min amount must be less than max amount.')
+          ctx.answerCbQuery('Min amount must be less than max amount. Please try again later.')
           return
         }
         if (config.quantity < 1) {
-          ctx.reply('Quantity must be greater than 0.')
+          ctx.answerCbQuery('Quantity must be greater than 0. Please try again later.')
           return
         }
         const balance = Number(ethers.utils.formatEther(await NESTTestContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
         if (config.amount > balance) {
-          ctx.reply(`Amount must be less than ${balance} NEST.`)
+          ctx.answerCbQuery(`Amount must be less than ${balance} NEST. Please try again later.`)
           return
         }
         await ctx.reply(`Check it again:
@@ -650,7 +647,7 @@ chatId: ${config.chatId}
         )
         ctx.session = {intent: undefined, config: config}
       } catch (e) {
-        ctx.reply('Sorry, I cannot understand your config. Please try again.')
+        ctx.answerCbQuery('Sorry, I cannot understand your config. Please try again.')
       }
     }
   }
