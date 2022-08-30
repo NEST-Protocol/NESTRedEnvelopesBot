@@ -227,6 +227,7 @@ bot.action('snatch', async (ctx) => {
     await ctx.answerCbQuery('Please reply your wallet address in the group directly!')
     return
   }
+  const user = queryUserRes.Items[0]
   const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
     ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id'},
     TableName: 'nest-red-envelopes',
@@ -244,29 +245,14 @@ bot.action('snatch', async (ctx) => {
     return
   }
   const redEnvelop = queryRedEnvelopeRes.Items[0]
-  await ctx.editMessageText(`${redEnvelop.config.text}
-
-Click *Snatch* button or reply your *wallet*!
-
-*Snatch record:*
-${redEnvelop?.record.map(record => `${record.username ?? record.user_id} get ${record.amount} NEST!`).join('\n')}
-  `, {
-    parse_mode: 'Markdown',
-    protect_content: true,
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('Snatch!', 'snatch')],
-    ])
-  })
   if (redEnvelop.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
     await ctx.answerCbQuery('You have already snatched this red envelope!')
     return
   }
   // check if red envelope is open
   if (redEnvelop.status !== 'open') {
-    ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.
-Please pay attention to the group news. Good luck next time.`, {
-      reply_to_message_id: ctx.update.callback_query.message.message_id,
-    })
+    await ctx.answerCbQuery(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.
+Please pay attention to the group news. Good luck next time.`)
     return
   }
   // can snatch
@@ -296,6 +282,7 @@ Please pay attention to the group news. Good luck next time.`, {
         user_id: ctx.update.callback_query.from.id,
         username: ctx.update.callback_query.from.username,
         amount,
+        wallet: user.wallet,
         created_at: new Date().getTime(),
       }],
       ':status': status,
@@ -354,29 +341,14 @@ bot.on('message', async (ctx) => {
         return
       }
       const redEnvelop = queryRedEnvelopeRes.Items[0]
-      await ctx.editMessageText(`${redEnvelop.config.text}
-
-Click *Snatch* button or reply your *wallet*!
-
-*Snatch record:*
-${redEnvelop?.record.map(record => `${record.username ?? record.user_id} get ${record.amount} NEST!`).join('\n')}
-  `, {
-        parse_mode: 'Markdown',
-        protect_content: true,
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback('Snatch!', 'snatch')],
-        ])
-      })
       if (redEnvelop.record.some(record => record.user_id === ctx.message.from.id)) {
         await ctx.answerCbQuery('You have already snatched this red envelope!')
         return
       }
       // check if red envelope is open
       if (redEnvelop.status !== 'open') {
-        ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.
-Please pay attention to the group news. Good luck next time.`, {
-          reply_to_message_id: ctx.message.message_id,
-        })
+        await ctx.answerCbQuery(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.
+Please pay attention to the group news. Good luck next time.`)
         return
       }
       let status = 'open', amount
@@ -403,7 +375,9 @@ Please pay attention to the group news. Good luck next time.`, {
           ':updated_at': new Date().getTime(),
           ':record': [{
             user_id: ctx.message.from.id,
+            username: ctx.message.from.username,
             amount,
+            wallet: input,
             created_at: new Date().getTime(),
           }],
           ':status': status,
