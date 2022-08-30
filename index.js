@@ -281,7 +281,10 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
           ':s': 'processing',
           ':h': res.hash,
         },
-      }));
+      })).catch(() => {
+        ctx.answerCbQuery("Some error occurred, please try again later.")
+      });
+      await ctx.telegram.sendMessage(item.config.chatId, `Your red envelope is processing, please check out TX: ${TX_URL[SupportedChainId.BSC_TEST]}${res.hash}`)
     }
     await ctx.answerCbQuery('Liquidate Success!')
     await ctx.editMessageText(`TX hash: ${TX_URL[SupportedChainId.BSC_TEST]}${res.hash}`, Markup.inlineKeyboard([
@@ -407,6 +410,7 @@ Click snatch button or reply your wallet address!`, {
           ctx.answerCbQuery("Some error occurred, please try again later.")
         })
         await ctx.answerCbQuery('Red Envelopes Sent Success!')
+        await editReplyL1MenuContent(ctx)
       }
     } catch (e) {
       ctx.answerCbQuery('Sorry, I cannot send message to target chat.')
