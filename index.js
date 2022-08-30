@@ -107,7 +107,7 @@ bot.start(async (ctx) => {
 //
 const replyL1MenuContent = async (ctx) => {
   ctx.reply(`Welcome to NEST Red Envelopes!`, Markup.inlineKeyboard([
-    [Markup.button.callback('Send Red Envelopes', 'config')],
+    [Markup.button.callback('Send Red Envelopes', 'set-config')],
     [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
