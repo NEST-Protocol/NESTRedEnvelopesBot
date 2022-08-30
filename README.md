@@ -31,8 +31,9 @@ The id is snowflake id.
 - [x] Receive red envelope with wallet address
 - [x] Receive red envelope with wallet address and async user wallet
 - [x] Receive red envelope and async receive record in the group
-- [ ] Send TX after receive all red envelope 
+- [x] Send TX after receive all red envelope 
 - [x] User send red envelope history
+- [x] Bot admin auth whitelist
 - [ ] User receive red envelope history
 - [ ] Wallet query 
 - [ ] Add red envelope cover 

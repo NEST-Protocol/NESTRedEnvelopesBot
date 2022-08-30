@@ -35,23 +35,22 @@ const NEST_ADDRESS = {
   [SupportedChainId.BSC_TEST]: '0x821edD79cc386E56FeC9DA5793b87a3A52373cdE',
 }
 
+const TX_URL = {
+  [SupportedChainId.BSC]: 'https://bscscan.com/tx/',
+  [SupportedChainId.BSC_TEST]: 'https://testnet.bscscan.com/tx/',
+}
+
 const mnemonic = process.env.MNEMONIC
 
 const walletMnemonic = ethers.Wallet.fromMnemonic(mnemonic)
 
 const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC]);
 const BSCTestProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC_TEST]);
-
 const BSCProviderWithSinger = walletMnemonic.connect(BSCProvider)
 const BSCTestProviderWithSinger = walletMnemonic.connect(BSCTestProvider)
 
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
-});
-
-const uid = new Snowflake({
-  custom_epoch: 1656604800000,
-  instance_id: 1,
 });
 
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
@@ -63,6 +62,11 @@ if (token === undefined) {
 
 const bot = new Telegraf(token)
 bot.use(session())
+
+const uid = new Snowflake({
+  custom_epoch: 1656604800000,
+  instance_id: 1,
+});
 
 //
 //    #####
@@ -108,7 +112,7 @@ const replyL1MenuContent = async (ctx) => {
 const editReplyL1MenuContent = async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText('Welcome to NEST Red Envelopes Bot!', Markup.inlineKeyboard([
-    [Markup.button.callback('Send Red Envelopes', 'send-info')],
+    [Markup.button.callback('Send Red Envelopes', 'set-config')],
     [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
@@ -159,37 +163,71 @@ bot.action('history', editReplyL2HistoryContent)
 
 bot.action('backToL2HistoryContent', editReplyL2HistoryContent)
 
-// L2 Liquidate Info
+//
+//    #        #####     #                                                       ###
+//    #       #     #    #       #  ####  #    # # #####    ##   ##### ######     #  #    # ######  ####
+//    #             #    #       # #    # #    # # #    #  #  #    #   #          #  ##   # #      #    #
+//    #        #####     #       # #    # #    # # #    # #    #   #   #####      #  # #  # #####  #    #
+//    #       #          #       # #  # # #    # # #    # ######   #   #          #  #  # # #      #    #
+//    #       #          #       # #   #  #    # # #    # #    #   #   #          #  #   ## #      #    #
+//    ####### #######    ####### #  ### #  ####  # #####  #    #   #   ######    ### #    # #       ####
+//
 const editReplyL2LiquidateInfoContent = async (ctx) => {
   // query number of red envelope status is pending
-  const result = await ddbDocClient.send(new ScanCommand({
-    TableName: 'nest-red-envelopes',
-    FilterExpression: '#s = :s',
-    ExpressionAttributeNames: {
-      '#s': 'status',
-    },
-    ExpressionAttributeValues: {
-      ':s': 'pending',
-    },
-  })).catch(() => {
-    ctx.answerCbQuery("Some error occurred, please try again later.")
-  });
-  
-  await ctx.answerCbQuery()
-  await ctx.editMessageText(`*NEST Red Envelopes Liquidate*
-  
-Number of pending red envelopes: ${result.Count}`, {
-    parse_mode: "Markdown",
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('Liquidate All', 'liquidate', result.Count === 0)],
-      [Markup.button.callback('« Back', 'backToL1MenuContent')],
+  try {
+    const [pendingResult, processingResult] = await Promise.all([
+      ddbDocClient.send(new ScanCommand({
+        TableName: 'nest-red-envelopes',
+        FilterExpression: '#s = :s',
+        ExpressionAttributeNames: {
+          '#s': 'status',
+        },
+        ExpressionAttributeValues: {
+          ':s': 'pending',
+        },
+      })),
+      ddbDocClient.send(new ScanCommand({
+        TableName: 'nest-red-envelopes',
+        FilterExpression: '#s = :s',
+        ExpressionAttributeNames: {
+          '#s': 'status',
+        },
+        ExpressionAttributeValues: {
+          ':s': 'processing',
+        },
+      }))
     ])
-  })
+    await ctx.answerCbQuery()
+    await ctx.editMessageText(`*NEST Red Envelopes Liquidate*
+  
+Number of pending red envelopes: ${pendingResult.Count}
+Number of processing red envelopes: ${processingResult.Count}`, {
+      parse_mode: "Markdown",
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('Liquidate All', 'liquidate', pendingResult.Count === 0)],
+        [Markup.button.callback('Close All', 'close', processingResult.Count === 0)],
+        [Markup.button.callback('« Back', 'backToL1MenuContent')],
+      ])
+    })
+  } catch (e) {
+    console.error(e)
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  }
 }
+
+bot.action('backToL2LiquidateInfoContent', editReplyL2LiquidateInfoContent)
 
 bot.action('liquidate-info', editReplyL2LiquidateInfoContent)
 
-// L2 Liquidate All
+//
+//    #        #####     #
+//    #       #     #    #       #  ####  #    # # #####    ##   ##### ######
+//    #             #    #       # #    # #    # # #    #  #  #    #   #
+//    #        #####     #       # #    # #    # # #    # #    #   #   #####
+//    #             #    #       # #  # # #    # # #    # ######   #   #
+//    #       #     #    #       # #   #  #    # # #    # #    #   #   #
+//    #######  #####     ####### #  ### #  ####  # #####  #    #   #   ######
+//
 const editReplyL2DoLiquidateContent = async (ctx) => {
   // query number of red envelope status is pending
   const result = await ddbDocClient.send(new ScanCommand({
@@ -241,8 +279,12 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
     }
     await ctx.answerCbQuery('Liquidate Success!')
     await ctx.editMessageText(`TX hash: ${res.hash}`, Markup.inlineKeyboard([
+      [Markup.button.callback('Close All', 'close')],
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
     ]))
+    for (const item of result.Items) {
+      await ctx.telegram.sendMessage(item.id, `Your red envelope has been liquidated, TX hash: ${TX_URL[SupportedChainId.BSC_TEST]}${res.hash}`)
+    }
   } catch (e) {
     await ctx.answerCbQuery("Some error occurred, please try again later.")
   }
@@ -250,8 +292,54 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
 
 bot.action('liquidate', editReplyL2DoLiquidateContent)
 
-// L2 send info
-bot.action('send-info', async (ctx) => {
+// L3 Close
+const editReplyL3CloseContent = async (ctx) => {
+  const result = await ddbDocClient.send(new ScanCommand({
+    TableName: 'nest-red-envelopes',
+    FilterExpression: '#s = :s',
+    ExpressionAttributeNames: {
+      '#s': 'status',
+    },
+    ExpressionAttributeValues: {
+      ':s': 'processing',
+    },
+  })).catch(() => {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  });
+  for (const item of result.Items) {
+    await ddbDocClient.send(new UpdateCommand({
+      TableName: 'nest-red-envelopes',
+      Key: {
+        id: item.id,
+      },
+      UpdateExpression: 'SET #s = :s',
+      ExpressionAttributeNames: {
+        '#s': 'status',
+      },
+      ExpressionAttributeValues: {
+        ':s': 'close',
+      },
+    }));
+  }
+  await ctx.answerCbQuery('Close Success!')
+  await ctx.editMessageText(`Close Success!`, Markup.inlineKeyboard([
+    [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
+  ]))
+}
+
+bot.action('close', editReplyL3CloseContent)
+
+
+//
+//    #        #####      #####                   #####
+//    #       #     #    #     # ###### #####    #     #  ####  #    # ###### #  ####
+//    #             #    #       #        #      #       #    # ##   # #      # #    #
+//    #        #####      #####  #####    #      #       #    # # #  # #####  # #
+//    #       #                # #        #      #       #    # #  # # #      # #  ###
+//    #       #          #     # #        #      #     # #    # #   ## #      # #    #
+//    ####### #######     #####  ######   #       #####   ####  #    # #      #  ####
+//
+bot.action('set-config', async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText(`Enter red envelope config with json format.
   
