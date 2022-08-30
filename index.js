@@ -3,6 +3,8 @@ const {PutCommand, DynamoDBDocumentClient, QueryCommand, UpdateCommand, ScanComm
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
 const {Snowflake} = require('nodejs-snowflake');
 const {isAddress} = require("ethers/lib/utils");
+const {ethers} = require("ethers");
+const freeTransferAbi = require("./abis/FreeTransfer.json");
 
 //
 //    #####
@@ -13,6 +15,36 @@ const {isAddress} = require("ethers/lib/utils");
 //   #     # #    # #   ## #      # #    #
 //    #####   ####  #    # #      #  ####
 //
+const SupportedChainId = {
+  BSC: 56,
+  BSC_TEST: 97,
+}
+
+const NETWORK_URLS = {
+  [SupportedChainId.BSC]: `https://bsc-dataseed.binance.org/`,
+  [SupportedChainId.BSC_TEST]: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
+}
+
+const FREE_TRANSFER_ADDRESS = {
+  [SupportedChainId.BSC]: '0x8d8e4d946ED4c818C9ace798C869C6F93cCF3df0',
+  [SupportedChainId.BSC_TEST]: '0xA4Cd6C205cEF92aB066177207114B6831194F61f',
+}
+
+const NEST_ADDRESS = {
+  [SupportedChainId.BSC]: '0x98f8669f6481ebb341b522fcd3663f79a3d1a6a7',
+  [SupportedChainId.BSC_TEST]: '0x821edD79cc386E56FeC9DA5793b87a3A52373cdE',
+}
+
+const mnemonic = process.env.MNEMONIC
+
+const walletMnemonic = ethers.Wallet.fromMnemonic(mnemonic)
+
+const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC]);
+const BSCTestProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC_TEST]);
+
+const BSCProviderWithSinger = walletMnemonic.connect(BSCProvider)
+const BSCTestProviderWithSinger = walletMnemonic.connect(BSCTestProvider)
+
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
 });
@@ -47,7 +79,13 @@ bot.start(async (ctx) => {
   if (chat_id < 0) {
     return
   }
-  await replyL1MenuContent(ctx)
+  
+  // chat_id in [2130493951, 5035670602, 552791389] , pass, otherwise, return
+  if (chat_id !== 2130493951 && chat_id !== 5035670602 && chat_id !== 552791389) {
+    await ctx.reply('Sorry, you are not allowed to use this bot!')
+    return
+  }
+  replyL1MenuContent(ctx)
 })
 
 //
@@ -63,16 +101,16 @@ const replyL1MenuContent = async (ctx) => {
   ctx.reply(`Welcome to NEST Red Envelopes!`, Markup.inlineKeyboard([
     [Markup.button.callback('Send Red Envelopes', 'config')],
     [Markup.button.callback('History', 'history')],
-    [Markup.button.callback('Wallet', 'wallet')],
+    [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
 }
 
 const editReplyL1MenuContent = async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText('Welcome to NEST Red Envelopes Bot!', Markup.inlineKeyboard([
-    [Markup.button.callback('Send Red Envelopes', 'config')],
+    [Markup.button.callback('Send Red Envelopes', 'send-info')],
     [Markup.button.callback('History', 'history')],
-    [Markup.button.callback('Wallet', 'wallet')],
+    [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
 }
 
@@ -117,22 +155,103 @@ Remaining available: ${left} NEST`,
       })
 }
 
-bot.action('history', async (ctx) => {
-  await editReplyL2HistoryContent(ctx)
-})
+bot.action('history', editReplyL2HistoryContent)
 
 bot.action('backToL2HistoryContent', editReplyL2HistoryContent)
 
-//
-//   #        #####      #####
-//   #       #     #    #     #  ####  #    # ###### #  ####
-//   #             #    #       #    # ##   # #      # #    #
-//   #        #####     #       #    # # #  # #####  # #
-//   #       #          #       #    # #  # # #      # #  ###
-//   #       #          #     # #    # #   ## #      # #    #
-//   ####### #######     #####   ####  #    # #      #  ####
-//
-bot.action('config', async (ctx) => {
+// L2 Liquidate Info
+const editReplyL2LiquidateInfoContent = async (ctx) => {
+  // query number of red envelope status is pending
+  const result = await ddbDocClient.send(new ScanCommand({
+    TableName: 'nest-red-envelopes',
+    FilterExpression: '#s = :s',
+    ExpressionAttributeNames: {
+      '#s': 'status',
+    },
+    ExpressionAttributeValues: {
+      ':s': 'pending',
+    },
+  })).catch(() => {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  });
+  
+  await ctx.answerCbQuery()
+  await ctx.editMessageText(`*NEST Red Envelopes Liquidate*
+  
+Number of pending red envelopes: ${result.Count}`, {
+    parse_mode: "Markdown",
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('Liquidate All', 'liquidate', result.Count === 0)],
+      [Markup.button.callback('« Back', 'backToL1MenuContent')],
+    ])
+  })
+}
+
+bot.action('liquidate-info', editReplyL2LiquidateInfoContent)
+
+// L2 Liquidate All
+const editReplyL2DoLiquidateContent = async (ctx) => {
+  // query number of red envelope status is pending
+  const result = await ddbDocClient.send(new ScanCommand({
+    TableName: 'nest-red-envelopes',
+    FilterExpression: '#s = :s',
+    ExpressionAttributeNames: {
+      '#s': 'status',
+    },
+    ExpressionAttributeValues: {
+      ':s': 'pending',
+    },
+  })).catch(() => {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  });
+  
+  let pendingList = []
+  for (const item of result.Items) {
+    pendingList.push.apply(pendingList, item.record)
+  }
+  
+  // send tx
+  const addressList = pendingList.map(item => item.wallet)
+  const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
+  const tokenAddress = NEST_ADDRESS[SupportedChainId.BSC_TEST]
+  const freeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[SupportedChainId.BSC_TEST], freeTransferAbi, BSCTestProviderWithSinger)
+  try {
+    const res = await freeTransferContract.transfer(
+        addressList,
+        tokenAmountList,
+        tokenAddress,
+    )
+    // set them to processing, and record tx hash
+    for (const item of result.Items) {
+      await ddbDocClient.send(new UpdateCommand({
+        TableName: 'nest-red-envelopes',
+        Key: {
+          id: item.id,
+        },
+        UpdateExpression: 'SET #s = :s, #h = :h',
+        ExpressionAttributeNames: {
+          '#s': 'status',
+          '#h': 'hash',
+        },
+        ExpressionAttributeValues: {
+          ':s': 'processing',
+          ':h': res.hash,
+        },
+      }));
+    }
+    await ctx.answerCbQuery('Liquidate Success!')
+    await ctx.editMessageText(`TX hash: ${res.hash}`, Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'backToL1MenuContent')],
+    ]))
+  } catch (e) {
+    await ctx.answerCbQuery("Some error occurred, please try again later.")
+  }
+}
+
+bot.action('liquidate', editReplyL2DoLiquidateContent)
+
+// L2 send info
+bot.action('send-info', async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText(`Enter red envelope config with json format.
   
