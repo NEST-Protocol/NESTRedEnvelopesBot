@@ -42,11 +42,7 @@ exports.handler = async (event) => {
   for (const item of result.Items) {
     pendingList.push.apply(pendingList, item.record)
   }
-  
   console.log(pendingList)
-  
-  
-  
   
   const response = {
     statusCode: 200,

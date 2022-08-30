@@ -99,13 +99,19 @@ const editReplyL2HistoryContent = async (ctx) => {
     ctx.answerCbQuery("Some error occurred, please try again later.")
   })
   await ctx.answerCbQuery()
-  const total = result.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
+  const quantity = result.Items.reduce((acc, cur) => acc + cur.config.quantity, 0)
+  const totalWrap = result.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
+  const left = result.Items.reduce((acc, cur) => acc + cur.balance, 0)
   await ctx.editMessageText(`*NEST Red Envelopes History*
 
-Send ${result.Count} red envelopes, total ${total} NEST.`,
+Times of red envelopes sent: ${result.Count}
+Number of red envelopes sent: ${quantity}
+Total sent: ${totalWrap} NEST
+Remaining available: ${left} NEST`,
       {
         parse_mode: "Markdown",
         ...Markup.inlineKeyboard([
+          [Markup.button.callback('Export', 'export')],
           [Markup.button.callback('« Back', 'backToL1MenuContent')],
         ])
       })
