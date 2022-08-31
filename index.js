@@ -45,13 +45,15 @@ const mnemonic = process.env.MNEMONIC
 
 const walletMnemonic = ethers.Wallet.fromMnemonic(mnemonic)
 
-// const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC]);
-const BSCTestProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC_TEST]);
-// const BSCProviderWithSinger = walletMnemonic.connect(BSCProvider)
-const BSCTestProviderWithSinger = walletMnemonic.connect(BSCTestProvider)
+const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC]);
+// const BSCTestProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC_TEST]);
+const BSCProviderWithSinger = walletMnemonic.connect(BSCProvider)
+// const BSCTestProviderWithSinger = walletMnemonic.connect(BSCTestProvider)
 
-const BSCTestFreeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[SupportedChainId.BSC_TEST], freeTransferAbi, BSCTestProviderWithSinger)
-const NESTTestContract = new ethers.Contract(NEST_ADDRESS[SupportedChainId.BSC_TEST], erc20abi, BSCTestProviderWithSinger)
+// const BSCTestFreeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[SupportedChainId.BSC_TEST], freeTransferAbi, BSCTestProviderWithSinger)
+const BSCFreeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[SupportedChainId.BSC], freeTransferAbi, BSCProviderWithSinger)
+// const NESTTestContract = new ethers.Contract(NEST_ADDRESS[SupportedChainId.BSC_TEST], erc20abi, BSCTestProviderWithSinger)
+const NESTContract = new ethers.Contract(NEST_ADDRESS[SupportedChainId.BSC], erc20abi, BSCProviderWithSinger)
 
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
@@ -200,7 +202,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
         },
       }))
     ])
-    const balance = Number(ethers.utils.formatEther(await NESTTestContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
+    const balance = Number(ethers.utils.formatEther(await NESTContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
     const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
     await ctx.answerCbQuery()
     await ctx.editMessageText(`*NEST Red Envelopes Liquidate*
@@ -259,7 +261,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
   const addressList = pendingList.map(item => item.wallet)
   const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
   try {
-    const res = await BSCTestFreeTransferContract.transfer(
+    const res = await BSCFreeTransferContract.transfer(
         addressList,
         tokenAmountList,
         NEST_ADDRESS[SupportedChainId.BSC_TEST],
@@ -636,7 +638,7 @@ Left ${redEnvelop.balance - amount} NEST!`, {
           ctx.answerCbQuery('Quantity must be greater than 0. Please try again later.')
           return
         }
-        const balance = Number(ethers.utils.formatEther(await NESTTestContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
+        const balance = Number(ethers.utils.formatEther(await NESTContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
         if (config.amount > balance) {
           ctx.answerCbQuery(`Amount must be less than ${balance} NEST. Please try again later.`)
           return
