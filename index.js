@@ -264,7 +264,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
     const res = await BSCFreeTransferContract.transfer(
         addressList,
         tokenAmountList,
-        NEST_ADDRESS[SupportedChainId.BSC_TEST],
+        NEST_ADDRESS[SupportedChainId.BSC],
     )
     // set them to processing, and record tx hash
     for (const item of result.Items) {
@@ -285,10 +285,10 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       })).catch(() => {
         ctx.answerCbQuery("Some error occurred, please try again later.")
       });
-      await ctx.telegram.sendMessage(item.config.chatId, `Your red envelope is processing, please check out TX: ${TX_URL[SupportedChainId.BSC_TEST]}${res.hash}`)
+      await ctx.telegram.sendMessage(item.config.chatId, `Your red envelope is processing, please check out TX: ${TX_URL[SupportedChainId.BSC]}${res.hash}`)
     }
     await ctx.answerCbQuery('Liquidate Success!')
-    await ctx.editMessageText(`TX hash: ${TX_URL[SupportedChainId.BSC_TEST]}${res.hash}`, Markup.inlineKeyboard([
+    await ctx.editMessageText(`TX hash: ${TX_URL[SupportedChainId.BSC]}${res.hash}`, Markup.inlineKeyboard([
       [Markup.button.callback('Close All', 'close')],
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
     ]))
