@@ -548,7 +548,7 @@ bot.on('message', async (ctx) => {
           updated_at: new Date().getTime(),
         },
       })).catch(() => {
-        ctx.answerCbQuery("Some error occurred, please try again later.")
+        ctx.reply('Some error occurred, please try again later.')
       })
       // auto snatch red envelope
       const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
@@ -570,13 +570,12 @@ bot.on('message', async (ctx) => {
       }
       const redEnvelop = queryRedEnvelopeRes.Items[0]
       if (redEnvelop.record.some(record => record.user_id === ctx.message.from.id)) {
-        await ctx.answerCbQuery('You have already snatched this red envelope!')
+        await ctx.reply('You have already snatched this red envelope!')
         return
       }
       // check if red envelope is open
       if (redEnvelop.status !== 'open') {
-        await ctx.answerCbQuery(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.
-Please pay attention to the group news. Good luck next time.`)
+        await ctx.reply('Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.')
         return
       }
       let status = 'open', amount
@@ -611,7 +610,7 @@ Please pay attention to the group news. Good luck next time.`)
           ':status': status,
         }
       })).catch(() => {
-        ctx.answerCbQuery("Some error occurred, please try again later.")
+        ctx.reply("Some error occurred, please try again later.")
       })
       ctx.reply(`Congratulations, ${ctx.message.from.username ?? ctx.message.from.id} have got ${amount} NEST.
 
@@ -627,20 +626,20 @@ Left ${redEnvelop.balance - amount} NEST!`, {
       try {
         const config = JSON.parse(ctx.message.text)
         if (config.token !== 'NEST') {
-          ctx.answerCbQuery('Token must be NEST. Please try again later.')
+          ctx.reply('Token must be NEST. Please try again later.')
           return
         }
         if (config.min > config.max) {
-          ctx.answerCbQuery('Min amount must be less than max amount. Please try again later.')
+          ctx.reply('Min amount must be less than max amount. Please try again later.')
           return
         }
         if (config.quantity < 1) {
-          ctx.answerCbQuery('Quantity must be greater than 0. Please try again later.')
+          ctx.reply('Quantity must be greater than 0. Please try again later.')
           return
         }
         const balance = Number(ethers.utils.formatEther(await NESTContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
         if (config.amount > balance) {
-          ctx.answerCbQuery(`Amount must be less than ${balance} NEST. Please try again later.`)
+          ctx.reply(`Amount must be less than ${balance} NEST. Please try again later.`)
           return
         }
         await ctx.reply(`Check it again:
@@ -659,7 +658,7 @@ chatId: ${config.chatId}
         )
         ctx.session = {intent: undefined, config: config}
       } catch (e) {
-        ctx.answerCbQuery('Sorry, I cannot understand your config. Please try again.')
+        ctx.reply('Sorry, I cannot understand your config. Please try again.')
       }
     }
   }
