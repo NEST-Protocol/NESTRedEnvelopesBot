@@ -180,7 +180,17 @@ bot.action('backToL2HistoryContent', editReplyL2HistoryContent)
 const editReplyL2LiquidateInfoContent = async (ctx) => {
   // query number of red envelope status is pending
   try {
-    const [pendingResult, processingResult] = await Promise.all([
+    const [openResult, pendingResult, processingResult] = await Promise.all([
+      ddbDocClient.send(new ScanCommand({
+        TableName: 'nest-red-envelopes',
+        FilterExpression: '#s = :s',
+        ExpressionAttributeNames: {
+          '#s': 'status',
+        },
+        ExpressionAttributeValues: {
+          ':s': 'open',
+        },
+      })),
       ddbDocClient.send(new ScanCommand({
         TableName: 'nest-red-envelopes',
         FilterExpression: '#s = :s',
@@ -213,6 +223,7 @@ Bot wallet balance: ${balance} NEST.
 Number of processing red envelopes: ${processingResult.Count}. Please check out TX and close that.`, {
       parse_mode: "Markdown",
       ...Markup.inlineKeyboard([
+        [Markup.button.callback('Pending All', 'pending', openResult.Count === 0)],
         [Markup.button.callback('Liquidate All', 'liquidate', pendingResult.Count === 0 || balance < pendingAmount)],
         [Markup.button.callback('Close All', 'close', processingResult.Count === 0)],
         [Markup.button.callback('« Back', 'backToL1MenuContent')],
@@ -298,6 +309,46 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
 }
 
 bot.action('liquidate', editReplyL2DoLiquidateContent)
+
+
+// Pending
+const editReplyL2PendingContent = async (ctx) => {
+  const result = await ddbDocClient.send(new ScanCommand({
+    TableName: 'nest-red-envelopes',
+    FilterExpression: '#s = :s',
+    ExpressionAttributeNames: {
+      '#s': 'status',
+    },
+    ExpressionAttributeValues: {
+      ':s': 'open',
+    },
+  })).catch(() => {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  });
+  for (const item of result.Items) {
+    await ddbDocClient.send(new UpdateCommand({
+      TableName: 'nest-red-envelopes',
+      Key: {
+        id: item.id,
+      },
+      UpdateExpression: 'SET #s = :s',
+      ExpressionAttributeNames: {
+        '#s': 'status',
+      },
+      ExpressionAttributeValues: {
+        ':s': 'pending',
+      },
+    }));
+  }
+  await ctx.answerCbQuery('Pending Success!')
+  await ctx.editMessageText(`Pending Success!`, Markup.inlineKeyboard([
+    [Markup.button.callback('Liquidate All', 'liquidate')],
+    [Markup.button.callback('Close All', 'close')],
+    [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
+  ]))
+}
+
+bot.action('pending', editReplyL2PendingContent)
 
 //
 //    #        #####      #####
