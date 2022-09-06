@@ -548,7 +548,9 @@ bot.on('message', async (ctx) => {
           updated_at: new Date().getTime(),
         },
       })).catch(() => {
-        ctx.reply('Some error occurred, please try again later.')
+        ctx.reply('Some error occurred, please try again later.', {
+          reply_to_message_id: ctx.message.message_id,
+        })
       })
       // auto snatch red envelope
       const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
@@ -565,17 +567,23 @@ bot.on('message', async (ctx) => {
         },
       }))
       if (queryRedEnvelopeRes.Count === 0) {
-        ctx.reply('There is none red envelope in this group.')
+        ctx.reply('There is none red envelope in this group.', {
+          reply_to_message_id: ctx.message.message_id,
+        })
         return
       }
       const redEnvelop = queryRedEnvelopeRes.Items[0]
       if (redEnvelop.record.some(record => record.user_id === ctx.message.from.id)) {
-        await ctx.reply('You have already snatched this red envelope!')
+        await ctx.reply('You have already snatched this red envelope!', {
+          reply_to_message_id: ctx.message.message_id,
+        })
         return
       }
       // check if red envelope is open
       if (redEnvelop.status !== 'open') {
-        await ctx.reply('Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.')
+        await ctx.reply('Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.', {
+          reply_to_message_id: ctx.message.message_id,
+        })
         return
       }
       let status = 'open', amount
@@ -610,7 +618,9 @@ bot.on('message', async (ctx) => {
           ':status': status,
         }
       })).catch(() => {
-        ctx.reply("Some error occurred, please try again later.")
+        ctx.reply("Some error occurred, please try again later.", {
+          reply_to_message_id: ctx.message.message_id,
+        })
       })
       ctx.reply(`Congratulations, ${ctx.message.from.username ?? ctx.message.from.id} have got ${amount} NEST.
 
