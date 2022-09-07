@@ -634,7 +634,7 @@ bot.on('message', async (ctx) => {
       }
       // check if red envelope is open
       if (redEnvelop.status !== 'open') {
-        await ctx.reply('Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.', {
+        await ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.`, {
           reply_to_message_id: ctx.message.message_id,
         })
         return
