@@ -416,6 +416,7 @@ max: max amount of each NEST Prize
 min: min amount of each NEST Prize
 text: best wishes
 chatId: target chatId
+cover: cover uri
 
 For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Prize. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes"}`, {
     parse_mode: 'Markdown',
@@ -440,15 +441,27 @@ bot.action('send', async (ctx) => {
   if (config) {
     try {
       // send message to chat_id, record chat_id and message_id to dynamodb
-      const res = await ctx.telegram.sendPhoto(config.chatId, 'https://bafybeia62qr6o72ykgjwmbn4ya4n337z6q22yrwc2agynfkeaioxvx3gka.ipfs.w3s.link/photo_2022-09-07_11-58-59.jpg', {
-        caption: `${config.text}
+      let res
+      if (config?.cover) {
+        res = await ctx.telegram.sendPhoto(config.chatId, config?.cover, {
+          caption: `${config.text}
 
 Click snatch button or reply your wallet address!`,
-        protect_content: true,
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback('Snatch!', 'snatch')],
-        ])
-      })
+          protect_content: true,
+          ...Markup.inlineKeyboard([
+            [Markup.button.callback('Snatch!', 'snatch')],
+          ])
+        })
+      } else {
+        res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
+
+Click snatch button or reply your wallet address!`, {
+          protect_content: true,
+          ...Markup.inlineKeyboard([
+            [Markup.button.callback('Snatch!', 'snatch')],
+          ])
+        })
+      }
       
       const message_id = res.message_id
       const chat_id = res.chat.id
@@ -714,6 +727,7 @@ max: ${config.max},
 min: ${config.min},
 text: ${config.text},
 chatId: ${config.chatId}
+cover: ${config?.cover}
 `, Markup.inlineKeyboard([
               [Markup.button.callback('Checked, Send Now!', 'send')],
               [Markup.button.callback('« Back', 'backToL1MenuContent')],
