@@ -732,10 +732,13 @@ min: ${config.min},
 text: ${config.text},
 chatId: ${config.chatId}
 cover: ${config?.cover}
-`, Markup.inlineKeyboard([
-              [Markup.button.callback('Checked, Send Now!', 'send')],
-              [Markup.button.callback('« Back', 'backToL1MenuContent')],
-            ])
+`, {
+              parse_mode: 'Markdown',
+              ...Markup.inlineKeyboard([
+                [Markup.button.callback('Checked, Send Now!', 'send')],
+                [Markup.button.callback('« Back', 'backToL1MenuContent')],
+              ])
+            }
         )
         ctx.session = {intent: undefined, config: config}
       } catch (e) {
