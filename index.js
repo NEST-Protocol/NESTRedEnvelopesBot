@@ -213,14 +213,18 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
       }))
     ])
     const balance = Number(ethers.utils.formatEther(await NESTContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
-    const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
+    const openAmount = openResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
+    const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     await ctx.answerCbQuery()
     await ctx.editMessageText(`*NEST NEST Prize Liquidate*
   
-Number of pending NEST Prize: ${pendingResult.Count}, total amount: ${pendingAmount} NEST.
-Bot wallet balance: ${balance} NEST.
+Number of open NEST Prize: ${openResult.Count}, had snatched: ${openAmount} NEST
 
-Number of processing NEST Prize: ${processingResult.Count}. Please check out TX and close that.`, {
+Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmount} NEST.
+
+Number of processing NEST Prize: ${processingResult.Count}. Please check out TX and close that.
+
+Bot wallet balance: ${balance} NEST.`, {
       parse_mode: "Markdown",
       ...Markup.inlineKeyboard([
         [Markup.button.callback('Pending All', 'pending', openResult.Count === 0)],
