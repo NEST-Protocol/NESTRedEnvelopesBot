@@ -108,8 +108,8 @@ bot.start(async (ctx) => {
 //   ####### #####    #     # ###### #    #  ####
 //
 const replyL1MenuContent = async (ctx) => {
-  ctx.reply(`Welcome to NEST Red Envelopes!`, Markup.inlineKeyboard([
-    [Markup.button.callback('Send Red Envelopes', 'set-config')],
+  ctx.reply(`Welcome to NEST NEST Prize!`, Markup.inlineKeyboard([
+    [Markup.button.callback('Send NEST Prize', 'set-config')],
     [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
@@ -117,8 +117,8 @@ const replyL1MenuContent = async (ctx) => {
 
 const editReplyL1MenuContent = async (ctx) => {
   await ctx.answerCbQuery()
-  await ctx.editMessageText('Welcome to NEST Red Envelopes Bot!', Markup.inlineKeyboard([
-    [Markup.button.callback('Send Red Envelopes', 'set-config')],
+  await ctx.editMessageText('Welcome to NEST NEST Prize Bot!', Markup.inlineKeyboard([
+    [Markup.button.callback('Send NEST Prize', 'set-config')],
     [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
@@ -150,10 +150,10 @@ const editReplyL2HistoryContent = async (ctx) => {
   const quantity = result.Items.reduce((acc, cur) => acc + cur.config.quantity, 0)
   const totalWrap = result.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
   const left = result.Items.reduce((acc, cur) => acc + cur.balance, 0)
-  await ctx.editMessageText(`*NEST Red Envelopes History*
+  await ctx.editMessageText(`*NEST NEST Prize History*
 
-Times of red envelopes sent: ${result.Count}
-Number of red envelopes sent: ${quantity}
+Times of NEST Prize sent: ${result.Count}
+Number of NEST Prize sent: ${quantity}
 Total sent: ${totalWrap} NEST
 Remaining available: ${left} NEST`,
       {
@@ -178,7 +178,7 @@ bot.action('backToL2HistoryContent', editReplyL2HistoryContent)
 //    ####### #######    ####### #  ### #  ####  # #####  #    #   #   ######    ### #    # #       ####
 //
 const editReplyL2LiquidateInfoContent = async (ctx) => {
-  // query number of red envelope status is pending
+  // query number of NEST Prize status is pending
   try {
     const [openResult, pendingResult, processingResult] = await Promise.all([
       ddbDocClient.send(new ScanCommand({
@@ -215,12 +215,12 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     const balance = Number(ethers.utils.formatEther(await NESTContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
     const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
     await ctx.answerCbQuery()
-    await ctx.editMessageText(`*NEST Red Envelopes Liquidate*
+    await ctx.editMessageText(`*NEST NEST Prize Liquidate*
   
-Number of pending red envelopes: ${pendingResult.Count}, total amount: ${pendingAmount} NEST.
+Number of pending NEST Prize: ${pendingResult.Count}, total amount: ${pendingAmount} NEST.
 Bot wallet balance: ${balance} NEST.
 
-Number of processing red envelopes: ${processingResult.Count}. Please check out TX and close that.`, {
+Number of processing NEST Prize: ${processingResult.Count}. Please check out TX and close that.`, {
       parse_mode: "Markdown",
       ...Markup.inlineKeyboard([
         [Markup.button.callback('Pending All', 'pending', openResult.Count === 0)],
@@ -249,7 +249,7 @@ bot.action('liquidate-info', editReplyL2LiquidateInfoContent)
 //    #######  #####     ####### #  ### #  ####  # #####  #    #   #   ######
 //
 const editReplyL2DoLiquidateContent = async (ctx) => {
-  // query number of red envelope status is pending
+  // query number of NEST Prize status is pending
   const result = await ddbDocClient.send(new ScanCommand({
     TableName: 'nest-red-envelopes',
     FilterExpression: '#s = :s',
@@ -296,7 +296,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       })).catch(() => {
         ctx.answerCbQuery("Some error occurred, please try again later.")
       });
-      await ctx.telegram.sendMessage(item.config.chatId, `Your red envelope is processing, please check out TX: ${TX_URL[SupportedChainId.BSC]}${res.hash}`)
+      await ctx.telegram.sendMessage(item.config.chatId, `Your NEST Prize is processing, please check out TX: ${TX_URL[SupportedChainId.BSC]}${res.hash}`)
     }
     await ctx.answerCbQuery('Liquidate Success!')
     await ctx.editMessageText(`TX hash: ${TX_URL[SupportedChainId.BSC]}${res.hash}`, Markup.inlineKeyboard([
@@ -406,18 +406,18 @@ bot.action('close', editReplyL3CloseContent)
 //
 bot.action('set-config', async (ctx) => {
   await ctx.answerCbQuery()
-  await ctx.editMessageText(`Enter red envelope config with json format.
+  await ctx.editMessageText(`Enter NEST Prize config with json format.
   
 *parameters:*
 token: token symbol
-quantity: number of red envelopes
-amount: amount of all red envelopes
-max: max amount of each red envelope
-min: min amount of each red envelope
+quantity: number of NEST Prize
+amount: amount of all NEST Prize
+max: max amount of each NEST Prize
+min: min amount of each NEST Prize
 text: best wishes
 chatId: target chatId
 
-For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Red Envelope. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes"}`, {
+For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Prize. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes"}`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
@@ -460,7 +460,7 @@ Click snatch button or reply your wallet address!`,
             chat_id,
             message_id,
             config,
-            balance: config.amount, // left balance of red envelopes
+            balance: config.amount, // left balance of NEST Prize
             status: 'open', // open, pending, closed
             creator: ctx.from.id,
             created_at: new Date().getTime(),
@@ -470,7 +470,7 @@ Click snatch button or reply your wallet address!`,
         })).catch(() => {
           ctx.answerCbQuery("Some error occurred, please try again later.")
         })
-        await ctx.answerCbQuery('Red Envelopes Sent Success!')
+        await ctx.answerCbQuery('NEST Prize Sent Success!')
         await editReplyL1MenuContent(ctx)
       }
     } catch (e) {
@@ -522,15 +522,15 @@ bot.action('snatch', async (ctx) => {
     ctx.answerCbQuery("Some error occurred, please try again later.")
   })
   if (queryRedEnvelopeRes.Count === 0) {
-    ctx.answerCbQuery("This red envelope is not found.")
+    ctx.answerCbQuery("The NEST Prize is not found.")
     return
   }
   const redEnvelop = queryRedEnvelopeRes.Items[0]
   if (redEnvelop.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
-    await ctx.answerCbQuery('You have already snatched this red envelope!')
+    await ctx.answerCbQuery('You have already snatched this NEST Prize!')
     return
   }
-  // check if red envelope is open
+  // check if NEST Prize is open
   if (redEnvelop.status !== 'open') {
     await ctx.answerCbQuery(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.
 Please pay attention to the group news. Good luck next time.`)
@@ -538,19 +538,19 @@ Please pay attention to the group news. Good luck next time.`)
   }
   // can snatch
   let status = 'open', amount
-  // check if red envelope is need empty
+  // check if NEST Prize is need empty
   if (redEnvelop.record.length === redEnvelop.config.quantity - 1) {
     status = 'pending'
     amount = redEnvelop.balance
   } else {
     // get random amount
     amount = Math.floor(Math.random() * (Math.min(redEnvelop.config.max, redEnvelop.balance) - redEnvelop.config.min + 1) + redEnvelop.config.min)
-    // check if red envelope is enough
+    // check if NEST Prize is enough
     if (redEnvelop.balance === amount) {
       status = 'pending'
     }
   }
-  // update red envelope info in dynamodb
+  // update NEST Prize info in dynamodb
   await ddbDocClient.send(new UpdateCommand({
     TableName: 'nest-red-envelopes',
     Key: {id: redEnvelop.id},
@@ -605,7 +605,7 @@ bot.on('message', async (ctx) => {
           reply_to_message_id: ctx.message.message_id,
         })
       })
-      // auto snatch red envelope
+      // auto snatch NEST Prize
       const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
         ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id', '#status': 'status'},
         TableName: 'nest-red-envelopes',
@@ -620,19 +620,19 @@ bot.on('message', async (ctx) => {
         },
       }))
       if (queryRedEnvelopeRes.Count === 0) {
-        ctx.reply('There is none red envelope in this group.', {
+        ctx.reply('There is none NEST Prize in this group.', {
           reply_to_message_id: ctx.message.message_id,
         })
         return
       }
       const redEnvelop = queryRedEnvelopeRes.Items[0]
       if (redEnvelop.record.some(record => record.user_id === ctx.message.from.id)) {
-        await ctx.reply('You have already snatched this red envelope!', {
+        await ctx.reply('You have already snatched this NEST Prize!', {
           reply_to_message_id: ctx.message.message_id,
         })
         return
       }
-      // check if red envelope is open
+      // check if NEST Prize is open
       if (redEnvelop.status !== 'open') {
         await ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.`, {
           reply_to_message_id: ctx.message.message_id,
@@ -640,19 +640,19 @@ bot.on('message', async (ctx) => {
         return
       }
       let status = 'open', amount
-      // check if red envelope is need empty
+      // check if NEST Prize is need empty
       if (redEnvelop.record.length === redEnvelop.config.quantity - 1) {
         status = 'pending'
         amount = redEnvelop.balance
       } else {
         // get random amount
         amount = Math.floor(Math.random() * (Math.min(redEnvelop.config.max, redEnvelop.balance) - redEnvelop.config.min + 1) + redEnvelop.config.min)
-        // check if red envelope is enough
+        // check if NEST Prize is enough
         if (redEnvelop.balance === amount) {
           status = 'pending'
         }
       }
-      // update red envelope info in dynamodb
+      // update NEST Prize info in dynamodb
       await ddbDocClient.send(new UpdateCommand({
         TableName: 'nest-red-envelopes',
         Key: {id: redEnvelop.id},
