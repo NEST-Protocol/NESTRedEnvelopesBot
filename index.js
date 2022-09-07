@@ -296,7 +296,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       })).catch(() => {
         ctx.answerCbQuery("Some error occurred, please try again later.")
       });
-      await ctx.telegram.sendMessage(item.config.chatId, `Your NEST Prize is processing, please check out TX: ${TX_URL[SupportedChainId.BSC]}${res.hash}`, {
+      await ctx.telegram.sendMessage(item.chat_id, `Your NEST Prize is processing, please check out TX: ${TX_URL[SupportedChainId.BSC]}${res.hash}`, {
         reply_to_message_id: item.message_id,
       })
     }
