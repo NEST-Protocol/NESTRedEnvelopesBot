@@ -440,7 +440,7 @@ bot.action('send', async (ctx) => {
   if (config) {
     try {
       // send message to chat_id, record chat_id and message_id to dynamodb
-      const res = await ctx.telegram.sendPhoto(config.chatId, 'https://bafybeifcrtclcyerxabeg235wqcjrg2yzl5riwj3eea4mwjlhqdiclcz3q.ipfs.w3s.link/red.jpg', {
+      const res = await ctx.telegram.sendPhoto(config.chatId, 'https://bafybeia62qr6o72ykgjwmbn4ya4n337z6q22yrwc2agynfkeaioxvx3gka.ipfs.w3s.link/photo_2022-09-07_11-58-59.jpg', {
         caption: `${config.text}
 
 Click snatch button or reply your wallet address!`,
