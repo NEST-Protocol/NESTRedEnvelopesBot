@@ -633,23 +633,23 @@ bot.on('message', async (ctx) => {
         },
       }))
       if (queryRedEnvelopeRes.Count === 0) {
-        ctx.reply('There is none NEST Prize in this group.', {
-          reply_to_message_id: ctx.message.message_id,
-        })
+        // ctx.reply('There is none NEST Prize in this group.', {
+        //   reply_to_message_id: ctx.message.message_id,
+        // })
         return
       }
       const redEnvelop = queryRedEnvelopeRes.Items[0]
       if (redEnvelop.record.some(record => record.user_id === ctx.message.from.id)) {
-        await ctx.reply('You have already snatched this NEST Prize!', {
-          reply_to_message_id: ctx.message.message_id,
-        })
+        // await ctx.reply('You have already snatched this NEST Prize!', {
+        //   reply_to_message_id: ctx.message.message_id,
+        // })
         return
       }
       // check if NEST Prize is open
       if (redEnvelop.status !== 'open') {
-        await ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.`, {
-          reply_to_message_id: ctx.message.message_id,
-        })
+        // await ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.`, {
+        //   reply_to_message_id: ctx.message.message_id,
+        // })
         return
       }
       let status = 'open', amount
