@@ -218,7 +218,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     await ctx.answerCbQuery()
     await ctx.editMessageText(`*NEST NEST Prize Liquidate*
   
-Number of open NEST Prize: ${openResult.Count}, had snatched: ${openAmount} NEST
+Number of open NEST Prize: ${openResult.Count}, had snatched: ${openAmount} NEST.
 
 Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmount} NEST.
 
