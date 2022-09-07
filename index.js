@@ -420,7 +420,7 @@ text: best wishes
 chatId: target chatId
 cover: cover uri
 
-For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Prize. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes"}`, {
+For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Prize. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes", "cover": ""}`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
@@ -444,8 +444,8 @@ bot.action('send', async (ctx) => {
     try {
       // send message to chat_id, record chat_id and message_id to dynamodb
       let res
-      if (config?.cover) {
-        res = await ctx.telegram.sendPhoto(config.chatId, config?.cover, {
+      if (config.cover !== '') {
+        res = await ctx.telegram.sendPhoto(config.chatId, config.cover, {
           caption: `${config.text}
 
 Click snatch button or reply your wallet address!`,
@@ -731,7 +731,7 @@ max: ${config.max},
 min: ${config.min},
 text: ${config.text},
 chatId: ${config.chatId}
-cover: ${config?.cover}
+cover: ${config.cover}
 `, {
               parse_mode: 'Markdown',
               ...Markup.inlineKeyboard([
