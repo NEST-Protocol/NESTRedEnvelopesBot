@@ -1,5 +1,26 @@
-const text = `{"token":"NEST","quantity":10,"amount":100,"max":10,"min":1,"text":"Topic：DeFi, AMM and OMM\\n\\n Learn from the past! Let's review the import concepts of DeFi and take a look at the innovative OMM model in NEST's Voice AMA! Participate for a chance to share a $150 NEST reward!\\n What do you need to do:\\n1️. Join the voice AMA through the Galaxy link: \\nhttps://galxe.com/nestprotocol/campaign/GC7BjUtMen \\n\\n2️. Fill in the Google form: https://docs.google.com/forms/d/136W8LSkO1vhG1wgErpzvTgsy6GE-G_CesBTkAh5vtyk/edit\\n\\nReward rules:\\n $150 for random 150 participants in the AMA\\n\\nWorkflow \\nWhat is DeFi\\nWhat are the key terms of DeFi\\nHow was the first generation of DeFi developed\\nWhat is AMM \\nHow OMM solves the AMM problem","chatId":"0","cover":""}`;
+const {ethers} = require("ethers");
+const erc20abi = require("./abis/erc20.json");
 
-const data = JSON.parse(text);
+const SupportedChainId = {
+  BSC: 56,
+  BSC_TEST: 97,
+}
 
-console.log(data.token, data.quantity, data.amount, data.max, data.min, data.text, data.chatId, data.cover);
+const NETWORK_URLS = {
+  [SupportedChainId.BSC]: `https://bsc-dataseed.binance.org/`,
+  [SupportedChainId.BSC_TEST]: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
+}
+
+const NEST_ADDRESS = {
+  [SupportedChainId.BSC]: '0x98f8669f6481ebb341b522fcd3663f79a3d1a6a7',
+  [SupportedChainId.BSC_TEST]: '0x821edD79cc386E56FeC9DA5793b87a3A52373cdE',
+}
+
+const BSCTestProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC_TEST]);
+
+const NESTTestContract = new ethers.Contract(NEST_ADDRESS[SupportedChainId.BSC_TEST], erc20abi, BSCTestProvider)
+
+NESTTestContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10').then((res) => {
+  console.log(Number(ethers.utils.formatEther(res)))
+})
+
