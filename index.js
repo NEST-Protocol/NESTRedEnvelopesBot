@@ -762,7 +762,7 @@ cover: ${config.cover}
 //    #     # #    # #    # #####  ###### ###### #    #
 //
 exports.handler = async (event, context, callback) => {
-  const tmp = JSON.parse(event.body);
+  const tmp = JSON.parse(JSON.stringify(event.body));
   await bot.handleUpdate(tmp);
   return callback(null, {
     statusCode: 200,
