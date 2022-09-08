@@ -565,10 +565,11 @@ Please pay attention to the group news. Good luck next time.`)
     amount = redEnvelop.balance
   } else {
     // get random amount
-    amount = Math.floor(Math.random() * (Math.min(redEnvelop.config.max, redEnvelop.balance) - redEnvelop.config.min + 1) + redEnvelop.config.min)
+    amount = Math.floor(Math.random() * (redEnvelop.config.max - redEnvelop.config.min) + redEnvelop.config.min)
     // check if NEST Prize is enough
-    if (redEnvelop.balance === amount) {
+    if (redEnvelop.balance <= amount) {
       status = 'pending'
+      amount = redEnvelop.balance
     }
   }
   // update NEST Prize info in dynamodb
