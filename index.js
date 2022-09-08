@@ -157,7 +157,7 @@ Number of NEST Prize sent: ${quantity}
 Total sent: ${totalWrap} NEST
 Remaining available: ${left} NEST`,
       {
-        parse_mode: "Markdown",
+        parse_mode: "MarkdownV2",
         ...Markup.inlineKeyboard([
           [Markup.button.callback('« Back', 'backToL1MenuContent')],
         ])
@@ -225,7 +225,7 @@ Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmo
 Number of processing NEST Prize: ${processingResult.Count}. Please check out TX and close that.
 
 Bot wallet balance: ${balance} NEST.`, {
-      parse_mode: "Markdown",
+      parse_mode: "MarkdownV2",
       ...Markup.inlineKeyboard([
         [Markup.button.callback('Pending All', 'pending', openResult.Count === 0)],
         [Markup.button.callback('Liquidate All', 'liquidate', pendingResult.Count === 0 || balance < pendingAmount)],
@@ -425,7 +425,7 @@ chatId: target chatId
 cover: cover uri
 
 For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Prize. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes", "cover": ""}`, {
-    parse_mode: 'Markdown',
+    parse_mode: 'MarkdownV2',
     ...Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
     ])
@@ -453,7 +453,7 @@ bot.action('send', async (ctx) => {
           caption: `${config.text}
 
 Click snatch button or reply your wallet address!`,
-          parse_mode: 'Markdown',
+          parse_mode: 'MarkdownV2',
           protect_content: true,
           ...Markup.inlineKeyboard([
             [Markup.button.callback('Snatch!', 'snatch')],
@@ -463,7 +463,7 @@ Click snatch button or reply your wallet address!`,
         res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
 
 Click snatch button or reply your wallet address!`, {
-          parse_mode: 'Markdown',
+          parse_mode: 'MarkdownV2',
           protect_content: true,
           ...Markup.inlineKeyboard([
             [Markup.button.callback('Snatch!', 'snatch')],
@@ -737,7 +737,7 @@ text: ${config.text},
 chatId: ${config.chatId}
 cover: ${config.cover}
 `, {
-              parse_mode: 'Markdown',
+              parse_mode: 'MarkdownV2',
               ...Markup.inlineKeyboard([
                 [Markup.button.callback('Checked, Send Now!', 'send')],
                 [Markup.button.callback('« Back', 'backToL1MenuContent')],
@@ -746,6 +746,7 @@ cover: ${config.cover}
         )
         ctx.session = {intent: undefined, config: config}
       } catch (e) {
+        console.log(e)
         ctx.reply('Sorry, I cannot understand your config. Please try again.')
       }
     }
