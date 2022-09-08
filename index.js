@@ -708,7 +708,7 @@ Left ${redEnvelop.balance - amount} NEST!`, {
     const intent = ctx.session?.intent
     if (intent === 'config') {
       try {
-        const config = JSON.parse(JSON.stringify(ctx.message.text))
+        const config = JSON.parse(ctx.message.text)
         if (config.token !== 'NEST') {
           ctx.reply('Token must be NEST. Please try again later.')
           return
