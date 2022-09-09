@@ -6,6 +6,7 @@ const {isAddress} = require("ethers/lib/utils");
 const {ethers} = require("ethers");
 const freeTransferAbi = require("./abis/FreeTransfer.json");
 const erc20abi = require("./abis/erc20.json");
+const axios = require('axios')
 
 //
 //    #####
@@ -423,8 +424,9 @@ min: min amount of each NEST Prize
 text: best wishes
 chatId: target chatId
 cover: cover uri
+auth: auth uri
 
-For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Prize. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes", "cover": ""}`, {
+For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Prize. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes", "cover": "", "auth": ""}`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
@@ -546,36 +548,56 @@ bot.action('snatch', async (ctx) => {
     ctx.answerCbQuery("The NEST Prize is not found.")
     return
   }
-  const redEnvelop = queryRedEnvelopeRes.Items[0]
-  if (redEnvelop.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
+  const redEnvelope = queryRedEnvelopeRes.Items[0]
+  if (redEnvelope.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
     await ctx.answerCbQuery('You have already snatched this NEST Prize!')
     return
   }
   // check if NEST Prize is open
-  if (redEnvelop.status !== 'open') {
-    await ctx.answerCbQuery(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.
+  if (redEnvelope.status !== 'open') {
+    await ctx.answerCbQuery(`Sorry, you are late. ${redEnvelope.config.amount} NEST have been given away.
 Please pay attention to the group news. Good luck next time.`)
     return
+  }
+  // check auth api
+  if (redEnvelope.config.auth) {
+    // check user auth
+    try {
+      const res = await axios(redEnvelope.config.auth, {
+        method: 'POST',
+        data: JSON.stringify({
+          user_id: ctx.update.callback_query.from.id,
+          wallet: user.wallet
+        })
+      })
+      if (!res.data) {
+        await ctx.answerCbQuery(`Sorry, you can't get this NEST Prize. Please read this rule carefully.`)
+        return
+      }
+    } catch (e) {
+      await ctx.answerCbQuery(`Sorry, some error occurred. Please try again later.`)
+      return
+    }
   }
   // can snatch
   let status = 'open', amount
   // check if NEST Prize is need empty
-  if (redEnvelop.record.length === redEnvelop.config.quantity - 1) {
+  if (redEnvelope.record.length === redEnvelope.config.quantity - 1) {
     status = 'pending'
-    amount = redEnvelop.balance
+    amount = redEnvelope.balance
   } else {
     // get random amount
-    amount = Math.floor(Math.random() * (redEnvelop.config.max - redEnvelop.config.min) + redEnvelop.config.min)
+    amount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
     // check if NEST Prize is enough
-    if (redEnvelop.balance <= amount) {
+    if (redEnvelope.balance <= amount) {
       status = 'pending'
-      amount = redEnvelop.balance
+      amount = redEnvelope.balance
     }
   }
   // update NEST Prize info in dynamodb
   await ddbDocClient.send(new UpdateCommand({
     TableName: 'nest-red-envelopes',
-    Key: {id: redEnvelop.id},
+    Key: {id: redEnvelope.id},
     UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
     ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
     ExpressionAttributeValues: {
@@ -647,38 +669,62 @@ bot.on('message', async (ctx) => {
         // })
         return
       }
-      const redEnvelop = queryRedEnvelopeRes.Items[0]
-      if (redEnvelop.record.some(record => record.user_id === ctx.message.from.id)) {
+      const redEnvelope = queryRedEnvelopeRes.Items[0]
+      if (redEnvelope.record.some(record => record.user_id === ctx.message.from.id)) {
         // await ctx.reply('You have already snatched this NEST Prize!', {
         //   reply_to_message_id: ctx.message.message_id,
         // })
         return
       }
       // check if NEST Prize is open
-      if (redEnvelop.status !== 'open') {
+      if (redEnvelope.status !== 'open') {
         // await ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.`, {
         //   reply_to_message_id: ctx.message.message_id,
         // })
         return
       }
+      // check auth api
+      if (redEnvelope.config.auth) {
+        // check user auth
+        try {
+          const res = await axios(redEnvelope.config.auth, {
+            method: 'POST',
+            data: JSON.stringify({
+              user_id: ctx.message.from.id,
+              wallet: input
+            })
+          })
+          if (!res.data) {
+            await ctx.reply(`Sorry, you can't get this NEST Prize. Please read this rule carefully.`, {
+              reply_to_message_id: ctx.message.message_id,
+            })
+            return
+          }
+        } catch (e) {
+          await ctx.reply(`Sorry, some error occurred. Please try again later.`, {
+            reply_to_message_id: ctx.message.message_id,
+          })
+          return
+        }
+      }
       let status = 'open', amount
       // check if NEST Prize is need empty
-      if (redEnvelop.record.length === redEnvelop.config.quantity - 1) {
+      if (redEnvelope.record.length === redEnvelope.config.quantity - 1) {
         status = 'pending'
-        amount = redEnvelop.balance
+        amount = redEnvelope.balance
       } else {
         // get random amount
-        amount = Math.floor(Math.random() * (redEnvelop.config.max - redEnvelop.config.min) + redEnvelop.config.min)
+        amount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
         // check if NEST Prize is enough
-        if (redEnvelop.balance <= amount) {
+        if (redEnvelope.balance <= amount) {
           status = 'pending'
-          amount = redEnvelop.balance
+          amount = redEnvelope.balance
         }
       }
       // update NEST Prize info in dynamodb
       await ddbDocClient.send(new UpdateCommand({
         TableName: 'nest-red-envelopes',
-        Key: {id: redEnvelop.id},
+        Key: {id: redEnvelope.id},
         UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
         ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
         ExpressionAttributeValues: {
@@ -700,7 +746,7 @@ bot.on('message', async (ctx) => {
       })
       ctx.reply(`Congratulations, ${ctx.message.from.username ?? ctx.message.from.id} have got ${amount} NEST.
 
-Left ${redEnvelop.balance - amount} NEST!`, {
+Left ${redEnvelope.balance - amount} NEST!`, {
         reply_to_message_id: ctx.message.message_id,
       })
     }
@@ -738,6 +784,7 @@ min: ${config.min},
 text: ${config.text},
 chatId: ${config.chatId}
 cover: ${config.cover}
+auth: ${config.auth}
 `, {
               parse_mode: 'Markdown',
               ...Markup.inlineKeyboard([
