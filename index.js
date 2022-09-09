@@ -109,7 +109,7 @@ bot.start(async (ctx) => {
 //   ####### #####    #     # ###### #    #  ####
 //
 const replyL1MenuContent = async (ctx) => {
-  ctx.reply(`Welcome to NEST NEST Prize!`, Markup.inlineKeyboard([
+  ctx.reply(`Welcome to NEST Prize!`, Markup.inlineKeyboard([
     [Markup.button.callback('Send NEST Prize', 'set-config')],
     [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
@@ -118,7 +118,7 @@ const replyL1MenuContent = async (ctx) => {
 
 const editReplyL1MenuContent = async (ctx) => {
   await ctx.answerCbQuery()
-  await ctx.editMessageText('Welcome to NEST NEST Prize Bot!', Markup.inlineKeyboard([
+  await ctx.editMessageText('Welcome to NEST Prize Bot!', Markup.inlineKeyboard([
     [Markup.button.callback('Send NEST Prize', 'set-config')],
     [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
@@ -151,7 +151,7 @@ const editReplyL2HistoryContent = async (ctx) => {
   const quantity = result.Items.reduce((acc, cur) => acc + cur.config.quantity, 0)
   const totalWrap = result.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
   const left = result.Items.reduce((acc, cur) => acc + cur.balance, 0)
-  await ctx.editMessageText(`*NEST NEST Prize History*
+  await ctx.editMessageText(`*NEST Prize History*
 
 Times of NEST Prize sent: ${result.Count}
 Number of NEST Prize sent: ${quantity}
@@ -217,7 +217,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     const openAmount = openResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     await ctx.answerCbQuery()
-    await ctx.editMessageText(`*NEST NEST Prize Liquidate*
+    await ctx.editMessageText(`*NEST Prize Liquidate*
   
 Number of open NEST Prize: ${openResult.Count}, had snatched: ${openAmount} NEST.
 
