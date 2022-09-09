@@ -744,9 +744,7 @@ bot.on('message', async (ctx) => {
           reply_to_message_id: ctx.message.message_id,
         })
       })
-      ctx.reply(`Congratulations, ${ctx.message.from.username ?? ctx.message.from.id} have got ${amount} NEST.
-
-Left ${redEnvelope.balance - amount} NEST!`, {
+      ctx.reply(`Congratulations, ${ctx.message.from.username ?? ctx.message.from.id} have got ${amount} NEST.`, {
         reply_to_message_id: ctx.message.message_id,
       })
     }
