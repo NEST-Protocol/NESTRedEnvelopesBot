@@ -634,21 +634,56 @@ bot.on('message', async (ctx) => {
   // group message
   if (chat_id < 0) {
     if (isAddress(input)) {
-      // update wallet address in dynamodb
-      await ddbDocClient.send(new PutCommand({
+      // query user id
+      // check user info in dynamodb
+      const queryUserRes = await ddbDocClient.send(new QueryCommand({
+        ExpressionAttributeNames: {'#user': 'user_id'},
         TableName: 'nest-red-envelopes',
-        Item: {
-          id: uid.getUniqueID(),  // snowflake id
-          user_id: ctx.message.from.id,
-          wallet: input,
-          created_at: new Date().getTime(),
-          updated_at: new Date().getTime(),
+        IndexName: 'user-index',
+        KeyConditionExpression: '#user = :user',
+        ExpressionAttributeValues: {
+          ':user': ctx.message.from.id,
         },
       })).catch(() => {
-        ctx.reply('Some error occurred, please try again later.', {
-          reply_to_message_id: ctx.message.message_id,
+        ctx.answerCbQuery("Some error occurred, please try again later.")
+      });
+      // If no user info do nothing.
+      if (queryUserRes.Count === 0) {
+        // update wallet address in dynamodb
+        ddbDocClient.send(new PutCommand({
+          TableName: 'nest-red-envelopes',
+          Item: {
+            id: uid.getUniqueID(),  // snowflake id
+            user_id: ctx.message.from.id,
+            wallet: input,
+            created_at: new Date().getTime(),
+            updated_at: new Date().getTime(),
+          },
+        })).catch(() => {
+          ctx.reply('Some error occurred, please try again later.', {
+            reply_to_message_id: ctx.message.message_id,
+          })
         })
-      })
+      } else {
+        const user = queryUserRes.Items[0]
+        if (user.wallet !== input) {
+          // update wallet address in dynamodb
+          ddbDocClient.send(new PutCommand({
+            TableName: 'nest-red-envelopes',
+            Item: {
+              id: user.id,
+              user_id: ctx.message.from.id,
+              wallet: input,
+              created_at: new Date().getTime(),
+              updated_at: new Date().getTime(),
+            },
+          })).catch(() => {
+            ctx.reply('Some error occurred, please try again later.', {
+              reply_to_message_id: ctx.message.message_id,
+            })
+          })
+        }
+      }
       // auto snatch NEST Prize
       const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
         ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id', '#status': 'status'},
@@ -664,23 +699,14 @@ bot.on('message', async (ctx) => {
         },
       }))
       if (queryRedEnvelopeRes.Count === 0) {
-        // ctx.reply('There is none NEST Prize in this group.', {
-        //   reply_to_message_id: ctx.message.message_id,
-        // })
         return
       }
       const redEnvelope = queryRedEnvelopeRes.Items[0]
       if (redEnvelope.record.some(record => record.user_id === ctx.message.from.id)) {
-        // await ctx.reply('You have already snatched this NEST Prize!', {
-        //   reply_to_message_id: ctx.message.message_id,
-        // })
         return
       }
       // check if NEST Prize is open
       if (redEnvelope.status !== 'open') {
-        // await ctx.reply(`Sorry, you are late. ${redEnvelop.config.amount} NEST have been given away.\nPlease pay attention to the group news. Good luck next time.`, {
-        //   reply_to_message_id: ctx.message.message_id,
-        // })
         return
       }
       // check auth api
