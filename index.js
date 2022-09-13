@@ -91,8 +91,8 @@ bot.start(async (ctx) => {
     return
   }
   
-  // chat_id in [2130493951, 5035670602, 552791389] , pass, otherwise, return
-  if (chat_id !== 2130493951 && chat_id !== 5035670602 && chat_id !== 552791389) {
+  // chat_id in [2130493951, 5035670602, 552791389, 1859030053] , pass, otherwise, return
+  if (chat_id !== 2130493951 && chat_id !== 5035670602 && chat_id !== 552791389 && chat_id !== 1859030053) {
     await ctx.reply('Sorry, you are not allowed to use this bot!')
     return
   }
