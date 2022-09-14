@@ -568,7 +568,10 @@ Please pay attention to the group news. Good luck next time.`)
         data: JSON.stringify({
           "user_id": ctx.update.callback_query.from.id,
           "wallet": user.wallet
-        })
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        }
       })
       if (!res.data) {
         await ctx.answerCbQuery(`Sorry, you can't get this NEST Prize. Please read this rule carefully.`)
