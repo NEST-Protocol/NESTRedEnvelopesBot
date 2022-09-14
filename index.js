@@ -566,8 +566,8 @@ Please pay attention to the group news. Good luck next time.`)
       const res = await axios(redEnvelope.config.auth, {
         method: 'POST',
         data: JSON.stringify({
-          user_id: ctx.update.callback_query.from.id,
-          wallet: user.wallet
+          "user_id": ctx.update.callback_query.from.id,
+          "wallet": user.wallet
         })
       })
       if (!res.data) {
