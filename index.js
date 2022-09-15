@@ -454,7 +454,7 @@ bot.action('send', async (ctx) => {
         res = await ctx.telegram.sendPhoto(config.chatId, config.cover, {
           caption: `${config.text}
 
-Click snatch button or reply your wallet address!`,
+Click snatch button!`,
           parse_mode: 'Markdown',
           protect_content: true,
           ...Markup.inlineKeyboard([
@@ -464,7 +464,7 @@ Click snatch button or reply your wallet address!`,
       } else {
         res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
 
-Click snatch button or reply your wallet address!`, {
+Click snatch button!`, {
           parse_mode: 'Markdown',
           protect_content: true,
           ...Markup.inlineKeyboard([
