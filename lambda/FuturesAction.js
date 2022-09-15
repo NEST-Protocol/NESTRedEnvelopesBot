@@ -20,7 +20,7 @@ exports.handler = async (event) => {
     const data = req.data.result || []
     
     const res = data.some((tx) => {
-      return (tx.from).toLowerCase() === wallet.toLowerCase() && tx.methodId === '0x15ee0aad' && (Number(tx.timeStamp) - new Date().getTime()/1000 < 86400)
+      return (tx.from).toLowerCase() === wallet.toLowerCase() && tx.methodId === '0x15ee0aad' && (new Date().getTime()/1000 - Number(tx.timeStamp) < 86400)
     })
     
     if (res) {
