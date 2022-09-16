@@ -602,8 +602,7 @@ Please pay attention to the group news. Good luck next time.`)
       status = 'pending'
       amount = redEnvelope.balance
     } else {
-      status = 'pending'
-      amount = 0
+      amount = rAmount
     }
   }
   // update NEST Prize info in dynamodb
