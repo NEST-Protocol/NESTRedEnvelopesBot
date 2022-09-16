@@ -265,7 +265,8 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       ':s': 'pending',
     },
   })).catch(() => {
-    ctx.answerCbQuery("Some error occurred, please try again later.")
+    ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
+    ctx.reply("Fetch pending NEST Prize failed, please try again later.")
   });
   
   let pendingList = []
@@ -282,6 +283,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         tokenAmountList,
         NEST_ADDRESS[SupportedChainId.BSC],
     )
+    ctx.reply('Send tx successfully, please check out TX and close that.')
     // set them to processing, and record tx hash
     for (const item of result.Items) {
       await ddbDocClient.send(new UpdateCommand({
@@ -299,13 +301,16 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
           ':h': res.hash,
         },
       })).catch(() => {
-        ctx.answerCbQuery("Some error occurred, please try again later.")
+        ctx.answerCbQuery("Update NEST Prize status failed, please try again later.")
+        ctx.reply("Update NEST Prize status failed, please try again later.")
       });
       try {
         await ctx.telegram.sendMessage(item.chat_id, `Your NEST Prize is processing, please check out TX: ${TX_URL[SupportedChainId.BSC]}${res.hash}`, {
           reply_to_message_id: item.message_id,
         })
       } catch (_) {
+        ctx.answerCbQuery("Send message to user failed, please try again later.")
+        ctx.reply("Send message to user failed, please try again later.")
       }
     }
     await ctx.answerCbQuery('Liquidate Success!')
