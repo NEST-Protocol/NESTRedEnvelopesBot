@@ -549,8 +549,7 @@ bot.action('snatch', async (ctx) => {
       ':chat_id': ctx.update.callback_query.message.chat.id,
       ':message_id': ctx.update.callback_query.message.message_id,
     },
-  })).catch((e) => {
-    console.log(e)
+  })).catch((_) => {
     ctx.answerCbQuery("Some error occurred, please try again later.")
   })
   if (!queryRedEnvelopeRes || queryRedEnvelopeRes.Count === 0) {
@@ -592,43 +591,43 @@ Please pay attention to the group news. Good luck next time.`)
     }
   }
   // can snatch
-  let status, amount
+  let status = "open", amount = 0
   // check if NEST Prize is need empty
   if (redEnvelope.record.length === redEnvelope.config.quantity - 1) {
     status = 'pending'
     amount = redEnvelope.balance
   } else {
-    const rAmount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
-    if (redEnvelope.balance <= rAmount) {
+    amount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
+    if (redEnvelope.balance <= amount) {
       status = 'pending'
       amount = redEnvelope.balance
-    } else {
-      amount = rAmount
     }
   }
   // update NEST Prize info in dynamodb
-  await ddbDocClient.send(new UpdateCommand({
-    TableName: 'nest-red-envelopes',
-    Key: {id: redEnvelope.id},
-    UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
-    ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
-    ExpressionAttributeValues: {
-      ':amount': amount,
-      ':updated_at': new Date().getTime(),
-      ':record': [{
-        user_id: ctx.update.callback_query.from.id,
-        username: ctx.update.callback_query.from.username,
-        amount,
-        wallet: user.wallet,
-        created_at: new Date().getTime(),
-      }],
-      ':status': status,
-    }
-  })).catch(() => {
+  try {
+    await ddbDocClient.send(new UpdateCommand({
+      TableName: 'nest-red-envelopes',
+      Key: {id: redEnvelope.id},
+      UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
+      ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
+      ExpressionAttributeValues: {
+        ':amount': amount,
+        ':updated_at': new Date().getTime(),
+        ':record': [{
+          user_id: ctx.update.callback_query.from.id,
+          username: ctx.update.callback_query.from.username,
+          amount,
+          wallet: user.wallet,
+          created_at: new Date().getTime(),
+        }],
+        ':status': status,
+      }
+    }))
+    await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
+    await ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
+  } catch (e) {
     ctx.answerCbQuery("Some error occurred, please try again later.")
-  })
-  await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
-  await ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
+  }
 })
 
 //
