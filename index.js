@@ -583,20 +583,19 @@ Please pay attention to the group news. Good luck next time.`)
     }
   }
   // can snatch
-  let status = 'open', amount
+  let status, amount
   // check if NEST Prize is need empty
   if (redEnvelope.record.length === redEnvelope.config.quantity - 1) {
     status = 'pending'
-    if (redEnvelope.balance >= 0) {
-      amount = redEnvelope.balance
-    }
+    amount = redEnvelope.balance
   } else {
-    // get random amount
-    amount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
-    // check if NEST Prize is enough
-    if (redEnvelope.balance <= amount && redEnvelope.balance >= 0) {
+    const rAmount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
+    if (redEnvelope.balance <= rAmount) {
       status = 'pending'
       amount = redEnvelope.balance
+    } else {
+      status = 'pending'
+      amount = 0
     }
   }
   // update NEST Prize info in dynamodb
