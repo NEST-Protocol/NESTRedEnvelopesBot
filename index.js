@@ -587,12 +587,14 @@ Please pay attention to the group news. Good luck next time.`)
   // check if NEST Prize is need empty
   if (redEnvelope.record.length === redEnvelope.config.quantity - 1) {
     status = 'pending'
-    amount = redEnvelope.balance
+    if (redEnvelope.balance >= 0) {
+      amount = redEnvelope.balance
+    }
   } else {
     // get random amount
     amount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
     // check if NEST Prize is enough
-    if (redEnvelope.balance <= amount) {
+    if (redEnvelope.balance <= amount && redEnvelope.balance >= 0) {
       status = 'pending'
       amount = redEnvelope.balance
     }
