@@ -554,7 +554,7 @@ bot.action('snatch', async (ctx) => {
     return
   }
   // check if NEST Prize is open
-  if (redEnvelope.status !== 'open') {
+  if (redEnvelope.status !== 'open' || redEnvelope.balance <= 0) {
     await ctx.answerCbQuery(`Sorry, you are late. ${redEnvelope.config.amount} NEST have been given away.
 Please pay attention to the group news. Good luck next time.`)
     return
