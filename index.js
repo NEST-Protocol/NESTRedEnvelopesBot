@@ -549,10 +549,11 @@ bot.action('snatch', async (ctx) => {
       ':chat_id': ctx.update.callback_query.message.chat.id,
       ':message_id': ctx.update.callback_query.message.message_id,
     },
-  })).catch(() => {
+  })).catch((e) => {
+    console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
   })
-  if (queryRedEnvelopeRes.Count === 0) {
+  if (!queryRedEnvelopeRes || queryRedEnvelopeRes.Count === 0) {
     ctx.answerCbQuery("The NEST Prize is not found.")
     return
   }
