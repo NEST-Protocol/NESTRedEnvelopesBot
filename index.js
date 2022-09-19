@@ -271,7 +271,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
   
   let pendingList = []
   for (const item of result.Items) {
-    pendingList.push.apply(pendingList, item.record)
+    pendingList.push.apply(pendingList, item.record.filter(r => r.amount > 0))
   }
   
   // send tx
@@ -563,7 +563,7 @@ bot.action('snatch', async (ctx) => {
   }
   // check if NEST Prize is open
   if (redEnvelope.status !== 'open' || redEnvelope.balance <= 0) {
-    await ctx.answerCbQuery(`Sorry, you are late. ${redEnvelope.config.amount} NEST have been given away.
+    await ctx.answerCbQuery(`Sorry, you are late. All NEST Prize have been given away.
 Please pay attention to the group news. Good luck next time.`)
     return
   }
