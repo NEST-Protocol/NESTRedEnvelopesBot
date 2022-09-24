@@ -277,7 +277,9 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         pendingList.push(item)
       }
     } else {
-      pendingList[index].amount += item.amount
+      if (item.amount > 0) {
+        pendingList[index].amount += item.amount
+      }
     }
   }
   
