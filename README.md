@@ -35,5 +35,5 @@ The id is snowflake id.
 - [x] User send red envelope history
 - [x] Bot admin auth whitelist
 - [x] Wallet query 
-- [ ] Add red envelope cover 
+- [x] Add red envelope cover 
 
