@@ -271,14 +271,16 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
   
   let pendingList = []
   for (const item of result.Items) {
-    const index = pendingList.findIndex((i) => i.wallet === item.wallet)
-    if (index === -1) {
-      if (item.amount > 0) {
-        pendingList.push(item)
-      }
-    } else {
-      if (item.amount > 0) {
-        pendingList[index].amount += item.amount
+    for (const user of item.record) {
+      const index = pendingList.findIndex((i) => i.wallet === user.wallet)
+      if (index === -1) {
+        if (user.amount > 0) {
+          pendingList.push(user)
+        }
+      } else {
+        if (user.amount > 0) {
+          pendingList[index].amount += user.amount
+        }
       }
     }
   }
