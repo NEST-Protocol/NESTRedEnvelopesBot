@@ -285,6 +285,12 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
     }
   }
   
+  if (pendingList.length === 0) {
+    await ctx.answerCbQuery("No pending NEST Prize found to send.")
+    await ctx.editMessageText("No pending NEST Prize found to send.")
+    return
+  }
+  
   // send tx
   const addressList = pendingList.map(item => item.wallet)
   const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
