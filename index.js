@@ -140,6 +140,7 @@ bot.action('backToL1MenuContent', editReplyL1MenuContent)
 const editReplyL2HistoryContent = async (ctx) => {
   const result = await ddbDocClient.send(new ScanCommand({
     TableName: 'nest-red-envelopes',
+    indexName: 'red-envelope-index',
     FilterExpression: 'creator = :creator',
     ExpressionAttributeValues: {
       ':creator': ctx.update.callback_query.from.id,
