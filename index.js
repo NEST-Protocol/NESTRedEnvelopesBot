@@ -470,6 +470,7 @@ bot.action('close', editReplyL3CloseContent)
 //    ####### #######     #####  ######   #       #####   ####  #    # #      #  ####
 //
 bot.action('set-config', async (ctx) => {
+  ctx.session = {...ctx.session, intent: 'config'}
   await ctx.answerCbQuery()
   await ctx.editMessageText(`Enter NEST Prize config with json format.
   
@@ -490,7 +491,6 @@ For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
     ])
   })
-  ctx.session = {intent: 'config'}
 })
 
 //
