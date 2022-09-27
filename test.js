@@ -52,12 +52,13 @@ const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 const main = async () => {
   const result = await ddbDocClient.send(new ScanCommand({
     TableName: 'nest-red-envelopes',
+    IndexName: 'red-envelope-index',
     FilterExpression: '#s = :s',
     ExpressionAttributeNames: {
       '#s': 'status',
     },
     ExpressionAttributeValues: {
-      ':s': 'pendingError',
+      ':s': 'pending',
     },
   })).catch(() => {
     ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
@@ -72,19 +73,19 @@ const main = async () => {
   const addressList = pendingList.map(item => item.wallet)
   const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
   
-  try {
-    const res = await BSCTestFreeTransferContract.transfer(
-        addressList,
-        tokenAmountList,
-        NEST_ADDRESS[SupportedChainId.BSC_TEST],
-        {
-          gasLimit: 95000 * addressList.length,
-        }
-    )
-    console.log(TX_URL[SupportedChainId.BSC_TEST] + res.hash)
-  } catch (e) {
-    console.log(e)
-  }
+  // try {
+  //   const res = await BSCTestFreeTransferContract.transfer(
+  //       addressList,
+  //       tokenAmountList,
+  //       NEST_ADDRESS[SupportedChainId.BSC_TEST],
+  //       {
+  //         gasLimit: 95000 * addressList.length,
+  //       }
+  //   )
+  //   console.log(TX_URL[SupportedChainId.BSC_TEST] + res.hash)
+  // } catch (e) {
+  //   console.log(e)
+  // }
 }
 
 main()
