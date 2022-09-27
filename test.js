@@ -1,42 +1,26 @@
 const {ethers} = require("ethers");
+const {ScanCommand, DynamoDBDocumentClient} = require("@aws-sdk/lib-dynamodb");
+const {DynamoDBClient} = require("@aws-sdk/client-dynamodb");
 
 const main = async () => {
-  const result = {
-    Items: [
-      {
-        record: [
-          {
-            wallet: 'b',
-            amount: 1,
-          },
-          {
-            wallet: 'a',
-            amount: 1,
-          },
-          {
-            wallet: 'b',
-            amount: 1,
-          },
-          {
-            wallet: 'c',
-            amount: 1,
-          }
-        ]
-      },
-      {
-        record: [
-          {
-            wallet: 'a',
-            amount: 1,
-          },
-          {
-            wallet: 'a',
-            amount: 1,
-          },
-        ]
-      }
-    ]
-  }
+  const ddbClient = new DynamoDBClient({
+    region: 'ap-northeast-1',
+  });
+  
+  const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
+  const result = await ddbDocClient.send(new ScanCommand({
+    TableName: 'nest-red-envelopes',
+    FilterExpression: '#s = :s',
+    ExpressionAttributeNames: {
+      '#s': 'status',
+    },
+    ExpressionAttributeValues: {
+      ':s': 'pending',
+    },
+  })).catch(() => {
+    ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
+    ctx.reply("Fetch pending NEST Prize failed, please try again later.")
+  });
   let pendingList = []
   for (const item of result.Items) {
     for (const user of item.record) {
