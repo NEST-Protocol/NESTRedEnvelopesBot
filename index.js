@@ -213,15 +213,30 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
         },
       }))
     ])
+    let pendingList = []
+    for (const item of pendingResult.Items) {
+      for (const user of item.record) {
+        const index = pendingList.findIndex((i) => i.wallet === user.wallet)
+        if (index === -1) {
+          if (user.amount > 0) {
+            pendingList.push(user)
+          }
+        } else {
+          if (user.amount > 0) {
+            pendingList[index].amount += user.amount
+          }
+        }
+      }
+    }
     const balance = Number(ethers.utils.formatEther(await NESTContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
     const openAmount = openResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     await ctx.answerCbQuery()
     await ctx.editMessageText(`*NEST Prize Liquidate*
-  
+
 Number of open NEST Prize: ${openResult.Count}, had snatched: ${openAmount} NEST.
 
-Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmount} NEST.
+Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmount} NEST, different users: ${pendingList.length}.
 
 Number of processing NEST Prize: ${processingResult.Count}. Please check out TX and close that.
 
