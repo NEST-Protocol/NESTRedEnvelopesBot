@@ -300,7 +300,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         tokenAmountList,
         NEST_ADDRESS[SupportedChainId.BSC],
         {
-          gasLimit: 10000000000,
+          gasLimit: 30000 * addressList.length,
         }
     )
     ctx.reply('Send tx successfully, please check out TX and close that.')

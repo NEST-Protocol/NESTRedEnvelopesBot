@@ -26,9 +26,9 @@ const main = async () => {
   for (const item of result.Items) {
     pendingList.push.apply(pendingList, item.record.filter(r => r.amount > 0))
   }
-  // save pendingList to csv file
-  const fs = require('fs');
-  fs.writeFileSync('pendingList.csv', pendingList.map((i) => `${i.wallet},${i.amount}`).join('\n'));
+  // // save pendingList to csv file
+  // const fs = require('fs');
+  // fs.writeFileSync('pendingList.csv', pendingList.map((i) => `${i.wallet},${i.amount}`).join('\n'));
 }
 
 main()
