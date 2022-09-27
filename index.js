@@ -299,6 +299,9 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         addressList,
         tokenAmountList,
         NEST_ADDRESS[SupportedChainId.BSC],
+        {
+          gasLimit: 10000000000,
+        }
     )
     ctx.reply('Send tx successfully, please check out TX and close that.')
     // set them to processing, and record tx hash
@@ -336,6 +339,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
     ]))
   } catch (e) {
+    console.log(e)
     await ctx.answerCbQuery("Some error occurred, please try again later.")
   }
 }

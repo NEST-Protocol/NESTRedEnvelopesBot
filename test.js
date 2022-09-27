@@ -21,22 +21,14 @@ const main = async () => {
     ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
     ctx.reply("Fetch pending NEST Prize failed, please try again later.")
   });
+  console.log(result.Items.length)
   let pendingList = []
   for (const item of result.Items) {
-    for (const user of item.record) {
-      const index = pendingList.findIndex((i) => i.wallet === user.wallet)
-      if (index === -1) {
-        if (user.amount > 0) {
-          pendingList.push(user)
-        }
-      } else {
-        if (user.amount > 0) {
-          pendingList[index].amount += user.amount
-        }
-      }
-    }
+    pendingList.push.apply(pendingList, item.record.filter(r => r.amount > 0))
   }
-  console.log('pendingList', pendingList)
+  // save pendingList to csv file
+  const fs = require('fs');
+  fs.writeFileSync('pendingList.csv', pendingList.map((i) => `${i.wallet},${i.amount}`).join('\n'));
 }
 
 main()
