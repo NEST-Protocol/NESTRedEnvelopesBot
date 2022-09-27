@@ -294,6 +294,13 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
   // send tx
   const addressList = pendingList.map(item => item.wallet)
   const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
+  
+  if (addressList.length > 3000) {
+    await ctx.answerCbQuery('Sorry, the number of NEST Prize is too large (> 3000)')
+    ctx.reply('Sorry, the number of NEST Prize is too large (> 3000)')
+    return
+  }
+  
   try {
     const res = await BSCFreeTransferContract.transfer(
         addressList,
