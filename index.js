@@ -578,6 +578,7 @@ Click snatch button!`, {
           protect_content: true,
           ...Markup.inlineKeyboard([
             [Markup.button.callback('Snatch!', 'snatch')],
+            [Markup.button.url('Submit Wallet', 'https://t.me/NESTRedEnvelopesBot')]
           ])
         })
       }
@@ -637,7 +638,7 @@ bot.action('snatch', async (ctx) => {
   });
   // If no user info do nothing.
   if (queryUserRes.Count === 0) {
-    await ctx.answerCbQuery('Please DM this bot and submit your wallet address.')
+    await ctx.answerCbQuery('Please Submit Wallet First!')
     return
   }
   const user = queryUserRes.Items[0]
