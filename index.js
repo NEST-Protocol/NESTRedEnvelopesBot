@@ -669,6 +669,10 @@ bot.action('snatch', async (ctx) => {
     await ctx.answerCbQuery('You have already snatched this NEST Prize!')
     return
   }
+  if (redEnvelope.record.some(record => record.wallet === user.wallet)) {
+    await ctx.answerCbQuery('This wallet have already snatched this NEST Prize!')
+    return
+  }
   // check if NEST Prize is open
   if (redEnvelope.status !== 'open' || redEnvelope.balance <= 0) {
     await ctx.answerCbQuery(`Sorry, you are late. All NEST Prize have been given away.
@@ -800,8 +804,11 @@ auth: ${config.auth}
       } catch (e) {
         ctx.reply('Sorry, I cannot understand your config. Please try again.')
       }
-    } else if (intent === 'set-user-wallet') {
+    }
+    else if (intent === 'set-user-wallet') {
       if (isAddress(input)) {
+        // Check if there is the same address
+        
         // check user info in dynamodb
         const queryUserRes = await ddbDocClient.send(new QueryCommand({
           ExpressionAttributeNames: {'#user': 'user_id'},
