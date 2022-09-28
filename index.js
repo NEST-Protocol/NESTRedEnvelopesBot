@@ -637,7 +637,7 @@ bot.action('snatch', async (ctx) => {
   });
   // If no user info do nothing.
   if (queryUserRes.Count === 0) {
-    await ctx.answerCbQuery('Please reply your wallet address in the group directly!')
+    await ctx.answerCbQuery('Please DM this bot and submit your wallet address.')
     return
   }
   const user = queryUserRes.Items[0]
