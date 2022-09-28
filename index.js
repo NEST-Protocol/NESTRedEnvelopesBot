@@ -8,6 +8,10 @@ const freeTransferAbi = require("./abis/FreeTransfer.json");
 const erc20abi = require("./abis/erc20.json");
 const axios = require('axios')
 
+// Command
+// start - submit or update wallet address
+// admin - admin portal to send prize
+
 //
 //    #####
 //   #     #  ####  #    # ###### #  ####
