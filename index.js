@@ -578,7 +578,7 @@ Click snatch button!`, {
           protect_content: true,
           ...Markup.inlineKeyboard([
             [Markup.button.callback('Snatch!', 'snatch')],
-            [Markup.button.url('Submit Wallet', 'https://t.me/NESTRedEnvelopesBot')]
+            [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot')]
           ])
         })
       }
