@@ -97,8 +97,9 @@ bot.start(async (ctx) => {
   if (ctx.session?.wallet) {
     ctx.reply(`Welcome to NEST Prize!
 
-Your wallet: ${ctx.session.wallet}`, Markup.inlineKeyboard([
+Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet')],
+      [Markup.button.url('Report Issues', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
     ]))
     return
   }
@@ -804,8 +805,7 @@ auth: ${config.auth}
       } catch (e) {
         ctx.reply('Sorry, I cannot understand your config. Please try again.')
       }
-    }
-    else if (intent === 'set-user-wallet') {
+    } else if (intent === 'set-user-wallet') {
       if (isAddress(input)) {
         // Check if there is the same address
         
