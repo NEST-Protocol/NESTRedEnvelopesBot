@@ -85,6 +85,7 @@ const uid = new Snowflake({
 //    #####    #   #    # #    #   #
 //
 bot.start(async (ctx) => {
+  ctx.session = {}
   // query user in db
   const queryUserRes = await ddbDocClient.send(new QueryCommand({
     ExpressionAttributeNames: {'#user': 'user_id'},
@@ -128,14 +129,7 @@ bot.command('admin', async (ctx) => {
 
 bot.action('set-user-wallet', async (ctx) => {
   ctx.session = {...ctx.session, intent: 'set-user-wallet'}
-  await ctx.reply('Please send your wallet address:', Markup.inlineKeyboard([
-    [Markup.button.callback('Cancel', 'cancel')],
-  ]))
-})
-
-bot.action('cancel', async (ctx) => {
-  ctx.session = {}
-  await ctx.reply('Operation cancelled.')
+  await ctx.editMessageText('Please send your wallet address:')
 })
 
 //
@@ -781,8 +775,7 @@ auth: ${config.auth}
       } catch (e) {
         ctx.reply('Sorry, I cannot understand your config. Please try again.')
       }
-    }
-    else if (intent === 'set-user-wallet') {
+    } else if (intent === 'set-user-wallet') {
       if (isAddress(input)) {
         // check user info in dynamodb
         const queryUserRes = await ddbDocClient.send(new QueryCommand({
@@ -808,7 +801,10 @@ auth: ${config.auth}
               created_at: new Date().getTime(),
               updated_at: new Date().getTime(),
             },
-          })).catch(() => {
+          })).then(() => {
+            ctx.session = {}
+            ctx.reply(`Your wallet address has submitted. ${input}`)
+          }).catch(() => {
             ctx.reply('Some error occurred, please try again later.', {
               reply_to_message_id: ctx.message.message_id,
             })
@@ -826,7 +822,10 @@ auth: ${config.auth}
                 created_at: new Date().getTime(),
                 updated_at: new Date().getTime(),
               },
-            })).catch(() => {
+            })).then(() => {
+              ctx.session = {}
+              ctx.reply(`Your wallet address has updated. ${input}`)
+            }).catch(() => {
               ctx.reply('Some error occurred, please try again later.', {
                 reply_to_message_id: ctx.message.message_id,
               })
