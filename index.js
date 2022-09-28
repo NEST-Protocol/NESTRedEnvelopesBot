@@ -89,6 +89,10 @@ const uid = new Snowflake({
 //    #####    #   #    # #    #   #
 //
 bot.start(async (ctx) => {
+  const chatId = ctx.update.message.chat.id
+  if (chatId < 0) {
+    return
+  }
   ctx.session = {...ctx.session, intent: undefined}
   if (ctx.session?.wallet) {
     ctx.reply(`Welcome to NEST Prize!
@@ -105,7 +109,7 @@ Your wallet: ${ctx.session.wallet}`, Markup.inlineKeyboard([
     IndexName: 'user-index',
     KeyConditionExpression: '#user = :user',
     ExpressionAttributeValues: {
-      ':user': ctx.message.from.id,
+      ':user': ctx.update.message.from.id,
     },
   })).catch(() => {
     ctx.answerCbQuery("Some error occurred, please try again later.")
