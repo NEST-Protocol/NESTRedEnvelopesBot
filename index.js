@@ -99,7 +99,7 @@ bot.start(async (ctx) => {
 
 Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet')],
-      [Markup.button.url('Report Issues', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
+      [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
     ]))
     return
   }
@@ -120,6 +120,7 @@ Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
 
 You have not submitted any addresses to me. Click the button below so you can Snatch our Prize!`, Markup.inlineKeyboard([
       [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
+      [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
     ]))
   } else {
     ctx.session = {wallet: queryUserRes.Items[0].wallet}
@@ -127,6 +128,7 @@ You have not submitted any addresses to me. Click the button below so you can Sn
 
 Your wallet: ${queryUserRes.Items[0].wallet}`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet')],
+      [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
     ]))
   }
 })
@@ -139,7 +141,9 @@ bot.command('admin', async (ctx) => {
   
   // chat_id in [2130493951, 5035670602, 552791389, 1859030053] , pass, otherwise, return
   if (chat_id !== 2130493951 && chat_id !== 5035670602 && chat_id !== 552791389 && chat_id !== 1859030053) {
-    await ctx.reply('Sorry, you are not allowed to use this bot!')
+    await ctx.reply('Sorry, you are not allowed to use this bot!', Markup.inlineKeyboard([
+      [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
+    ]))
     return
   }
   await replyL1MenuContent(ctx)
@@ -835,10 +839,15 @@ auth: ${config.auth}
             },
           })).then(() => {
             ctx.session = {...ctx.session, intent: undefined, wallet: input}
-            ctx.reply(`Your wallet address has submitted. ${input}`)
+            ctx.reply(`Your wallet address has submitted. ${input}`, Markup.inlineKeyboard([
+              [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+            ]))
           }).catch(() => {
             ctx.reply('Some error occurred, please try again later.', {
               reply_to_message_id: ctx.message.message_id,
+              ...Markup.inlineKeyboard([
+                [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
+              ])
             })
           })
         } else {
@@ -856,15 +865,22 @@ auth: ${config.auth}
               },
             })).then(() => {
               ctx.session = {...ctx.session, intent: undefined, wallet: input}
-              ctx.reply(`Your wallet address has updated. ${input}`)
+              ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
+                [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+              ]))
             }).catch(() => {
               ctx.reply('Some error occurred, please try again later.', {
                 reply_to_message_id: ctx.message.message_id,
+                ...Markup.inlineKeyboard([
+                  [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
+                ])
               })
             })
           } else {
             ctx.session = {...ctx.session, intent: undefined, wallet: input}
-            ctx.reply('You entered the same address as you did before.')
+            ctx.reply('You entered the same address as you did before.', Markup.inlineKeyboard([
+              [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+            ]))
           }
         }
       } else {
