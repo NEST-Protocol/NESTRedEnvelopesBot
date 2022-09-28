@@ -1,8 +1,8 @@
 const {ethers} = require("ethers");
 const {ScanCommand, DynamoDBDocumentClient} = require("@aws-sdk/lib-dynamodb");
 const {DynamoDBClient} = require("@aws-sdk/client-dynamodb");
-const freeTransferAbi = require("./abis/FreeTransfer.json");
-const erc20abi = require("./abis/erc20.json");
+const freeTransferAbi = require("../abis/FreeTransfer.json");
+const erc20abi = require("../abis/erc20.json");
 
 const SupportedChainId = {
   BSC: 56,
