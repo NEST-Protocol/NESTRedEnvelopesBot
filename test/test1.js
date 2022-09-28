@@ -43,11 +43,11 @@ const result = {
 for (const item of result.Items) {
   let walletMap = {}
   for (const user of item.record) {
-    if (walletMap[user.wallet.toUpperCase()]) {
+    if (walletMap[user.wallet.toLowerCase()]) {
       continue
     }
-    walletMap[user.wallet.toUpperCase()] = true
-    const index = pendingList.findIndex((i) => i.wallet.toUpperCase() === user.wallet.toUpperCase())
+    walletMap[user.wallet.toLowerCase()] = true
+    const index = pendingList.findIndex((i) => i.wallet.toLowerCase() === user.wallet.toLowerCase())
     if (index === -1) {
       if (user.amount > 0) {
         pendingList.push(user)
