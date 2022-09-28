@@ -6,7 +6,7 @@ const result = {
       id: '1',
       record: [
         {
-          wallet: 'a',
+          wallet: 'A',
           amount: 1,
         },
         {
@@ -43,11 +43,11 @@ const result = {
 for (const item of result.Items) {
   let walletMap = {}
   for (const user of item.record) {
-    if (walletMap[user.wallet]) {
+    if (walletMap[user.wallet.toUpperCase()]) {
       continue
     }
-    walletMap[user.wallet] = true
-    const index = pendingList.findIndex((i) => i.wallet === user.wallet)
+    walletMap[user.wallet.toUpperCase()] = true
+    const index = pendingList.findIndex((i) => i.wallet.toUpperCase() === user.wallet.toUpperCase())
     if (index === -1) {
       if (user.amount > 0) {
         pendingList.push(user)

@@ -345,11 +345,11 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
     // The same address, the same red envelope, can only be received once
     let walletMap = {}
     for (const user of item.record) {
-      if (walletMap[user.wallet]) {
+      if (walletMap[user.wallet.toUpperCase()]) {
         continue
       }
-      walletMap[user.wallet] = true
-      const index = pendingList.findIndex((i) => i.wallet === user.wallet)
+      walletMap[user.wallet.toUpperCase()] = true
+      const index = pendingList.findIndex((i) => i.wallet.toUpperCase() === user.wallet.toUpperCase())
       if (index === -1) {
         if (user.amount > 0) {
           pendingList.push(user)
