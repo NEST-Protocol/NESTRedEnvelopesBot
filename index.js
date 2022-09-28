@@ -85,7 +85,15 @@ const uid = new Snowflake({
 //    #####    #   #    # #    #   #
 //
 bot.start(async (ctx) => {
-  ctx.session = {}
+  ctx.session = {...ctx.session, intent: undefined}
+  if (ctx.session?.wallet) {
+    ctx.reply(`Welcome to NEST Prize!
+
+Your wallet: ${ctx.session.wallet}`, Markup.inlineKeyboard([
+      [Markup.button.callback('Update Wallet', 'set-user-wallet')],
+    ]))
+    return
+  }
   // query user in db
   const queryUserRes = await ddbDocClient.send(new QueryCommand({
     ExpressionAttributeNames: {'#user': 'user_id'},
@@ -105,6 +113,7 @@ You have not submitted any addresses to me. Click the button below so you can Sn
       [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
     ]))
   } else {
+    ctx.session = {wallet: queryUserRes.Items[0].wallet}
     ctx.reply(`Welcome to NEST Prize!
 
 Your wallet: ${queryUserRes.Items[0].wallet}`, Markup.inlineKeyboard([
@@ -128,6 +137,7 @@ bot.command('admin', async (ctx) => {
 })
 
 bot.action('set-user-wallet', async (ctx) => {
+  await ctx.answerCbQuery()
   ctx.session = {...ctx.session, intent: 'set-user-wallet'}
   await ctx.editMessageText('Please send your wallet address:')
 })
@@ -142,7 +152,7 @@ bot.action('set-user-wallet', async (ctx) => {
 //   ####### #####    #     # ###### #    #  ####
 //
 const replyL1MenuContent = async (ctx) => {
-  ctx.reply(`Welcome to NEST Prize!`, Markup.inlineKeyboard([
+  ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
     [Markup.button.callback('Send NEST Prize', 'set-config')],
     [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
@@ -802,7 +812,7 @@ auth: ${config.auth}
               updated_at: new Date().getTime(),
             },
           })).then(() => {
-            ctx.session = {}
+            ctx.session = {...ctx.session, intent: undefined, wallet: input}
             ctx.reply(`Your wallet address has submitted. ${input}`)
           }).catch(() => {
             ctx.reply('Some error occurred, please try again later.', {
@@ -823,13 +833,16 @@ auth: ${config.auth}
                 updated_at: new Date().getTime(),
               },
             })).then(() => {
-              ctx.session = {}
+              ctx.session = {...ctx.session, intent: undefined, wallet: input}
               ctx.reply(`Your wallet address has updated. ${input}`)
             }).catch(() => {
               ctx.reply('Some error occurred, please try again later.', {
                 reply_to_message_id: ctx.message.message_id,
               })
             })
+          } else {
+            ctx.session = {...ctx.session, intent: undefined, wallet: input}
+            ctx.reply('You entered the same address as you did before.')
           }
         }
       } else {
