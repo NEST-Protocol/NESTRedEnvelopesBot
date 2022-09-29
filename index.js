@@ -218,7 +218,7 @@ bot.action('backToL1MenuContent', editReplyL1MenuContent)
 const editReplyL2HistoryContent = async (ctx) => {
   const result = await ddbDocClient.send(new ScanCommand({
     TableName: 'nest-red-envelopes',
-    indexName: 'red-envelope-index',
+    ConsistentRead: true,
     FilterExpression: 'creator = :creator',
     ExpressionAttributeValues: {
       ':creator': ctx.update.callback_query.from.id,
@@ -263,7 +263,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     const [openResult, pendingResult, processingResult] = await Promise.all([
       ddbDocClient.send(new ScanCommand({
         TableName: 'nest-red-envelopes',
-        IndexName: 'red-envelope-index',
+        ConsistentRead: true,
         FilterExpression: '#s = :s',
         ExpressionAttributeNames: {
           '#s': 'status',
@@ -274,7 +274,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
       })),
       ddbDocClient.send(new ScanCommand({
         TableName: 'nest-red-envelopes',
-        IndexName: 'red-envelope-index',
+        ConsistentRead: true,
         FilterExpression: '#s = :s',
         ExpressionAttributeNames: {
           '#s': 'status',
@@ -285,7 +285,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
       })),
       ddbDocClient.send(new ScanCommand({
         TableName: 'nest-red-envelopes',
-        IndexName: 'red-envelope-index',
+        ConsistentRead: true,
         FilterExpression: '#s = :s',
         ExpressionAttributeNames: {
           '#s': 'status',
@@ -354,7 +354,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
   // query number of NEST Prize status is pending
   const result = await ddbDocClient.send(new ScanCommand({
     TableName: 'nest-red-envelopes',
-    IndexName: 'red-envelope-index',
+    ConsistentRead: true,
     FilterExpression: '#s = :s',
     ExpressionAttributeNames: {
       '#s': 'status',
@@ -462,7 +462,7 @@ bot.action('liquidate', editReplyL2DoLiquidateContent)
 const editReplyL2PendingContent = async (ctx) => {
   const result = await ddbDocClient.send(new ScanCommand({
     TableName: 'nest-red-envelopes',
-    IndexName: 'red-envelope-index',
+    ConsistentRead: true,
     FilterExpression: '#s = :s',
     ExpressionAttributeNames: {
       '#s': 'status',
@@ -510,7 +510,7 @@ bot.action('pending', editReplyL2PendingContent)
 const editReplyL3CloseContent = async (ctx) => {
   const result = await ddbDocClient.send(new ScanCommand({
     TableName: 'nest-red-envelopes',
-    IndexName: 'red-envelope-index',
+    ConsistentRead: true,
     FilterExpression: '#s = :s',
     ExpressionAttributeNames: {
       '#s': 'status',
