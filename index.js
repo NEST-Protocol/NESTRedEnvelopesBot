@@ -26,6 +26,9 @@ const SupportedChainId = {
   BSC_TEST: 97,
 }
 
+// Current Network
+const CURRENT_NETWORK = SupportedChainId.BSC_TEST
+
 const NETWORK_URLS = {
   [SupportedChainId.BSC]: `https://bsc-dataseed.binance.org/`,
   [SupportedChainId.BSC_TEST]: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
@@ -50,15 +53,11 @@ const mnemonic = process.env.MNEMONIC
 
 const walletMnemonic = ethers.Wallet.fromMnemonic(mnemonic)
 
-const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC]);
-// const BSCTestProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[SupportedChainId.BSC_TEST]);
+const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[CURRENT_NETWORK]);
 const BSCProviderWithSinger = walletMnemonic.connect(BSCProvider)
-// const BSCTestProviderWithSinger = walletMnemonic.connect(BSCTestProvider)
 
-// const BSCTestFreeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[SupportedChainId.BSC_TEST], freeTransferAbi, BSCTestProviderWithSinger)
-const BSCFreeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[SupportedChainId.BSC], freeTransferAbi, BSCProviderWithSinger)
-// const NESTTestContract = new ethers.Contract(NEST_ADDRESS[SupportedChainId.BSC_TEST], erc20abi, BSCTestProviderWithSinger)
-const NESTContract = new ethers.Contract(NEST_ADDRESS[SupportedChainId.BSC], erc20abi, BSCProviderWithSinger)
+const BSCFreeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[CURRENT_NETWORK], freeTransferAbi, BSCProviderWithSinger)
+const NESTContract = new ethers.Contract(NEST_ADDRESS[CURRENT_NETWORK], erc20abi, BSCProviderWithSinger)
 
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
@@ -409,7 +408,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
     const res = await BSCFreeTransferContract.transfer(
         addressList,
         tokenAmountList,
-        NEST_ADDRESS[SupportedChainId.BSC],
+        NEST_ADDRESS[CURRENT_NETWORK],
         {
           gasLimit: 30000 * addressList.length,
         }
@@ -436,7 +435,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         ctx.reply("Update NEST Prize status failed, please try again later.")
       });
       try {
-        await ctx.telegram.sendMessage(item.chat_id, `Your NEST Prize is processing, please check out TX: ${TX_URL[SupportedChainId.BSC]}${res.hash}`, {
+        await ctx.telegram.sendMessage(item.chat_id, `Your NEST Prize is processing, please check out TX: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, {
           reply_to_message_id: item.message_id,
         })
       } catch (_) {
@@ -445,7 +444,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       }
     }
     await ctx.answerCbQuery('Liquidate Success!')
-    await ctx.editMessageText(`TX hash: ${TX_URL[SupportedChainId.BSC]}${res.hash}`, Markup.inlineKeyboard([
+    await ctx.editMessageText(`TX hash: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, Markup.inlineKeyboard([
       [Markup.button.callback('Close All', 'close')],
       [Markup.button.callback('« Back', 'backToL1MenuContent')],
     ]))
