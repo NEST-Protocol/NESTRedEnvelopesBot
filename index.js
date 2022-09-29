@@ -93,6 +93,28 @@ bot.start(async (ctx) => {
   if (chatId < 0) {
     return
   }
+  ctx.reply(`BAB Token increase the diversity of incentive and validation methods of the NEST community, thus, we are introducing a daily timely giveaway for BAB Token holders. Total prize of $30,000 NEST tokens. For a period of 4 months.
+
+How to join?
+1. Join: https://t.me/NEST_BABGiveaway
+2. Join: https://t.me/NESTRedEnvelopesBot
+Add your wallet address in the bot.
+3. Click: on the giveaway link at the pin of the group.
+4. Click: snatch
+
+If you are a newbie, you must complete the first 3 steps. When you're done you just need to click snatch to get the giveaway!
+
+
+Rewards：
+Receive random or fixed NEST token as giveaway rewards or quiz rewards on daily base and will receive exclusive NFTs in the future.
+
+What are BAB tokens?
+https://developers.binance.com/docs/babt/introduction
+How do I get BAB tokens?
+https://www.binance.com/en/support/faq/bacaf9595b52440ea2b023195ba4a09c
+
+More giveaways: Conditions 200 NEST + 1 BAB
+https://t.me/NEST_Community/1609`)
   ctx.session = {...ctx.session, intent: undefined}
   if (ctx.session?.wallet) {
     ctx.reply(`Welcome to NEST Prize!
