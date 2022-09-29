@@ -142,7 +142,7 @@ bot.command('admin', async (ctx) => {
   // chat_id in [2130493951, 5035670602, 552791389, 1859030053] , pass, otherwise, return
   if (chat_id !== 2130493951 && chat_id !== 5035670602 && chat_id !== 552791389 && chat_id !== 1859030053) {
     await ctx.reply('Sorry, you are not allowed to use this bot!', Markup.inlineKeyboard([
-      [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
+      [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
     return
   }
@@ -846,7 +846,7 @@ auth: ${config.auth}
             ctx.reply('Some error occurred, please try again later.', {
               reply_to_message_id: ctx.message.message_id,
               ...Markup.inlineKeyboard([
-                [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
+                [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
               ])
             })
           })
@@ -872,7 +872,7 @@ auth: ${config.auth}
               ctx.reply('Some error occurred, please try again later.', {
                 reply_to_message_id: ctx.message.message_id,
                 ...Markup.inlineKeyboard([
-                  [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
+                  [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
                 ])
               })
             })
