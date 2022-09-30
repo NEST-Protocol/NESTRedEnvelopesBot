@@ -186,7 +186,7 @@ bot.action('set-user-wallet', async (ctx) => {
 //
 const replyL1MenuContent = async (ctx) => {
   ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
-    [Markup.button.callback('Send NEST Prize', 'set-config')],
+    [Markup.button.callback('Send', 'set-config')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
 }
@@ -194,7 +194,7 @@ const replyL1MenuContent = async (ctx) => {
 const editReplyL1MenuContent = async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText('Welcome to NEST Prize Bot!', Markup.inlineKeyboard([
-    [Markup.button.callback('Send NEST Prize', 'set-config')],
+    [Markup.button.callback('Send', 'set-config')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
 }
@@ -280,9 +280,9 @@ Number of processing NEST Prize: ${processingResult.Count}. Please check out TX 
 Bot wallet balance: ${balance} NEST.`, {
       parse_mode: "Markdown",
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('Pending All', 'pending', openResult.Count === 0)],
-        [Markup.button.callback('Liquidate All', 'liquidate', pendingResult.Count === 0 || balance < pendingAmount)],
-        [Markup.button.callback('Close All', 'close', processingResult.Count === 0)],
+        [Markup.button.callback('Stop All Snatching Prize', 'pending', openResult.Count === 0)],
+        [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate', pendingResult.Count === 0 || balance < pendingAmount)],
+        [Markup.button.callback('Close All Liquidated Prize', 'close', processingResult.Count === 0)],
         [Markup.button.callback('« Back', 'backToL1MenuContent')],
       ])
     })
@@ -401,7 +401,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       }
       await ctx.answerCbQuery('Liquidate Success!')
       await ctx.editMessageText(`TX hash: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, Markup.inlineKeyboard([
-        [Markup.button.callback('Close All', 'close')],
+        [Markup.button.callback('Close All Liquidated Prize', 'close')],
         [Markup.button.callback('« Back', 'backToL1MenuContent')],
       ]))
     } catch (e) {
@@ -447,10 +447,10 @@ const editReplyL2PendingContent = async (ctx) => {
         },
       }));
     }
-    await ctx.answerCbQuery('Pending Success!')
-    await ctx.editMessageText(`Pending Success!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Liquidate All', 'liquidate')],
-      [Markup.button.callback('Close All', 'close')],
+    await ctx.answerCbQuery('Stop All Snatching Prize Success!')
+    await ctx.editMessageText(`Stop All Snatching Prize Success!`, Markup.inlineKeyboard([
+      [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate')],
+      [Markup.button.callback('Close All Liquidated Prize', 'close')],
       [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
     ]))
   } catch (e) {
@@ -498,8 +498,8 @@ const editReplyL3CloseContent = async (ctx) => {
         },
       }));
     }
-    await ctx.answerCbQuery('Close Success!')
-    await ctx.editMessageText(`Close Success!`, Markup.inlineKeyboard([
+    await ctx.answerCbQuery('Close All Liquidated Prize Success!')
+    await ctx.editMessageText(`Close All Liquidated Prize Success!`, Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
     ]))
   } catch (e) {
@@ -641,7 +641,7 @@ bot.action('snatch', async (ctx) => {
     }
     const user = queryUserRes.Item
     try {
-      const queryRedEnvelopeRes = await ddbDocClient.send(new GetCommand({
+      const queryPrizeRes = await ddbDocClient.send(new GetCommand({
         TableName: 'nest-prize',
         ConsistentRead: true,
         Key: {
@@ -649,30 +649,30 @@ bot.action('snatch', async (ctx) => {
           message_id: ctx.update.callback_query.message.message_id,
         }
       }))
-      if (queryRedEnvelopeRes.Item === undefined) {
+      if (queryPrizeRes.Item === undefined) {
         ctx.answerCbQuery("The NEST Prize is not found.")
         return
       }
-      const redEnvelope = queryRedEnvelopeRes.Item
-      if (redEnvelope.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
+      const prize = queryPrizeRes.Item
+      if (prize.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
         await ctx.answerCbQuery('You have already snatched this NEST Prize!')
         return
       }
-      if (redEnvelope.record.some(record => record.wallet === user.wallet)) {
+      if (prize.record.some(record => record.wallet === user.wallet)) {
         await ctx.answerCbQuery('This wallet have already snatched this NEST Prize!')
         return
       }
       // check if NEST Prize is open
-      if (redEnvelope.status !== 'open' || redEnvelope.balance <= 0) {
+      if (prize.status !== 'open' || prize.balance <= 0) {
         await ctx.answerCbQuery(`Sorry, you are late. All NEST Prize have been given away.
 Please pay attention to the group news. Good luck next time.`)
         return
       }
       // check auth api
-      if (redEnvelope.config.auth) {
+      if (prize.config.auth) {
         // check user auth
         try {
-          const res = await axios(redEnvelope.config.auth, {
+          const res = await axios(prize.config.auth, {
             method: 'POST',
             data: JSON.stringify({
               "user_id": ctx.update.callback_query.from.id,
@@ -692,16 +692,16 @@ Please pay attention to the group news. Good luck next time.`)
         }
       }
       // can snatch
-      let status = "open", amount = 0
+      let status = "open", amount
       // check if NEST Prize is need empty
-      if (redEnvelope.record.length === redEnvelope.config.quantity - 1) {
+      if (prize.record.length === prize.config.quantity - 1) {
         status = 'pending'
-        amount = redEnvelope.balance
+        amount = prize.balance
       } else {
-        amount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
-        if (redEnvelope.balance <= amount) {
+        amount = Math.floor(Math.random() * (prize.config.max - prize.config.min) + prize.config.min)
+        if (prize.balance <= amount) {
           status = 'pending'
-          amount = redEnvelope.balance
+          amount = prize.balance
         }
       }
       // update NEST Prize info in dynamodb
