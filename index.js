@@ -82,7 +82,7 @@ bot.use(session())
 //    #####    #   #    # #    #   #
 //
 bot.start(async (ctx) => {
-  const chatId = ctx.update.message.chat.id
+  const chatId = ctx.update.callback_query.message.chat.id
   if (chatId < 0) {
     return
   }
@@ -123,7 +123,7 @@ Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
       Key: {
-        user_id: ctx.update.message.from.id,
+        user_id: ctx.update.callback_query.message.chat.id,
       },
     }))
     if (queryUserRes.Item === undefined) {
@@ -621,7 +621,7 @@ bot.action('snatch', async (ctx) => {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
       Key: {
-        user_id: ctx.update.message.from.id,
+        user_id: ctx.update.callback_query.from.id,
       },
     }))
     // If no user info do nothing.
@@ -800,7 +800,7 @@ auth: ${config.auth}
           const queryUserRes = await ddbDocClient.send(new GetCommand({
             TableName: 'nest-prize-users',
             Key: {
-              user_id: ctx.update.message.from.id,
+              user_id: ctx.message.from.id,
             },
           }))
           // If no user info do nothing.
