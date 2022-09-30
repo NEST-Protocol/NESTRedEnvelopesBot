@@ -82,7 +82,7 @@ bot.use(session())
 //    #####    #   #    # #    #   #
 //
 bot.start(async (ctx) => {
-  const chatId = ctx.update.callback_query.message.chat.id
+  const chatId = ctx.update.message.chat.id
   if (chatId < 0) {
     return
   }
