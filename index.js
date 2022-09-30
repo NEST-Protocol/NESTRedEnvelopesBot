@@ -321,20 +321,22 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
   
     let pendingList = []
     for (const item of result.Items) {
-      // The same address, the same red envelope, can only be received once
       let walletMap = {}
-      for (const user of item.record) {
+      let amount = 0
+      for (const user of item.record.slice(0, item.config.quantity)) {
         if (walletMap[user.wallet.toLowerCase()]) {
           continue
         }
         walletMap[user.wallet.toLowerCase()] = true
         const index = pendingList.findIndex((i) => i.wallet.toLowerCase() === user.wallet.toLowerCase())
         if (index === -1) {
-          if (user.amount > 0) {
+          if (user.amount > 0 && (amount + user.amount) <= item.config.amount) {
+            amount += user.amount
             pendingList.push(user)
           }
         } else {
-          if (user.amount > 0) {
+          if (user.amount > 0 && (amount + user.amount) <= item.config.amount) {
+            amount += user.amount
             pendingList[index].amount += user.amount
           }
         }
