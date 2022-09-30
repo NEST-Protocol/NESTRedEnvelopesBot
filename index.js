@@ -1,7 +1,6 @@
 const {Telegraf, Markup, session} = require('telegraf')
-const {PutCommand, DynamoDBDocumentClient, QueryCommand, UpdateCommand, ScanCommand} = require('@aws-sdk/lib-dynamodb');
+const {PutCommand, DynamoDBDocumentClient, UpdateCommand, GetCommand, QueryCommand} = require('@aws-sdk/lib-dynamodb');
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
-const {Snowflake} = require('nodejs-snowflake');
 const {isAddress} = require("ethers/lib/utils");
 const {ethers} = require("ethers");
 const freeTransferAbi = require("./abis/FreeTransfer.json");
@@ -73,11 +72,6 @@ if (token === undefined) {
 const bot = new Telegraf(token)
 bot.use(session())
 
-const uid = new Snowflake({
-  custom_epoch: 1656604800000,
-  instance_id: 1,
-});
-
 //
 //    #####
 //   #     # #####   ##   #####  #####
@@ -125,32 +119,32 @@ Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
     return
   }
   // query user in db
-  const queryUserRes = await ddbDocClient.send(new QueryCommand({
-    ExpressionAttributeNames: {'#user': 'user_id'},
-    TableName: 'nest-red-envelopes',
-    IndexName: 'user-index',
-    KeyConditionExpression: '#user = :user',
-    ExpressionAttributeValues: {
-      ':user': ctx.update.message.from.id,
-    },
-  })).catch(() => {
-    ctx.answerCbQuery("Some error occurred, please try again later.")
-  });
-  if (queryUserRes.Count === 0) {
-    ctx.reply(`Welcome to NEST Prize!
+  try {
+    const queryUserRes = await ddbDocClient.send(new GetCommand({
+      TableName: 'nest-prize-users',
+      Key: {
+        user_id: ctx.update.message.from.id,
+      },
+    }))
+    if (queryUserRes.Item === undefined) {
+      ctx.reply(`Welcome to NEST Prize!
 
 You have not submitted any addresses to me. Click the button below so you can Snatch our Prize!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
-      [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-    ]))
-  } else {
-    ctx.session = {wallet: queryUserRes.Items[0].wallet}
-    ctx.reply(`Welcome to NEST Prize!
+        [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
+        [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+      ]))
+    } else {
+      ctx.session = {wallet: queryUserRes.Item.wallet}
+      ctx.reply(`Welcome to NEST Prize!
 
-Your wallet: ${queryUserRes.Items[0].wallet}`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'set-user-wallet')],
-      [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-    ]))
+Your wallet: ${queryUserRes.Item.wallet}`, Markup.inlineKeyboard([
+        [Markup.button.callback('Update Wallet', 'set-user-wallet')],
+        [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+      ]))
+    }
+  } catch (e) {
+    console.log(e)
+    ctx.answerCbQuery("Some error occurred, please try again later.")
   }
 })
 
@@ -159,7 +153,6 @@ bot.command('admin', async (ctx) => {
   if (chat_id < 0) {
     return
   }
-  
   // chat_id in [2130493951, 5035670602, 552791389, 1859030053] , pass, otherwise, return
   if (chat_id !== 2130493951 && chat_id !== 5035670602 && chat_id !== 552791389 && chat_id !== 1859030053) {
     await ctx.reply('Sorry, you are not allowed to use this bot!', Markup.inlineKeyboard([
@@ -188,7 +181,6 @@ bot.action('set-user-wallet', async (ctx) => {
 const replyL1MenuContent = async (ctx) => {
   ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
     [Markup.button.callback('Send NEST Prize', 'set-config')],
-    [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
 }
@@ -197,55 +189,12 @@ const editReplyL1MenuContent = async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText('Welcome to NEST Prize Bot!', Markup.inlineKeyboard([
     [Markup.button.callback('Send NEST Prize', 'set-config')],
-    [Markup.button.callback('History', 'history')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
 }
 
 bot.command('menu', replyL1MenuContent)
 bot.action('backToL1MenuContent', editReplyL1MenuContent)
-
-//
-//   #        #####     #     #
-//   #       #     #    #     # #  ####  #####  ####  #####  #   #
-//   #             #    #     # # #        #   #    # #    #  # #
-//   #        #####     ####### #  ####    #   #    # #    #   #
-//   #       #          #     # #      #   #   #    # #####    #
-//   #       #          #     # # #    #   #   #    # #   #    #
-//   ####### #######    #     # #  ####    #    ####  #    #   #
-//
-const editReplyL2HistoryContent = async (ctx) => {
-  const result = await ddbDocClient.send(new ScanCommand({
-    TableName: 'nest-red-envelopes',
-    ConsistentRead: true,
-    FilterExpression: 'creator = :creator',
-    ExpressionAttributeValues: {
-      ':creator': ctx.update.callback_query.from.id,
-    }
-  })).catch(() => {
-    ctx.answerCbQuery("Some error occurred, please try again later.")
-  })
-  await ctx.answerCbQuery()
-  const quantity = result.Items.reduce((acc, cur) => acc + cur.config.quantity, 0)
-  const totalWrap = result.Items.reduce((acc, cur) => acc + cur.config.amount, 0)
-  const left = result.Items.reduce((acc, cur) => acc + cur.balance, 0)
-  await ctx.editMessageText(`*NEST Prize History*
-
-Times of NEST Prize sent: ${result.Count}
-Number of NEST Prize sent: ${quantity}
-Total sent: ${totalWrap} NEST
-Remaining available: ${left} NEST`,
-      {
-        parse_mode: "Markdown",
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback('« Back', 'backToL1MenuContent')],
-        ])
-      })
-}
-
-bot.action('history', editReplyL2HistoryContent)
-
-bot.action('backToL2HistoryContent', editReplyL2HistoryContent)
 
 //
 //    #        #####     #                                                       ###
@@ -260,39 +209,39 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
   // query number of NEST Prize status is pending
   try {
     const [openResult, pendingResult, processingResult] = await Promise.all([
-      ddbDocClient.send(new ScanCommand({
-        TableName: 'nest-red-envelopes',
-        ConsistentRead: true,
-        FilterExpression: '#s = :s',
+      ddbDocClient.send(new QueryCommand({
+        TableName: 'nest-prize',
+        IndexName: 'status-index',
+        KeyConditionExpression: '#status = :status',
         ExpressionAttributeNames: {
-          '#s': 'status',
+          '#status': 'status',
         },
         ExpressionAttributeValues: {
-          ':s': 'open',
+          ':status': 'open',
         },
       })),
-      ddbDocClient.send(new ScanCommand({
-        TableName: 'nest-red-envelopes',
-        ConsistentRead: true,
-        FilterExpression: '#s = :s',
+      ddbDocClient.send(new QueryCommand({
+        TableName: 'nest-prize',
+        IndexName: 'status-index',
+        KeyConditionExpression: '#status = :status',
         ExpressionAttributeNames: {
-          '#s': 'status',
+          '#status': 'status',
         },
         ExpressionAttributeValues: {
-          ':s': 'pending',
+          ':status': 'pending',
         },
       })),
-      ddbDocClient.send(new ScanCommand({
-        TableName: 'nest-red-envelopes',
-        ConsistentRead: true,
-        FilterExpression: '#s = :s',
+      ddbDocClient.send(new QueryCommand({
+        TableName: 'nest-prize',
+        IndexName: 'status-index',
+        KeyConditionExpression: '#status = :status',
         ExpressionAttributeNames: {
-          '#s': 'status',
+          '#status': 'status',
         },
         ExpressionAttributeValues: {
-          ':s': 'processing',
+          ':status': 'processing',
         },
-      }))
+      })),
     ])
     let pendingList = []
     for (const item of pendingResult.Items) {
@@ -350,107 +299,112 @@ bot.action('liquidate-info', editReplyL2LiquidateInfoContent)
 //    #######  #####     ####### #  ### #  ####  # #####  #    #   #   ######
 //
 const editReplyL2DoLiquidateContent = async (ctx) => {
-  // query number of NEST Prize status is pending
-  const result = await ddbDocClient.send(new ScanCommand({
-    TableName: 'nest-red-envelopes',
-    ConsistentRead: true,
-    FilterExpression: '#s = :s',
-    ExpressionAttributeNames: {
-      '#s': 'status',
-    },
-    ExpressionAttributeValues: {
-      ':s': 'pending',
-    },
-  })).catch(() => {
+  try {
+    const result = await ddbDocClient.send(new QueryCommand({
+      TableName: 'nest-prize',
+      IndexName: 'status-index',
+      KeyConditionExpression: '#status = :status',
+      ExpressionAttributeNames: {
+        '#status': 'status',
+      },
+      ExpressionAttributeValues: {
+        ':status': 'pending',
+      },
+    }))
+  
+    let pendingList = []
+    for (const item of result.Items) {
+      // The same address, the same red envelope, can only be received once
+      let walletMap = {}
+      for (const user of item.record) {
+        if (walletMap[user.wallet.toLowerCase()]) {
+          continue
+        }
+        walletMap[user.wallet.toLowerCase()] = true
+        const index = pendingList.findIndex((i) => i.wallet.toLowerCase() === user.wallet.toLowerCase())
+        if (index === -1) {
+          if (user.amount > 0) {
+            pendingList.push(user)
+          }
+        } else {
+          if (user.amount > 0) {
+            pendingList[index].amount += user.amount
+          }
+        }
+      }
+    }
+  
+    if (pendingList.length === 0) {
+      await ctx.answerCbQuery("No pending NEST Prize found to send.")
+      await ctx.editMessageText("No pending NEST Prize found to send.")
+      return
+    }
+  
+    // send tx
+    const addressList = pendingList.map(item => item.wallet)
+    const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
+  
+    if (addressList.length > 3000) {
+      await ctx.answerCbQuery('Sorry, the number of NEST Prize is too large (> 3000)')
+      ctx.reply('Sorry, the number of NEST Prize is too large (> 3000)')
+      return
+    }
+  
+    try {
+      const res = await BSCFreeTransferContract.transfer(
+          addressList,
+          tokenAmountList,
+          NEST_ADDRESS[CURRENT_NETWORK],
+          {
+            gasLimit: 30000 * addressList.length,
+          }
+      )
+      ctx.reply('Send tx successfully, please check out TX and close that.')
+      // set them to processing, and record tx hash
+      for (const item of result.Items) {
+        try {
+          await ddbDocClient.send(new UpdateCommand({
+            TableName: 'nest-prize',
+            Key: {
+              chat_id: ctx.update.callback_query.message.chat.id,
+              message_id: ctx.update.callback_query.message.message_id,
+            },
+            UpdateExpression: 'SET #s = :s, #h = :h',
+            ExpressionAttributeNames: {
+              '#s': 'status',
+              '#h': 'hash',
+            },
+            ExpressionAttributeValues: {
+              ':s': 'processing',
+              ':h': res.hash,
+            },
+          }))
+        } catch (e) {
+          ctx.answerCbQuery("Update NEST Prize status failed, please try again later.")
+          ctx.reply("Update NEST Prize status failed, please try again later.")
+        }
+   
+        try {
+          await ctx.telegram.sendMessage(item.chat_id, `Your NEST Prize is processing, please check out TX: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, {
+            reply_to_message_id: item.message_id,
+          })
+        } catch (_) {
+          ctx.answerCbQuery("Send message to user failed, please try again later.")
+          ctx.reply("Send message to user failed, please try again later.")
+        }
+      }
+      await ctx.answerCbQuery('Liquidate Success!')
+      await ctx.editMessageText(`TX hash: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, Markup.inlineKeyboard([
+        [Markup.button.callback('Close All', 'close')],
+        [Markup.button.callback('« Back', 'backToL1MenuContent')],
+      ]))
+    } catch (e) {
+      console.log(e)
+      await ctx.answerCbQuery("Some error occurred, please try again later.")
+    }
+  } catch (e) {
     ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
     ctx.reply("Fetch pending NEST Prize failed, please try again later.")
-  });
-  
-  let pendingList = []
-  for (const item of result.Items) {
-    // The same address, the same red envelope, can only be received once
-    let walletMap = {}
-    for (const user of item.record) {
-      if (walletMap[user.wallet.toLowerCase()]) {
-        continue
-      }
-      walletMap[user.wallet.toLowerCase()] = true
-      const index = pendingList.findIndex((i) => i.wallet.toLowerCase() === user.wallet.toLowerCase())
-      if (index === -1) {
-        if (user.amount > 0) {
-          pendingList.push(user)
-        }
-      } else {
-        if (user.amount > 0) {
-          pendingList[index].amount += user.amount
-        }
-      }
-    }
-  }
-  
-  if (pendingList.length === 0) {
-    await ctx.answerCbQuery("No pending NEST Prize found to send.")
-    await ctx.editMessageText("No pending NEST Prize found to send.")
-    return
-  }
-  
-  // send tx
-  const addressList = pendingList.map(item => item.wallet)
-  const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
-  
-  if (addressList.length > 3000) {
-    await ctx.answerCbQuery('Sorry, the number of NEST Prize is too large (> 3000)')
-    ctx.reply('Sorry, the number of NEST Prize is too large (> 3000)')
-    return
-  }
-  
-  try {
-    const res = await BSCFreeTransferContract.transfer(
-        addressList,
-        tokenAmountList,
-        NEST_ADDRESS[CURRENT_NETWORK],
-        {
-          gasLimit: 30000 * addressList.length,
-        }
-    )
-    ctx.reply('Send tx successfully, please check out TX and close that.')
-    // set them to processing, and record tx hash
-    for (const item of result.Items) {
-      await ddbDocClient.send(new UpdateCommand({
-        TableName: 'nest-red-envelopes',
-        Key: {
-          id: item.id,
-        },
-        UpdateExpression: 'SET #s = :s, #h = :h',
-        ExpressionAttributeNames: {
-          '#s': 'status',
-          '#h': 'hash',
-        },
-        ExpressionAttributeValues: {
-          ':s': 'processing',
-          ':h': res.hash,
-        },
-      })).catch(() => {
-        ctx.answerCbQuery("Update NEST Prize status failed, please try again later.")
-        ctx.reply("Update NEST Prize status failed, please try again later.")
-      });
-      try {
-        await ctx.telegram.sendMessage(item.chat_id, `Your NEST Prize is processing, please check out TX: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, {
-          reply_to_message_id: item.message_id,
-        })
-      } catch (_) {
-        ctx.answerCbQuery("Send message to user failed, please try again later.")
-        ctx.reply("Send message to user failed, please try again later.")
-      }
-    }
-    await ctx.answerCbQuery('Liquidate Success!')
-    await ctx.editMessageText(`TX hash: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, Markup.inlineKeyboard([
-      [Markup.button.callback('Close All', 'close')],
-      [Markup.button.callback('« Back', 'backToL1MenuContent')],
-    ]))
-  } catch (e) {
-    console.log(e)
-    await ctx.answerCbQuery("Some error occurred, please try again later.")
   }
 }
 
@@ -459,40 +413,43 @@ bot.action('liquidate', editReplyL2DoLiquidateContent)
 
 // Pending
 const editReplyL2PendingContent = async (ctx) => {
-  const result = await ddbDocClient.send(new ScanCommand({
-    TableName: 'nest-red-envelopes',
-    ConsistentRead: true,
-    FilterExpression: '#s = :s',
-    ExpressionAttributeNames: {
-      '#s': 'status',
-    },
-    ExpressionAttributeValues: {
-      ':s': 'open',
-    },
-  })).catch(() => {
-    ctx.answerCbQuery("Some error occurred, please try again later.")
-  });
-  for (const item of result.Items) {
-    await ddbDocClient.send(new UpdateCommand({
-      TableName: 'nest-red-envelopes',
-      Key: {
-        id: item.id,
-      },
-      UpdateExpression: 'SET #s = :s',
+  try {
+    const result = await ddbDocClient.send(new QueryCommand({
+      TableName: 'nest-prize',
+      IndexName: 'status-index',
+      KeyConditionExpression: '#status = :status',
       ExpressionAttributeNames: {
-        '#s': 'status',
+        '#status': 'status',
       },
       ExpressionAttributeValues: {
-        ':s': 'pending',
+        ':status': 'open',
       },
-    }));
+    }))
+    for (const item of result.Items) {
+      await ddbDocClient.send(new UpdateCommand({
+        TableName: 'nest-prize',
+        Key: {
+          chat_id: ctx.update.callback_query.message.chat.id,
+          message_id: ctx.update.callback_query.message.message_id,
+        },
+        UpdateExpression: 'SET #s = :s',
+        ExpressionAttributeNames: {
+          '#s': 'status',
+        },
+        ExpressionAttributeValues: {
+          ':s': 'pending',
+        },
+      }));
+    }
+    await ctx.answerCbQuery('Pending Success!')
+    await ctx.editMessageText(`Pending Success!`, Markup.inlineKeyboard([
+      [Markup.button.callback('Liquidate All', 'liquidate')],
+      [Markup.button.callback('Close All', 'close')],
+      [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
+    ]))
+  } catch (e) {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
   }
-  await ctx.answerCbQuery('Pending Success!')
-  await ctx.editMessageText(`Pending Success!`, Markup.inlineKeyboard([
-    [Markup.button.callback('Liquidate All', 'liquidate')],
-    [Markup.button.callback('Close All', 'close')],
-    [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
-  ]))
 }
 
 bot.action('pending', editReplyL2PendingContent)
@@ -507,38 +464,41 @@ bot.action('pending', editReplyL2PendingContent)
 //    #######  #####      #####  ######  ####   ####  ######
 //
 const editReplyL3CloseContent = async (ctx) => {
-  const result = await ddbDocClient.send(new ScanCommand({
-    TableName: 'nest-red-envelopes',
-    ConsistentRead: true,
-    FilterExpression: '#s = :s',
-    ExpressionAttributeNames: {
-      '#s': 'status',
-    },
-    ExpressionAttributeValues: {
-      ':s': 'processing',
-    },
-  })).catch(() => {
-    ctx.answerCbQuery("Some error occurred, please try again later.")
-  });
-  for (const item of result.Items) {
-    await ddbDocClient.send(new UpdateCommand({
-      TableName: 'nest-red-envelopes',
-      Key: {
-        id: item.id,
-      },
-      UpdateExpression: 'SET #s = :s',
+  try {
+    const result = await ddbDocClient.send(new QueryCommand({
+      TableName: 'nest-prize',
+      IndexName: 'status-index',
+      KeyConditionExpression: '#status = :status',
       ExpressionAttributeNames: {
-        '#s': 'status',
+        '#status': 'status',
       },
       ExpressionAttributeValues: {
-        ':s': 'close',
+        ':status': 'processing',
       },
-    }));
+    }))
+    for (const item of result.Items) {
+      await ddbDocClient.send(new UpdateCommand({
+        TableName: 'nest-prize',
+        Key: {
+          chat_id: ctx.update.callback_query.message.chat.id,
+          message_id: ctx.update.callback_query.message.message_id,
+        },
+        UpdateExpression: 'SET #s = :s',
+        ExpressionAttributeNames: {
+          '#s': 'status',
+        },
+        ExpressionAttributeValues: {
+          ':s': 'close',
+        },
+      }));
+    }
+    await ctx.answerCbQuery('Close Success!')
+    await ctx.editMessageText(`Close Success!`, Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
+    ]))
+  } catch (e) {
+    ctx.answerCbQuery("Some error occurred, please try again later.")
   }
-  await ctx.answerCbQuery('Close Success!')
-  await ctx.editMessageText(`Close Success!`, Markup.inlineKeyboard([
-    [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
-  ]))
 }
 
 bot.action('close', editReplyL3CloseContent)
@@ -618,25 +578,26 @@ Click snatch button!`, {
       const message_id = res.message_id
       const chat_id = res.chat.id
       if (message_id && chat_id) {
-        await ddbDocClient.send(new PutCommand({
-          TableName: 'nest-red-envelopes',
-          Item: {
-            id: uid.getUniqueID(),  // snowflake id
-            chat_id,
-            message_id,
-            config,
-            balance: config.amount, // left balance of NEST Prize
-            status: 'open', // open, pending, closed
-            creator: ctx.from.id,
-            created_at: new Date().getTime(),
-            updated_at: new Date().getTime(),
-            record: [],
-          },
-        })).catch(() => {
+        try {
+          await ddbDocClient.send(new PutCommand({
+            TableName: 'nest-prize',
+            Item: {
+              chat_id,
+              message_id,
+              config,
+              balance: config.amount, // left balance of NEST Prize
+              status: 'open', // open, pending, closed
+              creator: ctx.from.id,
+              created_at: new Date().getTime(),
+              updated_at: new Date().getTime(),
+              record: [],
+            },
+          }))
+          await ctx.answerCbQuery('NEST Prize Sent Success!')
+          await editReplyL1MenuContent(ctx)
+        } catch (e) {
           ctx.answerCbQuery("Some error occurred, please try again later.")
-        })
-        await ctx.answerCbQuery('NEST Prize Sent Success!')
-        await editReplyL1MenuContent(ctx)
+        }
       }
     } catch (e) {
       ctx.answerCbQuery('Sorry, I cannot send message to target chat.')
@@ -656,114 +617,117 @@ Click snatch button!`, {
 //    #####  #    # #    #   #    ####  #    #
 //
 bot.action('snatch', async (ctx) => {
-  // check user info in dynamodb
-  const queryUserRes = await ddbDocClient.send(new QueryCommand({
-    ExpressionAttributeNames: {'#user': 'user_id'},
-    TableName: 'nest-red-envelopes',
-    IndexName: 'user-index',
-    KeyConditionExpression: '#user = :user',
-    ExpressionAttributeValues: {
-      ':user': ctx.update.callback_query.from.id,
-    },
-  })).catch(() => {
-    ctx.answerCbQuery("Some error occurred, please try again later.")
-  });
-  // If no user info do nothing.
-  if (queryUserRes.Count === 0) {
-    await ctx.answerCbQuery('Please Submit Wallet First!')
-    return
-  }
-  const user = queryUserRes.Items[0]
-  const queryRedEnvelopeRes = await ddbDocClient.send(new QueryCommand({
-    ExpressionAttributeNames: {'#chat_id': 'chat_id', '#message_id': 'message_id'},
-    TableName: 'nest-red-envelopes',
-    IndexName: 'red-envelope-index',
-    KeyConditionExpression: '#chat_id = :chat_id AND #message_id = :message_id',
-    ExpressionAttributeValues: {
-      ':chat_id': ctx.update.callback_query.message.chat.id,
-      ':message_id': ctx.update.callback_query.message.message_id,
-    },
-  })).catch((_) => {
-    ctx.answerCbQuery("Some error occurred, please try again later.")
-  })
-  if (!queryRedEnvelopeRes || queryRedEnvelopeRes.Count === 0) {
-    ctx.answerCbQuery("The NEST Prize is not found.")
-    return
-  }
-  const redEnvelope = queryRedEnvelopeRes.Items[0]
-  if (redEnvelope.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
-    await ctx.answerCbQuery('You have already snatched this NEST Prize!')
-    return
-  }
-  if (redEnvelope.record.some(record => record.wallet === user.wallet)) {
-    await ctx.answerCbQuery('This wallet have already snatched this NEST Prize!')
-    return
-  }
-  // check if NEST Prize is open
-  if (redEnvelope.status !== 'open' || redEnvelope.balance <= 0) {
-    await ctx.answerCbQuery(`Sorry, you are late. All NEST Prize have been given away.
-Please pay attention to the group news. Good luck next time.`)
-    return
-  }
-  // check auth api
-  if (redEnvelope.config.auth) {
-    // check user auth
-    try {
-      const res = await axios(redEnvelope.config.auth, {
-        method: 'POST',
-        data: JSON.stringify({
-          "user_id": ctx.update.callback_query.from.id,
-          "wallet": user.wallet
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
-      if (!res.data) {
-        await ctx.answerCbQuery(`Sorry, you can't get this NEST Prize. Please read this rule carefully.`)
-        return
-      }
-    } catch (e) {
-      await ctx.answerCbQuery(`Sorry, some error occurred. Please try again later.`)
+  try {
+    const queryUserRes = await ddbDocClient.send(new GetCommand({
+      TableName: 'nest-prize-users',
+      Key: {
+        user_id: ctx.update.message.from.id,
+      },
+    }))
+    // If no user info do nothing.
+    if (queryUserRes.Item === undefined) {
+      await ctx.answerCbQuery('Please Submit Wallet First!')
       return
     }
-  }
-  // can snatch
-  let status = "open", amount = 0
-  // check if NEST Prize is need empty
-  if (redEnvelope.record.length === redEnvelope.config.quantity - 1) {
-    status = 'pending'
-    amount = redEnvelope.balance
-  } else {
-    amount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
-    if (redEnvelope.balance <= amount) {
-      status = 'pending'
-      amount = redEnvelope.balance
-    }
-  }
-  // update NEST Prize info in dynamodb
-  try {
-    await ddbDocClient.send(new UpdateCommand({
-      TableName: 'nest-red-envelopes',
-      Key: {id: redEnvelope.id},
-      UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
-      ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
-      ExpressionAttributeValues: {
-        ':amount': amount,
-        ':updated_at': new Date().getTime(),
-        ':record': [{
-          user_id: ctx.update.callback_query.from.id,
-          username: ctx.update.callback_query.from.username,
-          amount,
-          wallet: user.wallet,
-          created_at: new Date().getTime(),
-        }],
-        ':status': status,
+    const user = queryUserRes.Item
+    try {
+      const queryRedEnvelopeRes = await ddbDocClient.send(new GetCommand({
+        TableName: 'nest-prize',
+        ConsistentRead: true,
+        Key: {
+          chat_id: ctx.update.callback_query.message.chat.id,
+          message_id: ctx.update.callback_query.message.message_id,
+        }
+      }))
+      if (queryRedEnvelopeRes.Item === undefined) {
+        ctx.answerCbQuery("The NEST Prize is not found.")
+        return
       }
-    }))
-    await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
-    await ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
+      const redEnvelope = queryRedEnvelopeRes.Item
+      if (redEnvelope.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
+        await ctx.answerCbQuery('You have already snatched this NEST Prize!')
+        return
+      }
+      if (redEnvelope.record.some(record => record.wallet === user.wallet)) {
+        await ctx.answerCbQuery('This wallet have already snatched this NEST Prize!')
+        return
+      }
+      // check if NEST Prize is open
+      if (redEnvelope.status !== 'open' || redEnvelope.balance <= 0) {
+        await ctx.answerCbQuery(`Sorry, you are late. All NEST Prize have been given away.
+Please pay attention to the group news. Good luck next time.`)
+        return
+      }
+      // check auth api
+      if (redEnvelope.config.auth) {
+        // check user auth
+        try {
+          const res = await axios(redEnvelope.config.auth, {
+            method: 'POST',
+            data: JSON.stringify({
+              "user_id": ctx.update.callback_query.from.id,
+              "wallet": user.wallet
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          })
+          if (!res.data) {
+            await ctx.answerCbQuery(`Sorry, you can't get this NEST Prize. Please read this rule carefully.`)
+            return
+          }
+        } catch (e) {
+          await ctx.answerCbQuery(`Sorry, some error occurred. Please try again later.`)
+          return
+        }
+      }
+      // can snatch
+      let status = "open", amount = 0
+      // check if NEST Prize is need empty
+      if (redEnvelope.record.length === redEnvelope.config.quantity - 1) {
+        status = 'pending'
+        amount = redEnvelope.balance
+      } else {
+        amount = Math.floor(Math.random() * (redEnvelope.config.max - redEnvelope.config.min) + redEnvelope.config.min)
+        if (redEnvelope.balance <= amount) {
+          status = 'pending'
+          amount = redEnvelope.balance
+        }
+      }
+      // update NEST Prize info in dynamodb
+      try {
+        await ddbDocClient.send(new UpdateCommand({
+          TableName: 'nest-prize',
+          Key: {
+            chat_id: ctx.update.callback_query.message.chat.id,
+            message_id: ctx.update.callback_query.message.message_id,
+          },
+          UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
+          ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
+          ExpressionAttributeValues: {
+            ':amount': amount,
+            ':updated_at': new Date().getTime(),
+            ':record': [{
+              user_id: ctx.update.callback_query.from.id,
+              username: ctx.update.callback_query.from.username,
+              amount,
+              wallet: user.wallet,
+              created_at: new Date().getTime(),
+            }],
+            ':status': status,
+          }
+        }))
+        await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
+        await ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
+      } catch (e) {
+        ctx.answerCbQuery("Some error occurred, please try again later.")
+      }
+    } catch (e) {
+      console.log(e)
+      ctx.answerCbQuery("Some error occurred, please try again later.")
+    }
   } catch (e) {
+    console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
   }
 })
@@ -832,77 +796,72 @@ auth: ${config.auth}
       }
     } else if (intent === 'set-user-wallet') {
       if (isAddress(input)) {
-        // Check if there is the same address
-        
-        // check user info in dynamodb
-        const queryUserRes = await ddbDocClient.send(new QueryCommand({
-          ExpressionAttributeNames: {'#user': 'user_id'},
-          TableName: 'nest-red-envelopes',
-          IndexName: 'user-index',
-          KeyConditionExpression: '#user = :user',
-          ExpressionAttributeValues: {
-            ':user': ctx.message.from.id,
-          },
-        })).catch(() => {
-          ctx.answerCbQuery("Some error occurred, please try again later.")
-        });
-        // If no user info do nothing.
-        if (queryUserRes.Count === 0) {
-          // update wallet address in dynamodb
-          ddbDocClient.send(new PutCommand({
-            TableName: 'nest-red-envelopes',
-            Item: {
-              id: uid.getUniqueID(),  // snowflake id
-              user_id: ctx.message.from.id,
-              wallet: input,
-              created_at: new Date().getTime(),
-              updated_at: new Date().getTime(),
+        try {
+          const queryUserRes = await ddbDocClient.send(new GetCommand({
+            TableName: 'nest-prize-users',
+            Key: {
+              user_id: ctx.update.message.from.id,
             },
-          })).then(() => {
-            ctx.session = {...ctx.session, intent: undefined, wallet: input}
-            ctx.reply(`Your wallet address has submitted. ${input}`, Markup.inlineKeyboard([
-              [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-            ]))
-          }).catch(() => {
-            ctx.reply('Some error occurred, please try again later.', {
-              reply_to_message_id: ctx.message.message_id,
-              ...Markup.inlineKeyboard([
-                [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
-              ])
-            })
-          })
-        } else {
-          const user = queryUserRes.Items[0]
-          if (user.wallet !== input) {
-            // update wallet address in dynamodb
-            ddbDocClient.send(new PutCommand({
-              TableName: 'nest-red-envelopes',
-              Item: {
-                id: user.id,
-                user_id: ctx.message.from.id,
-                wallet: input,
-                created_at: new Date().getTime(),
-                updated_at: new Date().getTime(),
-              },
-            })).then(() => {
+          }))
+          // If no user info do nothing.
+          if (queryUserRes.Item === undefined) {
+            try {
+              await ddbDocClient.send(new PutCommand({
+                TableName: 'nest-prize-users',
+                Item: {
+                  user_id: ctx.message.from.id,
+                  wallet: input,
+                  created_at: new Date().getTime(),
+                  updated_at: new Date().getTime(),
+                },
+              }))
               ctx.session = {...ctx.session, intent: undefined, wallet: input}
-              ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
+              ctx.reply(`Your wallet address has submitted. ${input}`, Markup.inlineKeyboard([
                 [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
               ]))
-            }).catch(() => {
+            } catch (e) {
               ctx.reply('Some error occurred, please try again later.', {
                 reply_to_message_id: ctx.message.message_id,
                 ...Markup.inlineKeyboard([
                   [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
                 ])
               })
-            })
+            }
           } else {
-            ctx.session = {...ctx.session, intent: undefined, wallet: input}
-            ctx.reply('You entered the same address as you did before.', Markup.inlineKeyboard([
-              [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-            ]))
+            const user = queryUserRes.Item
+            if (user.wallet !== input) {
+              try {
+                await ddbDocClient.send(new PutCommand({
+                  TableName: 'nest-prize-users',
+                  Item: {
+                    user_id: ctx.message.from.id,
+                    wallet: input,
+                    created_at: new Date().getTime(),
+                    updated_at: new Date().getTime(),
+                  },
+                }))
+                ctx.session = {...ctx.session, intent: undefined, wallet: input}
+                ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
+                  [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+                ]))
+              } catch (e) {
+                ctx.reply('Some error occurred, please try again later.', {
+                  reply_to_message_id: ctx.message.message_id,
+                  ...Markup.inlineKeyboard([
+                    [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
+                  ])
+                })
+              }
+            } else {
+              ctx.session = {...ctx.session, intent: undefined, wallet: input}
+              ctx.reply('You entered the same address as you did before.', Markup.inlineKeyboard([
+                [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+              ]))
+            }
           }
+        } catch (e) {
+          console.log(e)
+          ctx.answerCbQuery("Some error occurred, please try again later.")
         }
       } else {
         ctx.reply('Please input a valid wallet address.', {
