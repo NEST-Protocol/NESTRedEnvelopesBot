@@ -7,18 +7,41 @@ const ddbClient = new DynamoDBClient({
 
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
-ddbDocClient.send(new QueryCommand({
-  TableName: 'nest-prize',
-  IndexName: 'status-index',
-  KeyConditionExpression: '#status = :status',
-  ExpressionAttributeValues: {
-    ':status': 'open',
-  },
-  ExpressionAttributeNames: {
-    '#status': 'status',
-  }
-})).then((res) => {
-  console.log(res)
-}).catch((e) => {
-  console.log(e)
-})
+(async () => {
+  const [openResult, pendingResult, processingResult] = await Promise.all([
+    ddbDocClient.send(new QueryCommand({
+      TableName: 'nest-prize',
+      IndexName: 'status-index',
+      KeyConditionExpression: '#status = :status',
+      ExpressionAttributeNames: {
+        '#status': 'status',
+      },
+      ExpressionAttributeValues: {
+        ':status': 'open',
+      },
+    })),
+    ddbDocClient.send(new QueryCommand({
+      TableName: 'nest-prize',
+      IndexName: 'status-index',
+      KeyConditionExpression: '#status = :status',
+      ExpressionAttributeNames: {
+        '#status': 'status',
+      },
+      ExpressionAttributeValues: {
+        ':status': 'pending',
+      },
+    })),
+    ddbDocClient.send(new QueryCommand({
+      TableName: 'nest-prize',
+      IndexName: 'status-index',
+      KeyConditionExpression: '#status = :status',
+      ExpressionAttributeNames: {
+        '#status': 'status',
+      },
+      ExpressionAttributeValues: {
+        ':status': 'processing',
+      },
+    })),
+  ])
+  console.log(openResult, pendingResult, processingResult)
+})();

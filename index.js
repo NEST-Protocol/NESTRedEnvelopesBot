@@ -48,6 +48,11 @@ const TX_URL = {
   [SupportedChainId.BSC_TEST]: 'https://testnet.bscscan.com/tx/',
 }
 
+const TX_GAS = {
+  [SupportedChainId.BSC]: 30000,
+  [SupportedChainId.BSC_TEST]: 90000,
+}
+
 const mnemonic = process.env.MNEMONIC
 
 const walletMnemonic = ethers.Wallet.fromMnemonic(mnemonic)
@@ -122,8 +127,9 @@ Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
+      ConsistentRead: true,
       Key: {
-        user_id: ctx.update.callback_query.message.chat.id,
+        user_id: ctx.update.message.from.id,
       },
     }))
     if (queryUserRes.Item === undefined) {
@@ -245,7 +251,8 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     ])
     let pendingList = []
     for (const item of pendingResult.Items) {
-      for (const user of item.record) {
+      const record = item?.record || []
+      for (const user of record) {
         const index = pendingList.findIndex((i) => i.wallet === user.wallet)
         if (index === -1) {
           if (user.amount > 0) {
@@ -356,18 +363,17 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
           tokenAmountList,
           NEST_ADDRESS[CURRENT_NETWORK],
           {
-            gasLimit: 30000 * addressList.length,
+            gasLimit: TX_GAS[CURRENT_NETWORK] * addressList.length,
           }
       )
       ctx.reply('Send tx successfully, please check out TX and close that.')
-      // set them to processing, and record tx hash
       for (const item of result.Items) {
         try {
           await ddbDocClient.send(new UpdateCommand({
             TableName: 'nest-prize',
             Key: {
-              chat_id: ctx.update.callback_query.message.chat.id,
-              message_id: ctx.update.callback_query.message.message_id,
+              chat_id: item.chat_id,
+              message_id: item.message_id,
             },
             UpdateExpression: 'SET #s = :s, #h = :h',
             ExpressionAttributeNames: {
@@ -429,8 +435,8 @@ const editReplyL2PendingContent = async (ctx) => {
       await ddbDocClient.send(new UpdateCommand({
         TableName: 'nest-prize',
         Key: {
-          chat_id: ctx.update.callback_query.message.chat.id,
-          message_id: ctx.update.callback_query.message.message_id,
+          chat_id: item.chat_id,
+          message_id: item.message_id,
         },
         UpdateExpression: 'SET #s = :s',
         ExpressionAttributeNames: {
@@ -480,8 +486,8 @@ const editReplyL3CloseContent = async (ctx) => {
       await ddbDocClient.send(new UpdateCommand({
         TableName: 'nest-prize',
         Key: {
-          chat_id: ctx.update.callback_query.message.chat.id,
-          message_id: ctx.update.callback_query.message.message_id,
+          chat_id: item.chat_id,
+          message_id: item.message_id,
         },
         UpdateExpression: 'SET #s = :s',
         ExpressionAttributeNames: {
@@ -596,13 +602,16 @@ Click snatch button!`, {
           await ctx.answerCbQuery('NEST Prize Sent Success!')
           await editReplyL1MenuContent(ctx)
         } catch (e) {
+          console.log(e)
           ctx.answerCbQuery("Some error occurred, please try again later.")
         }
       }
     } catch (e) {
+      console.log(e)
       ctx.answerCbQuery('Sorry, I cannot send message to target chat.')
     }
   } else {
+    console.log(e)
     ctx.answerCbQuery('Sorry, I cannot understand your config. Please try again.')
   }
 })
@@ -620,6 +629,7 @@ bot.action('snatch', async (ctx) => {
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
+      ConsistentRead: true,
       Key: {
         user_id: ctx.update.callback_query.from.id,
       },
@@ -720,6 +730,7 @@ Please pay attention to the group news. Good luck next time.`)
         await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
         await ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
       } catch (e) {
+        console.log(e)
         ctx.answerCbQuery("Some error occurred, please try again later.")
       }
     } catch (e) {
@@ -799,6 +810,7 @@ auth: ${config.auth}
         try {
           const queryUserRes = await ddbDocClient.send(new GetCommand({
             TableName: 'nest-prize-users',
+            ConsistentRead: true,
             Key: {
               user_id: ctx.message.from.id,
             },
