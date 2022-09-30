@@ -14,10 +14,11 @@ const NEST = new ethers.Contract(NEST_ADDRESS, erc20abi, provider)
 const BABT = new ethers.Contract(BABT_ADDRESS, erc721abi, provider)
 
 exports.handler = async (event) => {
-  const user_id = JSON.parse(event.body)?.user_id ?? undefined
+  const nest_min_value = event.queryStringParameters?.nest ?? undefined
+//   const user_id = JSON.parse(event.body)?.user_id ?? undefined
   const wallet = JSON.parse(event.body)?.wallet ?? undefined
   
-  if (user_id === undefined && wallet === undefined) {
+  if (nest_min_value === undefined || wallet === undefined) {
     return {
       statusCode: 200,
       body: false
@@ -29,7 +30,7 @@ exports.handler = async (event) => {
     BABT.balanceOf(wallet)
   ])
   
-  if (balanceOfNEST.gte(ethers.utils.parseEther("100")) && balanceOfBABT.gte(1)) {
+  if (balanceOfNEST.gte(ethers.utils.parseEther(nest_min_value)) && balanceOfBABT.gte(1)) {
     return {
       statusCode: 200,
       body: true,
