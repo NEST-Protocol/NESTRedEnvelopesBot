@@ -318,7 +318,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         ':status': 'pending',
       },
     }))
-  
+    
     let pendingList = []
     for (const item of result.Items) {
       let walletMap = {}
@@ -342,23 +342,25 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         }
       }
     }
-  
+    
     if (pendingList.length === 0) {
       await ctx.answerCbQuery("No pending NEST Prize found to send.")
-      await ctx.editMessageText("No pending NEST Prize found to send.")
+      await ctx.editMessageText("No pending NEST Prize found to send.", Markup.inlineKeyboard([
+        [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
+      ]))
       return
     }
-  
+    
     // send tx
     const addressList = pendingList.map(item => item.wallet)
     const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
-  
+    
     if (addressList.length > 3000) {
       await ctx.answerCbQuery('Sorry, the number of NEST Prize is too large (> 3000)')
       ctx.reply('Sorry, the number of NEST Prize is too large (> 3000)')
       return
     }
-  
+    
     try {
       const res = await BSCFreeTransferContract.transfer(
           addressList,
@@ -391,7 +393,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
           ctx.answerCbQuery("Update NEST Prize status failed, please try again later.")
           ctx.reply("Update NEST Prize status failed, please try again later.")
         }
-   
+        
         try {
           await ctx.telegram.sendMessage(item.chat_id, `Your NEST Prize is processing, please check out TX: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, {
             reply_to_message_id: item.message_id,
