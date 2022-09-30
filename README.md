@@ -1,5 +1,9 @@
 # NEST Prize Bot
 
+Telegram Bot: [NESTRedEnvelopesBot](https://t.me/NESTRedEnvelopesBot)
+
+Query tx on [BscScan](https://bscscan.com/address/0x3b00ce7e2d0e0e905990f9b09a1f515c71a91c10)
+
 ## DynamoDB Design
 
 ### Table: `nest-prize`
