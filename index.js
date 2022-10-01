@@ -481,7 +481,6 @@ const editReplyL2PendingContent = async (ctx) => {
     await ctx.answerCbQuery('Stop All Snatching Prize Success!')
     await ctx.editMessageText(`Stop All Snatching Prize Success!`, Markup.inlineKeyboard([
       [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate')],
-      [Markup.button.callback('Close All Liquidated Prize', 'close')],
       [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
     ]))
   } catch (e) {
