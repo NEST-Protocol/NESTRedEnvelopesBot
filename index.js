@@ -26,7 +26,7 @@ const SupportedChainId = {
 }
 
 // Current Network
-const CURRENT_NETWORK = SupportedChainId.BSC_TEST
+const CURRENT_NETWORK = SupportedChainId.BSC
 
 const NETWORK_URLS = {
   [SupportedChainId.BSC]: `https://bsc-dataseed.binance.org/`,
