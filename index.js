@@ -121,7 +121,7 @@ https://t.me/NEST_Community/1609`)
 
 Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet')],
-      [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+      [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
     ]))
     return
   }
@@ -139,7 +139,7 @@ Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
 
 You have not submitted any addresses to me. Click the button below so you can Snatch our Prize!`, Markup.inlineKeyboard([
         [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
-        [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+        [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
       ]))
     } else {
       ctx.session = {wallet: queryUserRes.Item.wallet}
@@ -147,7 +147,7 @@ You have not submitted any addresses to me. Click the button below so you can Sn
 
 Your wallet: ${queryUserRes.Item.wallet}`, Markup.inlineKeyboard([
         [Markup.button.callback('Update Wallet', 'set-user-wallet')],
-        [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+        [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
       ]))
     }
   } catch (e) {
@@ -620,7 +620,7 @@ Click snatch button!`, {
           protect_content: true,
           ...Markup.inlineKeyboard([
             [Markup.button.callback('Snatch!', 'snatch')],
-            [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot')]
+            [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
           ])
         })
       }
@@ -873,7 +873,7 @@ auth: ${config.auth}
               }))
               ctx.session = {...ctx.session, intent: undefined, wallet: input}
               ctx.reply(`Your wallet address has submitted. ${input}`, Markup.inlineKeyboard([
-                [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+                [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
               ]))
             } catch (e) {
               ctx.reply('Some error occurred, please try again later.', {
@@ -898,7 +898,7 @@ auth: ${config.auth}
                 }))
                 ctx.session = {...ctx.session, intent: undefined, wallet: input}
                 ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
-                  [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+                  [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
                 ]))
               } catch (e) {
                 ctx.reply('Some error occurred, please try again later.', {
@@ -911,7 +911,7 @@ auth: ${config.auth}
             } else {
               ctx.session = {...ctx.session, intent: undefined, wallet: input}
               ctx.reply('You entered the same address as you did before.', Markup.inlineKeyboard([
-                [Markup.button.url('🌟 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+                [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
               ]))
             }
           }
