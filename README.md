@@ -16,7 +16,7 @@ This repository contains:
 - [Background](#background)
 - [Install](#install)
 - [Usage](#usage)
-- [Example Readmes](#example-readmes)
+- [Example Bot](#example-bot)
 - [Related Efforts](#related-efforts)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
@@ -68,7 +68,7 @@ You need to replace some configuration in the source code, including:
 | `user_id`      | `Number` | pk                      |
 | `wallet`       | `Number` | pk of GSI(wallet-index) |
 
-## Example Readmes
+## Example Bot
 
 [NEST Prize Bot](https://t.me/NESTRedEnvelopesBot)
 
