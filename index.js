@@ -775,7 +775,7 @@ Please pay attention to the group news. Good luck next time.`)
           }
         }))
         await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
-        await ctx.reply(`Congratulations, ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
+        await ctx.reply(`🎉! ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
       } catch (e) {
         console.log(e)
         ctx.answerCbQuery("Some error occurred, please try again later.")
