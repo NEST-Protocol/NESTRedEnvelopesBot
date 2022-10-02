@@ -1,5 +1,5 @@
 {
-  "name": "NESTRedEnvelopesBot",
+  "name": "nest-prize-bot",
   "version": "1.0.0",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.154.0",
@@ -7,7 +7,6 @@
     "axios": "^0.27.2",
     "dotenv": "^16.0.1",
     "ethers": "^5.7.0",
-    "nodejs-snowflake": "^2.0.1",
     "telegraf": "^4.8.6"
   }
 }
