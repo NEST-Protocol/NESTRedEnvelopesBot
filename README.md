@@ -76,12 +76,11 @@ You need to replace some configuration in the source code, including:
 
 - [telegraf](https://github.com/telegraf/telegraf)
 - [ethers.js](https://github.com/ethers-io/ethers.js)
-- [axios](https://github.com/axios/axios)
-- [Wizarding Pay Bot](https://github.com/wakandalabs/wizardingpay-telegram-bot) is a log-free escrow wallet that supports use in various social software such as Telegram or Discord.
+- [wizardingpay-telegram-bot](https://github.com/wakandalabs/wizardingpay-telegram-bot) is a log-free escrow wallet that supports use in various social software such as Telegram or Discord.
 
 ## Maintainers
 
-[@tunogya](https://github.com/tunogya)。
+[@tunogya](https://github.com/tunogya)
 
 ## Contributing
 
