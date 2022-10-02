@@ -301,7 +301,7 @@ Bot wallet balance: ${balance} NEST.`, {
       ])
     })
   } catch (e) {
-    console.error(e)
+    console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
   }
 }
@@ -411,6 +411,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
             },
           }))
         } catch (e) {
+          console.log(e)
           ctx.answerCbQuery("Update NEST Prize status failed, please try again later.")
           ctx.reply("Update NEST Prize status failed, please try again later.")
         }
@@ -434,6 +435,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       await ctx.answerCbQuery("Some error occurred, please try again later.")
     }
   } catch (e) {
+    console.log(e)
     ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
     ctx.reply("Fetch pending NEST Prize failed, please try again later.")
   }
@@ -484,6 +486,7 @@ const editReplyL2PendingContent = async (ctx) => {
       [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
     ]))
   } catch (e) {
+    console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
   }
 }
@@ -540,6 +543,7 @@ const editReplyL3CloseContent = async (ctx) => {
       [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
     ]))
   } catch (e) {
+    console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
   }
 }
@@ -655,7 +659,6 @@ Click snatch button!`, {
       ctx.answerCbQuery('Sorry, I cannot send message to target chat.')
     }
   } else {
-    console.log(e)
     ctx.answerCbQuery('Sorry, I cannot understand your config. Please try again.')
   }
 })
@@ -847,6 +850,7 @@ auth: ${config.auth}
         )
         ctx.session = {intent: undefined, config: config}
       } catch (e) {
+        console.log(e)
         ctx.reply('Sorry, I cannot understand your config. Please try again.')
       }
     } else if (intent === 'set-user-wallet') {
@@ -876,6 +880,7 @@ auth: ${config.auth}
                 [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
               ]))
             } catch (e) {
+              console.log(e)
               ctx.reply('Some error occurred, please try again later.', {
                 reply_to_message_id: ctx.message.message_id,
                 ...Markup.inlineKeyboard([
