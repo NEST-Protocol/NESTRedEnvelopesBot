@@ -118,9 +118,39 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.
 Your wallet: ${queryUserRes.Item.wallet}
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
         [Markup.button.callback('Update Wallet', 'set-user-wallet')],
+        [Markup.button.callback('My Referrals', 'get-user-referrals')],
         [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
       ]))
     }
+  } catch (e) {
+    console.log(e)
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  }
+})
+
+bot.action('get-user-referrals', async (ctx) => {
+  try {
+    const result = await ddbDocClient.send(new QueryCommand({
+      TableName: 'nest-prize-users',
+      IndexName: 'invite-code-index',
+      KeyConditionExpression: 'invite_code = :invite_code',
+      ExpressionAttributeValues: {
+        ':invite_code': ctx.update.callback_query.from.id,
+      }
+      
+    }))
+    if (result.Count === 0) {
+      await ctx.answerCbQuery()
+      ctx.editMessageText("You have no referrals yet.")
+      return
+    }
+    await ctx.answerCbQuery()
+    ctx.reply(`Your referrals:
+
+${result.Items.map((item) => (
+      `${item.user_id}`
+    )).join(',')
+    }`)
   } catch (e) {
     console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
