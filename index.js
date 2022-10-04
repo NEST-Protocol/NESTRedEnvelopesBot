@@ -370,11 +370,20 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         ctx.reply("Update NEST Prize status failed, please try again later.")
       }
     }
-  
-    for (const item of pendingList) {
-      fs.appendFileSync('pending.csv', `${item.wallet},${item.amount}\n`)
+    
+    try {
+      let data = 'address,amount\n'
+      for (const item of pendingList) {
+        data += `${item.wallet},${item.amount}\n`
+      }
+      await ctx.answerCbQuery()
+      await ctx.replyWithDocument({
+        source: Buffer.from(data),
+        filename: `pending.csv`,
+      })
+    } catch (e) {
+      ctx.reply("Send csv file failed, please try again later.")
     }
-    await ctx.replyWithDocument('pending.csv')
   } catch (e) {
     console.log(e)
     ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
