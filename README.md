@@ -1,8 +1,6 @@
 # NEST Prize Bot
 
-The NEST Prize Bot is a tool developed by our team for the activity of the NEST community. It can help members of the NEST community to issue and receive NEST Prize in the Telegram group.
-
-Currently, supported network: ```BSC```、```BSC Testnet```
+The NEST Prize Bot is a tool developed by our team for the activity of the NEST community. It can record the receipt of Prize and export them.
 
 This repository contains:
 
@@ -28,8 +26,8 @@ Our development team has developed countless telegram bots for rewarding active 
 
 The goals for this repository are:
 
-1. Provide a universal red envelope robot for the NEST community
-2. Make reward distribution fairer and more transparent
+1. Record the receipt of NEST Prize
+2. Export all the receipt data
 3. Reduce the cost of reward distribution and reduce transaction errors
 4. Anti cheating
 
@@ -44,12 +42,9 @@ $ npm install
 ## Usage
 
 You need to replace some configuration in the source code, including:
-1. The private key and public key of the robot account, where the private key needs to be configured in the environment variables of Lambda
-2. Create a new Telegram bot account and configure its token in Lambda's environment variables
-3. Modify the whitelist of administrators in the original code, ```WHITELIST```
-4. Modify the token address in the original code, ```NEST_ADDRESS```
-5. The robot account needs to authorize the transfer contract, and FREE_TRANSFER_ADDRESS is the transfer contract address
-6. Need to create a DynamoDB database
+1. Create a new Telegram bot account and configure its token in Lambda's environment variables
+2. Modify the whitelist of administrators in the original code, ```WHITELIST```
+3. Need to create a DynamoDB database
 
 ### DynamoDB Design
 
@@ -75,7 +70,6 @@ You need to replace some configuration in the source code, including:
 ## Related Efforts
 
 - [telegraf](https://github.com/telegraf/telegraf)
-- [ethers.js](https://github.com/ethers-io/ethers.js)
 - [wizardingpay-telegram-bot](https://github.com/wakandalabs/wizardingpay-telegram-bot) is a log-free escrow wallet that supports use in various social software such as Telegram or Discord.
 
 ## Maintainers
