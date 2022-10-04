@@ -258,7 +258,6 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
         }
       }
     }
-    const balance = Number(ethers.utils.formatEther(await NESTContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
     const openAmount = openResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     await ctx.answerCbQuery()
@@ -268,9 +267,7 @@ Number of open NEST Prize: ${openResult.Count}, had snatched: ${openAmount} NEST
 
 Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmount} NEST, different users: ${pendingList.length}.
 
-Number of processing NEST Prize: ${processingResult.Count}. Please check out TX and close that.
-
-Bot wallet balance: ${balance} NEST.`, {
+Number of processing NEST Prize: ${processingResult.Count}. Please check out TX and close that.`, {
       parse_mode: "Markdown",
       ...Markup.inlineKeyboard([
         [Markup.button.callback('Stop All Snatching Prize', 'pending', openResult.Count === 0)],
@@ -766,11 +763,6 @@ bot.on('message', async (ctx) => {
         }
         if (config.quantity < 1) {
           ctx.reply('Quantity must be greater than 0. Please try again later.')
-          return
-        }
-        const balance = Number(ethers.utils.formatEther(await NESTContract.balanceOf('0x3B00ce7E2d0E0E905990f9B09A1F515C71a91C10')))
-        if (config.amount > balance) {
-          ctx.reply(`Amount must be less than ${balance} NEST. Please try again later.`)
           return
         }
         await ctx.reply(`Check it again:
