@@ -2,8 +2,6 @@ const {Telegraf, Markup, session} = require('telegraf')
 const {PutCommand, DynamoDBDocumentClient, UpdateCommand, GetCommand, QueryCommand} = require('@aws-sdk/lib-dynamodb');
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
 const {isAddress} = require("ethers/lib/utils");
-const {ethers} = require("ethers");
-const erc20abi = require("./abis/erc20.json");
 const axios = require('axios')
 
 // Command
@@ -19,29 +17,7 @@ const axios = require('axios')
 //   #     # #    # #   ## #      # #    #
 //    #####   ####  #    # #      #  ####
 //
-const SupportedChainId = {
-  BSC: 56,
-  BSC_TEST: 97,
-}
-
-// Current Network
-const CURRENT_NETWORK = SupportedChainId.BSC
-
-const NETWORK_URLS = {
-  [SupportedChainId.BSC]: `https://bsc-dataseed.binance.org/`,
-  [SupportedChainId.BSC_TEST]: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
-}
-
-const NEST_ADDRESS = {
-  [SupportedChainId.BSC]: '0x98f8669f6481ebb341b522fcd3663f79a3d1a6a7',
-  [SupportedChainId.BSC_TEST]: '0x821edD79cc386E56FeC9DA5793b87a3A52373cdE',
-}
-
 const WHITELIST = [2130493951, 5035670602, 552791389, 1859030053]
-
-const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[CURRENT_NETWORK]);
-
-const NESTContract = new ethers.Contract(NEST_ADDRESS[CURRENT_NETWORK], erc20abi, BSCProvider)
 
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
@@ -93,11 +69,25 @@ https://www.binance.com/en/support/faq/bacaf9595b52440ea2b023195ba4a09c
 
 More giveaways: Conditions 200 NEST + 1 BAB
 https://t.me/NEST_Community/1609`)
+  if (ctx.startPayload) {
+    await ddbDocClient.send(new UpdateCommand({
+      TableName: 'nest-prize-users',
+      Key: {
+        chatId: chatId,
+      },
+      UpdateExpression: 'set invite_code = :invite_code',
+      ExpressionAttributeValues: {
+        ':invite_code': Number(ctx.startPayload),
+      }
+    }))
+  }
   ctx.session = {...ctx.session, intent: undefined}
   if (ctx.session?.wallet) {
     ctx.reply(`Welcome to NEST Prize!
 
-Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
+Your wallet: ${ctx.session.wallet}
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
+`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet')],
       [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
     ]))
@@ -112,10 +102,12 @@ Your wallet: ${ctx.session.wallet}.`, Markup.inlineKeyboard([
         user_id: ctx.update.message.from.id,
       },
     }))
-    if (queryUserRes.Item === undefined) {
+    if (queryUserRes.Item === undefined || queryUserRes.Item?.wallet === undefined) {
       ctx.reply(`Welcome to NEST Prize!
 
-You have not submitted any addresses to me. Click the button below so you can Snatch our Prize!`, Markup.inlineKeyboard([
+You have not submitted any addresses to me. Click the button below so you can Snatch our Prize!
+
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
         [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
         [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
       ]))
@@ -123,7 +115,8 @@ You have not submitted any addresses to me. Click the button below so you can Sn
       ctx.session = {wallet: queryUserRes.Item.wallet}
       ctx.reply(`Welcome to NEST Prize!
 
-Your wallet: ${queryUserRes.Item.wallet}`, Markup.inlineKeyboard([
+Your wallet: ${queryUserRes.Item.wallet}
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
         [Markup.button.callback('Update Wallet', 'set-user-wallet')],
         [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
       ]))
