@@ -3,7 +3,6 @@ const {PutCommand, DynamoDBDocumentClient, UpdateCommand, GetCommand, QueryComma
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
 const {isAddress} = require("ethers/lib/utils");
 const {ethers} = require("ethers");
-const freeTransferAbi = require("./abis/FreeTransfer.json");
 const erc20abi = require("./abis/erc20.json");
 const axios = require('axios')
 const fs = require('fs');
@@ -34,37 +33,16 @@ const NETWORK_URLS = {
   [SupportedChainId.BSC_TEST]: `https://data-seed-prebsc-1-s1.binance.org:8545/`,
 }
 
-const FREE_TRANSFER_ADDRESS = {
-  [SupportedChainId.BSC]: '0x8d8e4d946ED4c818C9ace798C869C6F93cCF3df0',
-  [SupportedChainId.BSC_TEST]: '0xA4Cd6C205cEF92aB066177207114B6831194F61f',
-}
-
 const NEST_ADDRESS = {
   [SupportedChainId.BSC]: '0x98f8669f6481ebb341b522fcd3663f79a3d1a6a7',
   [SupportedChainId.BSC_TEST]: '0x821edD79cc386E56FeC9DA5793b87a3A52373cdE',
 }
 
-const TX_URL = {
-  [SupportedChainId.BSC]: 'https://bscscan.com/tx/',
-  [SupportedChainId.BSC_TEST]: 'https://testnet.bscscan.com/tx/',
-}
-
-const TX_GAS = {
-  [SupportedChainId.BSC]: 30000,
-  [SupportedChainId.BSC_TEST]: 90000,
-}
-
 const WHITELIST = [2130493951, 5035670602, 552791389, 1859030053]
 
-const mnemonic = process.env.MNEMONIC
-
-const walletMnemonic = ethers.Wallet.fromMnemonic(mnemonic)
-
 const BSCProvider = new ethers.providers.JsonRpcProvider(NETWORK_URLS[CURRENT_NETWORK]);
-const BSCProviderWithSinger = walletMnemonic.connect(BSCProvider)
 
-const BSCFreeTransferContract = new ethers.Contract(FREE_TRANSFER_ADDRESS[CURRENT_NETWORK], freeTransferAbi, BSCProviderWithSinger)
-const NESTContract = new ethers.Contract(NEST_ADDRESS[CURRENT_NETWORK], erc20abi, BSCProviderWithSinger)
+const NESTContract = new ethers.Contract(NEST_ADDRESS[CURRENT_NETWORK], erc20abi, BSCProvider)
 
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
@@ -373,15 +351,6 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       return
     }
     
-    // send tx
-    const addressList = pendingList.map(item => item.wallet)
-    const tokenAmountList = pendingList.map(item => ethers.BigNumber.from(item.amount).mul(ethers.BigNumber.from(10).pow(18)).toString())
-    
-    if (addressList.length > 3000) {
-      await ctx.answerCbQuery('Sorry, the number of NEST Prize is too large (> 3000)')
-      ctx.reply('Sorry, the number of NEST Prize is too large (> 3000)')
-      return
-    }
     for (const item of result.Items) {
       try {
         await ddbDocClient.send(new UpdateCommand({
@@ -409,9 +378,6 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       fs.appendFileSync('pending.csv', `${item.wallet},${item.amount}\n`)
     }
     await ctx.replyWithDocument('pending.csv')
-    await ctx.editMessageText(`TX hash: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, Markup.inlineKeyboard([
-      [Markup.button.callback('« Back', 'backToL1MenuContent')],
-    ]))
   } catch (e) {
     console.log(e)
     ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
