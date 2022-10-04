@@ -140,8 +140,7 @@ bot.action('get-user-referrals', async (ctx) => {
       
     }))
     if (result.Count === 0) {
-      await ctx.answerCbQuery()
-      ctx.editMessageText("You have no referrals yet.")
+      await ctx.answerCbQuery("You have no referrals yet.")
       return
     }
     await ctx.answerCbQuery()
