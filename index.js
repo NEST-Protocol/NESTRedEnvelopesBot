@@ -102,6 +102,7 @@ Your wallet: ${ctx.session.wallet}
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
 `, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet')],
+      [Markup.button.callback('My Referrals', 'get-user-referrals')],
       [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
     ]))
     return
@@ -110,7 +111,6 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
-      ConsistentRead: true,
       Key: {
         user_id: ctx.update.message.from.id,
       },
@@ -122,6 +122,7 @@ You have not submitted any addresses to me. Click the button below so you can Sn
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
         [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
+        [Markup.button.callback('My Referrals', 'get-user-referrals')],
         [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
       ]))
     } else {
