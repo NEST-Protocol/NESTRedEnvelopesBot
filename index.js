@@ -88,7 +88,7 @@ https://t.me/NEST_Community/1609`)
       Key: {
         user_id: ctx.update.message.from.id,
       },
-      UpdateExpression: 'set invite_code = :invite_code, username = :username',
+      UpdateExpression: 'set username = :username',
       ExpressionAttributeValues: {
         ':username': ctx.update.message.from.username || '',
       }
