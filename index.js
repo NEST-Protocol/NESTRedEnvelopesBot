@@ -274,7 +274,7 @@ Bot wallet balance: ${balance} NEST.`, {
       parse_mode: "Markdown",
       ...Markup.inlineKeyboard([
         [Markup.button.callback('Stop All Snatching Prize', 'pending', openResult.Count === 0)],
-        [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate', pendingResult.Count === 0 || balance < pendingAmount)],
+        [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate', pendingResult.Count === 0)],
         [Markup.button.callback('Close All Liquidated Prize', 'close', processingResult.Count === 0)],
         [Markup.button.callback('« Back', 'backToL1MenuContent')],
       ])
