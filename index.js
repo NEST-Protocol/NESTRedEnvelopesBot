@@ -6,6 +6,7 @@ const {ethers} = require("ethers");
 const freeTransferAbi = require("./abis/FreeTransfer.json");
 const erc20abi = require("./abis/erc20.json");
 const axios = require('axios')
+const fs = require('fs');
 
 // Command
 // start - submit or update wallet address
@@ -381,59 +382,36 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       ctx.reply('Sorry, the number of NEST Prize is too large (> 3000)')
       return
     }
-    
-    try {
-      const res = await BSCFreeTransferContract.transfer(
-          addressList,
-          tokenAmountList,
-          NEST_ADDRESS[CURRENT_NETWORK],
-          {
-            gasLimit: TX_GAS[CURRENT_NETWORK] * addressList.length,
-          }
-      )
-      ctx.reply('Send tx successfully, please check out TX and close that.')
-      for (const item of result.Items) {
-        try {
-          await ddbDocClient.send(new UpdateCommand({
-            TableName: 'nest-prize',
-            Key: {
-              chat_id: item.chat_id,
-              message_id: item.message_id,
-            },
-            UpdateExpression: 'SET #s = :s, #h = :h',
-            ExpressionAttributeNames: {
-              '#s': 'status',
-              '#h': 'hash',
-            },
-            ExpressionAttributeValues: {
-              ':s': 'processing',
-              ':h': res.hash,
-            },
-          }))
-        } catch (e) {
-          console.log(e)
-          ctx.answerCbQuery("Update NEST Prize status failed, please try again later.")
-          ctx.reply("Update NEST Prize status failed, please try again later.")
-        }
-        
-        try {
-          await ctx.telegram.sendMessage(item.chat_id, `Your NEST Prize is processing, please check out TX: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, {
-            reply_to_message_id: item.message_id,
-          })
-        } catch (_) {
-          ctx.answerCbQuery("Send message to user failed, please try again later.")
-          ctx.reply("Send message to user failed, please try again later.")
-        }
+    for (const item of result.Items) {
+      try {
+        await ddbDocClient.send(new UpdateCommand({
+          TableName: 'nest-prize',
+          Key: {
+            chat_id: item.chat_id,
+            message_id: item.message_id,
+          },
+          UpdateExpression: 'SET #s = :s',
+          ExpressionAttributeNames: {
+            '#s': 'status',
+          },
+          ExpressionAttributeValues: {
+            ':s': 'processing',
+          },
+        }))
+      } catch (e) {
+        console.log(e)
+        ctx.answerCbQuery("Update NEST Prize status failed, please try again later.")
+        ctx.reply("Update NEST Prize status failed, please try again later.")
       }
-      await ctx.answerCbQuery('Liquidate Success!')
-      await ctx.editMessageText(`TX hash: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, Markup.inlineKeyboard([
-        [Markup.button.callback('Close All Liquidated Prize', 'close')],
-        [Markup.button.callback('« Back', 'backToL1MenuContent')],
-      ]))
-    } catch (e) {
-      console.log(e)
-      await ctx.answerCbQuery("Some error occurred, please try again later.")
     }
+  
+    for (const item of pendingList) {
+      fs.appendFileSync('pending.csv', `${item.wallet},${item.amount}\n`)
+    }
+    await ctx.replyWithDocument('pending.csv')
+    await ctx.editMessageText(`TX hash: ${TX_URL[CURRENT_NETWORK]}${res.hash}`, Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'backToL1MenuContent')],
+    ]))
   } catch (e) {
     console.log(e)
     ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
