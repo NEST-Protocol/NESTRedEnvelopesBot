@@ -69,19 +69,18 @@ https://www.binance.com/en/support/faq/bacaf9595b52440ea2b023195ba4a09c
 
 More giveaways: Conditions 200 NEST + 1 BAB
 https://t.me/NEST_Community/1609`)
-  if (ctx.startPayload && Number(ctx.startPayload) !== ctx.update.message.from.id) {
-    await ddbDocClient.send(new UpdateCommand({
-      TableName: 'nest-prize-users',
-      Key: {
-        user_id: ctx.update.message.from.id,
-      },
-      UpdateExpression: 'set invite_code = :invite_code and username = :username',
-      ExpressionAttributeValues: {
-        ':invite_code': Number(ctx.startPayload),
-        ':username': ctx.update.message.from.username,
-      }
-    }))
-  }
+  // update user info
+  await ddbDocClient.send(new UpdateCommand({
+    TableName: 'nest-prize-users',
+    Key: {
+      user_id: ctx.update.message.from.id,
+    },
+    UpdateExpression: 'set invite_code = :invite_code and username = :username',
+    ExpressionAttributeValues: {
+      ':invite_code': Number(ctx.startPayload || 0),
+      ':username': ctx.update.message.from.username || '',
+    }
+  }))
   ctx.session = {...ctx.session, intent: undefined}
   if (ctx.session?.wallet) {
     ctx.reply(`Welcome to NEST Prize!
