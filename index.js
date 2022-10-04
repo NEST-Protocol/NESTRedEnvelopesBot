@@ -75,9 +75,10 @@ https://t.me/NEST_Community/1609`)
       Key: {
         user_id: ctx.update.message.from.id,
       },
-      UpdateExpression: 'set invite_code = :invite_code',
+      UpdateExpression: 'set invite_code = :invite_code and username = :username',
       ExpressionAttributeValues: {
         ':invite_code': Number(ctx.startPayload),
+        ':username': ctx.update.message.from.username,
       }
     }))
   }
@@ -137,7 +138,6 @@ bot.action('get-user-referrals', async (ctx) => {
       ExpressionAttributeValues: {
         ':invite_code': ctx.update.callback_query.from.id,
       }
-      
     }))
     if (result.Count === 0) {
       await ctx.answerCbQuery("You have no referrals yet.")
@@ -147,7 +147,7 @@ bot.action('get-user-referrals', async (ctx) => {
     ctx.reply(`Your referrals:
 
 ${result.Items.map((item) => (
-      `${item.user_id}`
+      `${item?.username ? `@${item.username}` : `${item.chat_id}`}`
     )).join(',')
     }`)
   } catch (e) {
@@ -835,6 +835,7 @@ auth: ${config.auth}
                 TableName: 'nest-prize-users',
                 Item: {
                   user_id: ctx.message.from.id,
+                  username: ctx.message.from.username,
                   wallet: input,
                   created_at: new Date().getTime(),
                   updated_at: new Date().getTime(),
@@ -861,6 +862,7 @@ auth: ${config.auth}
                   TableName: 'nest-prize-users',
                   Item: {
                     user_id: ctx.message.from.id,
+                    username: ctx.message.from.username,
                     wallet: input,
                     created_at: new Date().getTime(),
                     updated_at: new Date().getTime(),
