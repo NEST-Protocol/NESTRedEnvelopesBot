@@ -623,8 +623,7 @@ bot.action('snatch', async (ctx) => {
         user_id: ctx.update.callback_query.from.id,
       },
     }))
-    // If no user info do nothing.
-    if (queryUserRes.Item === undefined) {
+    if (queryUserRes.Item === undefined || queryUserRes.Item?.wallet === undefined) {
       await ctx.answerCbQuery('Please Submit Wallet First!')
       return
     }
