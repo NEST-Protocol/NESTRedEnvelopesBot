@@ -5,7 +5,6 @@ const {isAddress} = require("ethers/lib/utils");
 const {ethers} = require("ethers");
 const erc20abi = require("./abis/erc20.json");
 const axios = require('axios')
-const fs = require('fs');
 
 // Command
 // start - submit or update wallet address
