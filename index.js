@@ -75,7 +75,7 @@ https://t.me/NEST_Community/1609`)
     Key: {
       user_id: ctx.update.message.from.id,
     },
-    UpdateExpression: 'set invite_code = :invite_code and username = :username',
+    UpdateExpression: 'set invite_code = :invite_code, username = :username',
     ExpressionAttributeValues: {
       ':invite_code': Number(ctx.startPayload || 0),
       ':username': ctx.update.message.from.username || '',
@@ -143,11 +143,15 @@ bot.action('get-user-referrals', async (ctx) => {
       return
     }
     await ctx.answerCbQuery()
-    ctx.reply(`Your referrals:
+    ctx.reply(`My Referrals:
 
-${result.Items.map((item) => (
-      `${item?.username ? `@${item.username}` : `${item.chat_id}`}`
-    )).join(',')
+${result.Items.map((item) => {
+      if (item?.username) {
+        return `@${item.username}`
+      } else {
+        return item.user_id
+      }
+    }).join(',')
     }`)
   } catch (e) {
     console.log(e)
