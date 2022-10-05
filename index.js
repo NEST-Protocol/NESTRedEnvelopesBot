@@ -915,15 +915,16 @@ auth: ${config.auth}
             const user = queryUserRes.Item
             if (user.wallet !== input) {
               try {
-                await ddbDocClient.send(new PutCommand({
+                await ddbDocClient.send(new UpdateCommand({
                   TableName: 'nest-prize-users',
-                  Item: {
+                  Key: {
                     user_id: ctx.message.from.id,
-                    username: ctx.message.from.username,
-                    wallet: input,
-                    created_at: new Date().getTime(),
-                    updated_at: new Date().getTime(),
                   },
+                  UpdateExpression: 'SET wallet = :wallet, updated_at = :updated_at',
+                  ExpressionAttributeValues: {
+                    ':wallet': input,
+                    ':updated_at': new Date().getTime(),
+                  }
                 }))
                 ctx.session = {...ctx.session, intent: undefined, wallet: input}
                 await lmt.removeTokens(1)
