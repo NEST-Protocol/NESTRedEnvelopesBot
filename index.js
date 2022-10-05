@@ -3,6 +3,7 @@ const {PutCommand, DynamoDBDocumentClient, UpdateCommand, GetCommand, QueryComma
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
 const {isAddress} = require("ethers/lib/utils");
 const axios = require('axios')
+const {RateLimiter} = require("limiter");
 
 // Command
 // start - submit or update wallet address
@@ -17,6 +18,12 @@ const axios = require('axios')
 //   #     # #    # #   ## #      # #    #
 //    #####   ####  #    # #      #  ####
 //
+
+const lmt = new RateLimiter({
+  tokensPerInterval: 30,
+  interval: 'second',
+})
+
 const WHITELIST = [2130493951, 5035670602, 552791389, 1859030053]
 
 const ddbClient = new DynamoDBClient({
@@ -47,6 +54,7 @@ bot.start(async (ctx) => {
   if (chatId < 0) {
     return
   }
+  await lmt.removeTokens(1)
   ctx.reply(`BAB Token increase the diversity of incentive and validation methods of the NEST community, thus, we are introducing a daily timely giveaway for BAB Token holders. Total prize of $30,000 NEST tokens. For a period of 4 months.
 
 How to join?
@@ -96,6 +104,7 @@ https://t.me/NEST_Community/1609`)
   }
   ctx.session = {...ctx.session, intent: undefined}
   if (ctx.session?.wallet) {
+    await lmt.removeTokens(1)
     ctx.reply(`Welcome to NEST Prize!
 
 Your wallet: ${ctx.session.wallet}
@@ -116,6 +125,7 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.
       },
     }))
     if (queryUserRes.Item === undefined || queryUserRes.Item?.wallet === undefined) {
+      await lmt.removeTokens(1)
       ctx.reply(`Welcome to NEST Prize!
 
 You have not submitted any addresses to me. Click the button below so you can Snatch our Prize!
@@ -127,6 +137,7 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.
       ]))
     } else {
       ctx.session = {wallet: queryUserRes.Item.wallet}
+      await lmt.removeTokens(1)
       ctx.reply(`Welcome to NEST Prize!
 
 Your wallet: ${queryUserRes.Item.wallet}
@@ -157,6 +168,7 @@ bot.action('get-user-referrals', async (ctx) => {
       return
     }
     await ctx.answerCbQuery()
+    await lmt.removeTokens(1)
     ctx.reply(`My Referrals:
 
 ${result.Items.map((item) => {
@@ -179,6 +191,7 @@ bot.command('admin', async (ctx) => {
     return
   }
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
+    await lmt.removeTokens(1)
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -190,6 +203,7 @@ bot.command('admin', async (ctx) => {
 bot.action('set-user-wallet', async (ctx) => {
   await ctx.answerCbQuery()
   ctx.session = {...ctx.session, intent: 'set-user-wallet'}
+  await lmt.removeTokens(1)
   await ctx.editMessageText('Please send your wallet address:')
 })
 
@@ -203,6 +217,7 @@ bot.action('set-user-wallet', async (ctx) => {
 //   ####### #####    #     # ###### #    #  ####
 //
 const replyL1MenuContent = async (ctx) => {
+  await lmt.removeTokens(1)
   ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
     [Markup.button.callback('Send', 'set-config')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
@@ -212,12 +227,14 @@ const replyL1MenuContent = async (ctx) => {
 const editReplyL1MenuContent = async (ctx) => {
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
+    await lmt.removeTokens(1)
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
     return
   }
   await ctx.answerCbQuery()
+  await lmt.removeTokens(1)
   await ctx.editMessageText('NEST Prize Admin Portal', Markup.inlineKeyboard([
     [Markup.button.callback('Send', 'set-config')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
@@ -239,6 +256,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
   // query number of NEST Prize status is pending
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
+    await lmt.removeTokens(1)
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -299,6 +317,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     const openAmount = openResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     await ctx.answerCbQuery()
+    await lmt.removeTokens(1)
     await ctx.editMessageText(`*NEST Prize Liquidate*
 
 Number of open NEST Prize: ${openResult.Count}, had snatched: ${openAmount} NEST.
@@ -336,6 +355,7 @@ bot.action('liquidate-info', editReplyL2LiquidateInfoContent)
 const editReplyL2DoLiquidateContent = async (ctx) => {
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
+    await lmt.removeTokens(1)
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -380,6 +400,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
     
     if (pendingList.length === 0) {
       await ctx.answerCbQuery("No pending NEST Prize found to send.")
+      await lmt.removeTokens(1)
       await ctx.editMessageText("No pending NEST Prize found to send.", Markup.inlineKeyboard([
         [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
       ]))
@@ -405,6 +426,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       } catch (e) {
         console.log(e)
         ctx.answerCbQuery("Update NEST Prize status failed, please try again later.")
+        await lmt.removeTokens(1)
         ctx.reply("Update NEST Prize status failed, please try again later.")
       }
     }
@@ -415,6 +437,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         data += `${item.wallet},${item.amount}\n`
       }
       await ctx.answerCbQuery()
+      await lmt.removeTokens(1)
       await ctx.replyWithDocument({
         source: Buffer.from(data),
         filename: `pending.csv`,
@@ -425,6 +448,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
   } catch (e) {
     console.log(e)
     ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
+    await lmt.removeTokens(1)
     ctx.reply("Fetch pending NEST Prize failed, please try again later.")
   }
 }
@@ -435,6 +459,7 @@ bot.action('liquidate', editReplyL2DoLiquidateContent)
 const editReplyL2PendingContent = async (ctx) => {
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
+    await lmt.removeTokens(1)
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -469,6 +494,7 @@ const editReplyL2PendingContent = async (ctx) => {
       }));
     }
     await ctx.answerCbQuery('Stop All Snatching Prize Success!')
+    await lmt.removeTokens(1)
     await ctx.editMessageText(`Stop All Snatching Prize Success!`, Markup.inlineKeyboard([
       [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate')],
       [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
@@ -493,6 +519,7 @@ bot.action('pending', editReplyL2PendingContent)
 const editReplyL3CloseContent = async (ctx) => {
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
+    await lmt.removeTokens(1)
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -527,6 +554,7 @@ const editReplyL3CloseContent = async (ctx) => {
       }));
     }
     await ctx.answerCbQuery('Close All Liquidated Prize Success!')
+    await lmt.removeTokens(1)
     await ctx.editMessageText(`Close All Liquidated Prize Success!`, Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
     ]))
@@ -550,6 +578,7 @@ bot.action('close', editReplyL3CloseContent)
 bot.action('set-config', async (ctx) => {
   ctx.session = {...ctx.session, intent: 'config'}
   await ctx.answerCbQuery()
+  await lmt.removeTokens(1)
   await ctx.editMessageText(`Enter NEST Prize config with json format.
   
 *parameters:*
@@ -583,6 +612,7 @@ For example: { "token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 
 bot.action('send', async (ctx) => {
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
+    await lmt.removeTokens(1)
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -594,6 +624,7 @@ bot.action('send', async (ctx) => {
       // send message to chat_id, record chat_id and message_id to dynamodb
       let res
       if (config.cover !== '') {
+        await lmt.removeTokens(1)
         res = await ctx.telegram.sendPhoto(config.chatId, config.cover, {
           caption: `${config.text}
 
@@ -605,6 +636,7 @@ Click snatch button!`,
           ])
         })
       } else {
+        await lmt.removeTokens(1)
         res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
 
 Click snatch button!`, {
@@ -762,6 +794,7 @@ Please pay attention to the group news. Good luck next time.`)
           }
         }))
         await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
+        await lmt.removeTokens(1)
         await ctx.reply(`🎉! ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
       } catch (e) {
         console.log(e)
@@ -800,17 +833,21 @@ bot.on('message', async (ctx) => {
       try {
         const config = JSON.parse(ctx.message.text)
         if (config.token !== 'NEST') {
+          await lmt.removeTokens(1)
           ctx.reply('Token must be NEST. Please try again later.')
           return
         }
         if (config.min > config.max) {
+          await lmt.removeTokens(1)
           ctx.reply('Min amount must be less than max amount. Please try again later.')
           return
         }
         if (config.quantity < 1) {
+          await lmt.removeTokens(1)
           ctx.reply('Quantity must be greater than 0. Please try again later.')
           return
         }
+        await lmt.removeTokens(1)
         await ctx.reply(`Check it again:
 
 token: ${config.token},
@@ -833,6 +870,7 @@ auth: ${config.auth}
         ctx.session = {intent: undefined, config: config}
       } catch (e) {
         console.log(e)
+        await lmt.removeTokens(1)
         ctx.reply('Sorry, I cannot understand your config. Please try again.')
       }
     } else if (intent === 'set-user-wallet') {
@@ -859,11 +897,13 @@ auth: ${config.auth}
                 },
               }))
               ctx.session = {...ctx.session, intent: undefined, wallet: input}
+              await lmt.removeTokens(1)
               ctx.reply(`Your wallet address has submitted. ${input}`, Markup.inlineKeyboard([
                 [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
               ]))
             } catch (e) {
               console.log(e)
+              await lmt.removeTokens(1)
               ctx.reply('Some error occurred, please try again later.', {
                 reply_to_message_id: ctx.message.message_id,
                 ...Markup.inlineKeyboard([
@@ -886,10 +926,12 @@ auth: ${config.auth}
                   },
                 }))
                 ctx.session = {...ctx.session, intent: undefined, wallet: input}
+                await lmt.removeTokens(1)
                 ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
                   [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
                 ]))
               } catch (e) {
+                await lmt.removeTokens(1)
                 ctx.reply('Some error occurred, please try again later.', {
                   reply_to_message_id: ctx.message.message_id,
                   ...Markup.inlineKeyboard([
@@ -899,6 +941,7 @@ auth: ${config.auth}
               }
             } else {
               ctx.session = {...ctx.session, intent: undefined, wallet: input}
+              await lmt.removeTokens(1)
               ctx.reply('You entered the same address as you did before.', Markup.inlineKeyboard([
                 [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
               ]))
@@ -909,6 +952,7 @@ auth: ${config.auth}
           ctx.answerCbQuery("Some error occurred, please try again later.")
         }
       } else {
+        await lmt.removeTokens(1)
         ctx.reply('Please input a valid wallet address.', {
           reply_to_message_id: ctx.message.message_id,
         })
