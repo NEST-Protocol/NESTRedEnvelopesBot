@@ -913,7 +913,7 @@ auth: ${config.auth}
             }
           } else {
             const user = queryUserRes.Item
-            if (user.wallet !== input) {
+            if (user?.wallet !== input) {
               try {
                 await ddbDocClient.send(new UpdateCommand({
                   TableName: 'nest-prize-users',
