@@ -74,11 +74,17 @@ You need to replace some configuration in the source code, including:
 
 ## Maintainers
 
-[@tunogya](https://github.com/tunogya)
+[@tunogya](https://github.com/tunogya).
 
 ## Contributing
 
 Feel free to dive in! [Open an issue](https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues/new) or submit PRs.
+
+### Contributors
+
+This project exists thanks to all the people who contribute.
+
+[@kitty-tin](https://github.com/kitty-tin)
 
 ## License
 
