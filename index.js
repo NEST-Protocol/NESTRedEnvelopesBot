@@ -263,7 +263,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     return
   }
   try {
-    const [openResult, pendingResult, processingResult] = await Promise.all([
+    const [openResult, pendingResult] = await Promise.all([
       ddbDocClient.send(new QueryCommand({
         TableName: 'nest-prize',
         IndexName: 'status-index',
@@ -284,17 +284,6 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
         },
         ExpressionAttributeValues: {
           ':status': 'pending',
-        },
-      })),
-      ddbDocClient.send(new QueryCommand({
-        TableName: 'nest-prize',
-        IndexName: 'status-index',
-        KeyConditionExpression: '#status = :status',
-        ExpressionAttributeNames: {
-          '#status': 'status',
-        },
-        ExpressionAttributeValues: {
-          ':status': 'processing',
         },
       })),
     ])
@@ -322,14 +311,11 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
 
 Number of open NEST Prize: ${openResult.Count}, had snatched: ${openAmount} NEST.
 
-Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmount} NEST, different users: ${pendingList.length}.
-
-Number of processing NEST Prize: ${processingResult.Count}. Please check out TX and close that.`, {
+Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmount} NEST, different users: ${pendingList.length}.`, {
       parse_mode: "Markdown",
       ...Markup.inlineKeyboard([
         [Markup.button.callback('Stop All Snatching Prize', 'pending', openResult.Count === 0)],
         [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate', pendingResult.Count === 0)],
-        [Markup.button.callback('Close All Liquidated Prize', 'close', processingResult.Count === 0)],
         [Markup.button.callback('« Back', 'backToL1MenuContent')],
       ])
     })
@@ -415,17 +401,19 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
             chat_id: item.chat_id,
             message_id: item.message_id,
           },
-          UpdateExpression: 'SET #s = :s',
+          UpdateExpression: 'SET #s = :s, #t = :t',
           ExpressionAttributeNames: {
             '#s': 'status',
+            '#t': 'ttl',
           },
           ExpressionAttributeValues: {
             ':s': 'processing',
+            ':t': Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
           },
         }))
       } catch (e) {
         console.log(e)
-        ctx.answerCbQuery("Update NEST Prize status failed, please try again later.")
+        ctx.answerCbQuery()
         await lmt.removeTokens(1)
         ctx.reply("Update NEST Prize status failed, please try again later.")
       }
@@ -506,67 +494,6 @@ const editReplyL2PendingContent = async (ctx) => {
 }
 
 bot.action('pending', editReplyL2PendingContent)
-
-//
-//    #        #####      #####
-//    #       #     #    #     # #       ####   ####  ######
-//    #             #    #       #      #    # #      #
-//    #        #####     #       #      #    #  ####  #####
-//    #             #    #       #      #    #      # #
-//    #       #     #    #     # #      #    # #    # #
-//    #######  #####      #####  ######  ####   ####  ######
-//
-const editReplyL3CloseContent = async (ctx) => {
-  const chat_id = ctx.update.callback_query.from.id
-  if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
-    await lmt.removeTokens(1)
-    await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
-      [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
-    ]))
-    return
-  }
-  try {
-    const result = await ddbDocClient.send(new QueryCommand({
-      TableName: 'nest-prize',
-      IndexName: 'status-index',
-      KeyConditionExpression: '#status = :status',
-      ExpressionAttributeNames: {
-        '#status': 'status',
-      },
-      ExpressionAttributeValues: {
-        ':status': 'processing',
-      },
-    }))
-    for (const item of result.Items) {
-      await ddbDocClient.send(new UpdateCommand({
-        TableName: 'nest-prize',
-        Key: {
-          chat_id: item.chat_id,
-          message_id: item.message_id,
-        },
-        UpdateExpression: 'SET #s = :s, #t = :t',
-        ExpressionAttributeNames: {
-          '#s': 'status',
-          '#t': 'ttl',
-        },
-        ExpressionAttributeValues: {
-          ':s': 'close',
-          ':t': Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
-        },
-      }));
-    }
-    await ctx.answerCbQuery('Close All Liquidated Prize Success!')
-    await lmt.removeTokens(1)
-    await ctx.editMessageText(`Close All Liquidated Prize Success!`, Markup.inlineKeyboard([
-      [Markup.button.callback('« Back', 'backToL2LiquidateInfoContent')],
-    ]))
-  } catch (e) {
-    console.log(e)
-    ctx.answerCbQuery("Some error occurred, please try again later.")
-  }
-}
-
-bot.action('close', editReplyL3CloseContent)
 
 //
 //    #        #####      #####                   #####
@@ -662,7 +589,7 @@ Click snatch button!`, {
               message_id,
               config,
               balance: config.amount, // left balance of NEST Prize
-              status: 'open', // open, pending, closed
+              status: 'open', // open, pending, processing
               creator: ctx.from.id,
               created_at: new Date().getTime(),
               updated_at: new Date().getTime(),
