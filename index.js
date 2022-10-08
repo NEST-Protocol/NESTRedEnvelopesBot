@@ -745,12 +745,6 @@ Please pay attention to the group news. Good luck next time.`)
             ExpressionAttributeNames: {'#status': 'status'},
             ExpressionAttributeValues: {
               ':updated_at': new Date().getTime(),
-              ':record': [{
-                user_id: ctx.update.callback_query.from.id,
-                username: ctx.update.callback_query.from.username,
-                amount,
-                wallet: user.wallet,
-              }],
               ':status': 'pending',
             }
           }))
@@ -811,7 +805,6 @@ Please pay attention to the group news. Good luck next time.`)
               username: ctx.update.callback_query.from.username,
               amount,
               wallet: user.wallet,
-              created_at: new Date().getTime(),
             }],
             ':status': status,
           }
