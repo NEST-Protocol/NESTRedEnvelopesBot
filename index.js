@@ -544,12 +544,14 @@ const editReplyL3CloseContent = async (ctx) => {
           chat_id: item.chat_id,
           message_id: item.message_id,
         },
-        UpdateExpression: 'SET #s = :s',
+        UpdateExpression: 'SET #s = :s, #t = :t',
         ExpressionAttributeNames: {
           '#s': 'status',
+          '#t': 'ttl',
         },
         ExpressionAttributeValues: {
           ':s': 'close',
+          ':t': Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
         },
       }));
     }
