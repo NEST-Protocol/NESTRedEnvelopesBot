@@ -734,6 +734,27 @@ bot.action('snatch', async (ctx) => {
       if (prize.status !== 'open' || prize.balance <= 0) {
         await ctx.answerCbQuery(`Sorry, you are late. All NEST Prize have been given away.
 Please pay attention to the group news. Good luck next time.`)
+        if (prize.status === 'open') {
+          await ddbDocClient.send(new UpdateCommand({
+            TableName: 'nest-prize',
+            Key: {
+              chat_id: ctx.update.callback_query.message.chat.id,
+              message_id: ctx.update.callback_query.message.message_id,
+            },
+            UpdateExpression: 'set #status = :status',
+            ExpressionAttributeNames: {'#status': 'status'},
+            ExpressionAttributeValues: {
+              ':updated_at': new Date().getTime(),
+              ':record': [{
+                user_id: ctx.update.callback_query.from.id,
+                username: ctx.update.callback_query.from.username,
+                amount,
+                wallet: user.wallet,
+              }],
+              ':status': 'pending',
+            }
+          }))
+        }
         return
       }
       // check auth api
