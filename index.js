@@ -103,19 +103,6 @@ https://t.me/NEST_Community/1609`)
     }))
   }
   ctx.session = {...ctx.session, intent: undefined}
-  if (ctx.session?.wallet) {
-    await lmt.removeTokens(1)
-    ctx.reply(`Welcome to NEST Prize!
-
-Your wallet: ${ctx.session.wallet}
-Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
-`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'set-user-wallet')],
-      [Markup.button.callback('My Referrals', 'get-user-referrals')],
-      [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-    ]))
-    return
-  }
   // query user in db
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
@@ -132,8 +119,7 @@ You have not submitted any addresses to me. Click the button below so you can Sn
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
         [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
-        [Markup.button.callback('My Referrals', 'get-user-referrals')],
-        [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+        [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
       ]))
     } else {
       ctx.session = {wallet: queryUserRes.Item.wallet}
@@ -143,8 +129,46 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.
 Your wallet: ${queryUserRes.Item.wallet}
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
         [Markup.button.callback('Update Wallet', 'set-user-wallet')],
-        [Markup.button.callback('My Referrals', 'get-user-referrals')],
-        [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+        [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+      ]))
+    }
+  } catch (e) {
+    console.log(e)
+    ctx.answerCbQuery("Some error occurred, please try again later.")
+  }
+})
+
+bot.action('menu', async (ctx) => {
+  const chat_id = ctx.update.callback_query.message.chat.id
+  if (chat_id < 0) {
+    return
+  }
+  await lmt.removeTokens(1)
+  try {
+    const queryUserRes = await ddbDocClient.send(new GetCommand({
+      TableName: 'nest-prize-users',
+      Key: {
+        user_id: ctx.update.callback_query.from.id,
+      },
+    }))
+    if (queryUserRes.Item === undefined || queryUserRes.Item?.wallet === undefined) {
+      await lmt.removeTokens(1)
+      ctx.editMessageText(`Welcome to NEST Prize!
+
+You have not submitted any addresses to me. Click the button below so you can Snatch our Prize!
+
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}`, Markup.inlineKeyboard([
+        [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
+        [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+      ]))
+    } else {
+      await lmt.removeTokens(1)
+      ctx.editMessageText(`Welcome to NEST Prize!
+
+Your wallet: ${queryUserRes.Item.wallet}
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}`, Markup.inlineKeyboard([
+        [Markup.button.callback('Update Wallet', 'set-user-wallet')],
+        [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
       ]))
     }
   } catch (e) {
@@ -169,7 +193,7 @@ bot.action('get-user-referrals', async (ctx) => {
     }
     await ctx.answerCbQuery()
     await lmt.removeTokens(1)
-    ctx.reply(`My Referrals:
+    ctx.editMessageText(`My Referrals:
 
 ${result.Items.map((item) => {
       if (item?.username) {
@@ -178,7 +202,9 @@ ${result.Items.map((item) => {
         return item.user_id
       }
     }).join(',')
-    }`)
+    }`, Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'menu')],
+    ]))
   } catch (e) {
     console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
@@ -289,15 +315,22 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     ])
     let pendingList = []
     for (const item of pendingResult.Items) {
-      const record = item?.record || []
-      for (const user of record) {
-        const index = pendingList.findIndex((i) => i.wallet === user.wallet)
+      let walletMap = {}
+      let amount = 0
+      for (const user of item.record.slice(0, item.config.quantity)) {
+        if (walletMap[user.wallet.toLowerCase()]) {
+          continue
+        }
+        walletMap[user.wallet.toLowerCase()] = true
+        const index = pendingList.findIndex((i) => i.wallet.toLowerCase() === user.wallet.toLowerCase())
         if (index === -1) {
-          if (user.amount > 0) {
+          if (user.amount > 0 && (amount + user.amount) <= item.config.amount) {
+            amount += user.amount
             pendingList.push(user)
           }
         } else {
-          if (user.amount > 0) {
+          if (user.amount > 0 && (amount + user.amount) <= item.config.amount) {
+            amount += user.amount
             pendingList[index].amount += user.amount
           }
         }
@@ -839,9 +872,10 @@ auth: ${config.auth}
                   updated_at: new Date().getTime(),
                 },
               }))
-              ctx.session = {...ctx.session, intent: undefined, wallet: input}
+              ctx.session = {...ctx.session, intent: undefined}
               await lmt.removeTokens(1)
               ctx.reply(`Your wallet address has submitted. ${input}`, Markup.inlineKeyboard([
+                [Markup.button.callback('« Back', 'menu')],
                 [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
               ]))
             } catch (e) {
@@ -850,6 +884,7 @@ auth: ${config.auth}
               ctx.reply('Some error occurred, please try again later.', {
                 reply_to_message_id: ctx.message.message_id,
                 ...Markup.inlineKeyboard([
+                  [Markup.button.callback('« Back', 'menu')],
                   [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
                 ])
               })
@@ -869,9 +904,10 @@ auth: ${config.auth}
                     ':updated_at': new Date().getTime(),
                   }
                 }))
-                ctx.session = {...ctx.session, intent: undefined, wallet: input}
+                ctx.session = {...ctx.session, intent: undefined}
                 await lmt.removeTokens(1)
                 ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
+                  [Markup.button.callback('« Back', 'menu')],
                   [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
                 ]))
               } catch (e) {
@@ -879,14 +915,16 @@ auth: ${config.auth}
                 ctx.reply('Some error occurred, please try again later.', {
                   reply_to_message_id: ctx.message.message_id,
                   ...Markup.inlineKeyboard([
+                    [Markup.button.callback('« Back', 'menu')],
                     [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
                   ])
                 })
               }
             } else {
-              ctx.session = {...ctx.session, intent: undefined, wallet: input}
+              ctx.session = {...ctx.session, intent: undefined}
               await lmt.removeTokens(1)
               ctx.reply('You entered the same address as you did before.', Markup.inlineKeyboard([
+                [Markup.button.callback('« Back', 'menu')],
                 [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
               ]))
             }
