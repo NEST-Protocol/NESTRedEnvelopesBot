@@ -756,6 +756,7 @@ Please pay attention to the group news. Good luck next time.`)
             message_id: ctx.update.callback_query.message.message_id,
           },
           UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
+          ConditionExpression: 'balance >= :amount',
           ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
           ExpressionAttributeValues: {
             ':amount': amount,
@@ -767,14 +768,14 @@ Please pay attention to the group news. Good luck next time.`)
               wallet: user.wallet,
             }],
             ':status': status,
-          }
+          },
         }))
         await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
         await lmt.removeTokens(1)
         await ctx.reply(`🎉! ${ctx.update.callback_query.from.username ?? ctx.update.callback_query.from.id} have got ${amount} NEST.`)
       } catch (e) {
         console.log(e)
-        ctx.answerCbQuery("Some error occurred, please try again later.")
+        ctx.answerCbQuery("Sorry, you didn't get it, try again!")
       }
     } catch (e) {
       console.log(e)
