@@ -77,8 +77,8 @@ https://www.binance.com/en/support/faq/bacaf9595b52440ea2b023195ba4a09c
 
 More giveaways: Conditions 200 NEST + 1 BAB
 https://t.me/NEST_Community/1609`)
-  // update user info
   if (ctx.startPayload && Number(ctx.startPayload) !== ctx.update.message.from.id) {
+    // Update new username and new invite code, not myself
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
       Key: {
@@ -91,6 +91,7 @@ https://t.me/NEST_Community/1609`)
       }
     }))
   } else {
+    // update new username, if not exist, create new one
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
       Key: {
@@ -139,10 +140,6 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.
 })
 
 bot.action('menu', async (ctx) => {
-  const chat_id = ctx.update.callback_query.message.chat.id
-  if (chat_id < 0) {
-    return
-  }
   await lmt.removeTokens(1)
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
@@ -427,29 +424,27 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
     }
     
     for (const item of result.Items) {
-      try {
-        await ddbDocClient.send(new UpdateCommand({
-          TableName: 'nest-prize',
-          Key: {
-            chat_id: item.chat_id,
-            message_id: item.message_id,
-          },
-          UpdateExpression: 'SET #s = :s, #t = :t',
-          ExpressionAttributeNames: {
-            '#s': 'status',
-            '#t': 'ttl',
-          },
-          ExpressionAttributeValues: {
-            ':s': 'processing',
-            ':t': Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
-          },
-        }))
-      } catch (e) {
+      ddbDocClient.send(new UpdateCommand({
+        TableName: 'nest-prize',
+        Key: {
+          chat_id: item.chat_id,
+          message_id: item.message_id,
+        },
+        UpdateExpression: 'SET #s = :s, #t = :t',
+        ConditionExpression: '#s = :ps',
+        ExpressionAttributeNames: {
+          '#s': 'status',
+          '#t': 'ttl',
+        },
+        ExpressionAttributeValues: {
+          ':s': 'processing',
+          ':t': Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
+          ':ps': 'pending',
+        },
+      })).catch((e) => {
         console.log(e)
-        ctx.answerCbQuery()
-        await lmt.removeTokens(1)
-        ctx.reply("Update NEST Prize status failed, please try again later.")
-      }
+        ctx.answerCbQuery('Update NEST Prize status failed.')
+      })
     }
     
     try {
@@ -499,20 +494,22 @@ const editReplyL2PendingContent = async (ctx) => {
       },
     }))
     for (const item of result.Items) {
-      await ddbDocClient.send(new UpdateCommand({
+      ddbDocClient.send(new UpdateCommand({
         TableName: 'nest-prize',
         Key: {
           chat_id: item.chat_id,
           message_id: item.message_id,
         },
         UpdateExpression: 'SET #s = :s',
+        ConditionExpression: '#s = :os',
         ExpressionAttributeNames: {
           '#s': 'status',
         },
         ExpressionAttributeValues: {
           ':s': 'pending',
+          ':os': 'open',
         },
-      }));
+      })).catch((e) => console.log(e))
     }
     await ctx.answerCbQuery('Stop All Snatching Prize Success!')
     await lmt.removeTokens(1)
@@ -695,7 +692,7 @@ bot.action('snatch', async (ctx) => {
         await ctx.answerCbQuery(`Sorry, you are late. All NEST Prize have been given away.
 Please pay attention to the group news. Good luck next time.`)
         if (prize.status === 'open') {
-          await ddbDocClient.send(new UpdateCommand({
+          ddbDocClient.send(new UpdateCommand({
             TableName: 'nest-prize',
             Key: {
               chat_id: ctx.update.callback_query.message.chat.id,
@@ -707,7 +704,7 @@ Please pay attention to the group news. Good luck next time.`)
               ':updated_at': new Date().getTime(),
               ':status': 'pending',
             }
-          }))
+          })).catch(e => console.log(e))
         }
         return
       }
