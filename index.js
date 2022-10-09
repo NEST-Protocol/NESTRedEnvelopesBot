@@ -739,7 +739,10 @@ Please pay attention to the group news. Good luck next time.`)
       // check if NEST Prize is need empty
       if (prize.record.length === prize.config.quantity - 1) {
         status = 'pending'
-        amount = prize.balance
+        amount = Math.floor(Math.random() * (prize.config.max - prize.config.min) + prize.config.min)
+        if (prize.balance <= amount) {
+          amount = prize.balance
+        }
       } else {
         amount = Math.floor(Math.random() * (prize.config.max - prize.config.min) + prize.config.min)
         if (prize.balance <= amount) {
