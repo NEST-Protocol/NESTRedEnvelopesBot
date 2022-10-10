@@ -702,7 +702,8 @@ Please pay attention to the group news. Good luck next time.`)
             method: 'POST',
             data: JSON.stringify({
               "user_id": ctx.update.callback_query.from.id,
-              "wallet": user.wallet
+              "wallet": user?.wallet,
+              "twitter": user?.twitter,
             }),
             headers: {
               'Content-Type': 'application/json',
