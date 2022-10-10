@@ -872,7 +872,7 @@ auth: ${config.auth}
         })
       }
     } else if (intent === 'set-user-twitter') {
-      if (input.startsWith('@')) {
+      if (input.startsWith('@') && input.length > 1) {
         try {
           await ddbDocClient.send(new UpdateCommand({
             TableName: 'nest-prize-users',
@@ -886,7 +886,7 @@ auth: ${config.auth}
           }))
           ctx.session = {...ctx.session, intent: undefined}
           await lmt.removeTokens(1)
-          ctx.reply(`Your twitter has updated. ${input}`, Markup.inlineKeyboard([
+          ctx.reply(`Your twitter has updated. ${input.slice(1)}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
             [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
           ]))
