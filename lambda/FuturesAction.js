@@ -2,8 +2,8 @@ const axios = require("axios");
 
 const apiKey = process.env.APIKEY
 exports.handler = async (event) => {
-  const user_id = JSON.parse(event.body)?.user_id ?? undefined
-  const wallet = JSON.parse(event.body)?.wallet ?? undefined
+  const user_id = JSON.parse(event?.body)?.user_id ?? undefined
+  const wallet = JSON.parse(event?.body)?.wallet ?? undefined
   
   if (user_id === undefined && wallet === undefined) {
     return {
