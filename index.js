@@ -112,27 +112,16 @@ https://t.me/NEST_Community/1609`)
         user_id: ctx.update.message.from.id,
       },
     }))
-    if (queryUserRes.Item === undefined || queryUserRes.Item?.wallet === undefined) {
-      await lmt.removeTokens(1)
-      ctx.reply(`Welcome to NEST Prize!
+    await lmt.removeTokens(1)
+    ctx.reply(`Welcome to NEST Prize!
 
-You have not submitted any addresses to me. Click the button below so you can Snatch our Prize!
+You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}
+You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
-        [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
-        [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-      ]))
-    } else {
-      ctx.session = {wallet: queryUserRes.Item.wallet}
-      await lmt.removeTokens(1)
-      ctx.reply(`Welcome to NEST Prize!
-
-Your wallet: ${queryUserRes.Item.wallet}
-Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
-        [Markup.button.callback('Update Wallet', 'set-user-wallet')],
-        [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-      ]))
-    }
+      [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
+      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+    ]))
   } catch (e) {
     console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
@@ -148,26 +137,16 @@ bot.action('menu', async (ctx) => {
         user_id: ctx.update.callback_query.from.id,
       },
     }))
-    if (queryUserRes.Item === undefined || queryUserRes.Item?.wallet === undefined) {
-      await lmt.removeTokens(1)
-      ctx.editMessageText(`Welcome to NEST Prize!
+    await lmt.removeTokens(1)
+    ctx.editMessageText(`Welcome to NEST Prize!
 
-You have not submitted any addresses to me. Click the button below so you can Snatch our Prize!
+You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}
+You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}`, Markup.inlineKeyboard([
-        [Markup.button.callback('Submit Wallet', 'set-user-wallet')],
-        [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-      ]))
-    } else {
-      await lmt.removeTokens(1)
-      ctx.editMessageText(`Welcome to NEST Prize!
-
-Your wallet: ${queryUserRes.Item.wallet}
-Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}`, Markup.inlineKeyboard([
-        [Markup.button.callback('Update Wallet', 'set-user-wallet')],
-        [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-      ]))
-    }
+      [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
+      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+    ]))
   } catch (e) {
     console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
@@ -228,6 +207,13 @@ bot.action('set-user-wallet', async (ctx) => {
   ctx.session = {...ctx.session, intent: 'set-user-wallet'}
   await lmt.removeTokens(1)
   await ctx.editMessageText('Please send your wallet address:')
+})
+
+bot.action('set-user-twitter', async (ctx) => {
+  await ctx.answerCbQuery()
+  ctx.session = {...ctx.session, intent: 'set-user-twitter'}
+  await lmt.removeTokens(1)
+  await ctx.editMessageText('Please send your twitter username with @:')
 })
 
 //
@@ -853,90 +839,70 @@ auth: ${config.auth}
     } else if (intent === 'set-user-wallet') {
       if (isAddress(input)) {
         try {
-          const queryUserRes = await ddbDocClient.send(new GetCommand({
+          await ddbDocClient.send(new UpdateCommand({
             TableName: 'nest-prize-users',
-            ConsistentRead: true,
             Key: {
               user_id: ctx.message.from.id,
             },
+            UpdateExpression: 'SET wallet = :wallet',
+            ExpressionAttributeValues: {
+              ':wallet': input,
+            }
           }))
-          // If no user info do nothing.
-          if (queryUserRes.Item === undefined) {
-            try {
-              await ddbDocClient.send(new PutCommand({
-                TableName: 'nest-prize-users',
-                Item: {
-                  user_id: ctx.message.from.id,
-                  username: ctx.message.from.username,
-                  wallet: input,
-                  created_at: new Date().getTime(),
-                  updated_at: new Date().getTime(),
-                },
-              }))
-              ctx.session = {...ctx.session, intent: undefined}
-              await lmt.removeTokens(1)
-              ctx.reply(`Your wallet address has submitted. ${input}`, Markup.inlineKeyboard([
-                [Markup.button.callback('« Back', 'menu')],
-                [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-              ]))
-            } catch (e) {
-              console.log(e)
-              await lmt.removeTokens(1)
-              ctx.reply('Some error occurred, please try again later.', {
-                reply_to_message_id: ctx.message.message_id,
-                ...Markup.inlineKeyboard([
-                  [Markup.button.callback('« Back', 'menu')],
-                  [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
-                ])
-              })
-            }
-          } else {
-            const user = queryUserRes.Item
-            if (user?.wallet !== input) {
-              try {
-                await ddbDocClient.send(new UpdateCommand({
-                  TableName: 'nest-prize-users',
-                  Key: {
-                    user_id: ctx.message.from.id,
-                  },
-                  UpdateExpression: 'SET wallet = :wallet, updated_at = :updated_at',
-                  ExpressionAttributeValues: {
-                    ':wallet': input,
-                    ':updated_at': new Date().getTime(),
-                  }
-                }))
-                ctx.session = {...ctx.session, intent: undefined}
-                await lmt.removeTokens(1)
-                ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
-                  [Markup.button.callback('« Back', 'menu')],
-                  [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-                ]))
-              } catch (e) {
-                await lmt.removeTokens(1)
-                ctx.reply('Some error occurred, please try again later.', {
-                  reply_to_message_id: ctx.message.message_id,
-                  ...Markup.inlineKeyboard([
-                    [Markup.button.callback('« Back', 'menu')],
-                    [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
-                  ])
-                })
-              }
-            } else {
-              ctx.session = {...ctx.session, intent: undefined}
-              await lmt.removeTokens(1)
-              ctx.reply('You entered the same address as you did before.', Markup.inlineKeyboard([
-                [Markup.button.callback('« Back', 'menu')],
-                [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-              ]))
-            }
-          }
+          ctx.session = {...ctx.session, intent: undefined}
+          await lmt.removeTokens(1)
+          ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
+            [Markup.button.callback('« Back', 'menu')],
+            [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+          ]))
         } catch (e) {
-          console.log(e)
-          ctx.answerCbQuery("Some error occurred, please try again later.")
+          await lmt.removeTokens(1)
+          ctx.reply('Some error occurred, please try again later.', {
+            reply_to_message_id: ctx.message.message_id,
+            ...Markup.inlineKeyboard([
+              [Markup.button.callback('« Back', 'menu')],
+              [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
+            ])
+          })
         }
       } else {
         await lmt.removeTokens(1)
         ctx.reply('Please input a valid wallet address.', {
+          reply_to_message_id: ctx.message.message_id,
+        })
+      }
+    } else if (intent === 'set-user-twitter') {
+      if (input.startsWith('@')) {
+        try {
+          await ddbDocClient.send(new UpdateCommand({
+            TableName: 'nest-prize-users',
+            Key: {
+              user_id: ctx.message.from.id,
+            },
+            UpdateExpression: 'SET twitter = :twitter',
+            ExpressionAttributeValues: {
+              ':twitter': input,
+            }
+          }))
+          ctx.session = {...ctx.session, intent: undefined}
+          await lmt.removeTokens(1)
+          ctx.reply(`Your twitter has updated. ${input}`, Markup.inlineKeyboard([
+            [Markup.button.callback('« Back', 'menu')],
+            [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+          ]))
+        } catch (e) {
+          await lmt.removeTokens(1)
+          ctx.reply('Some error occurred, please try again later.', {
+            reply_to_message_id: ctx.message.message_id,
+            ...Markup.inlineKeyboard([
+              [Markup.button.callback('« Back', 'menu')],
+              [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
+            ])
+          })
+        }
+      } else {
+        await lmt.removeTokens(1)
+        ctx.reply('Please input a valid twitter account with @.', {
           reply_to_message_id: ctx.message.message_id,
         })
       }
