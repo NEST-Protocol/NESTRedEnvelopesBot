@@ -120,7 +120,7 @@ You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
-      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('Follow us', 'https://github.com/NEST-Protocol')],
     ]))
   } catch (e) {
     console.log(e)
@@ -145,7 +145,7 @@ You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
-      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('Follow us', 'https://github.com/NEST-Protocol')],
     ]))
   } catch (e) {
     console.log(e)
@@ -854,7 +854,7 @@ auth: ${config.auth}
           await lmt.removeTokens(1)
           ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+            [Markup.button.url('Follow us', 'https://github.com/NEST-Protocol')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
@@ -889,7 +889,7 @@ auth: ${config.auth}
           await lmt.removeTokens(1)
           ctx.reply(`Your twitter has updated. ${input.slice(1)}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+            [Markup.button.url('Follow us', 'https://github.com/NEST-Protocol')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
