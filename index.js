@@ -881,7 +881,7 @@ auth: ${config.auth}
             },
             UpdateExpression: 'SET twitter = :twitter',
             ExpressionAttributeValues: {
-              ':twitter': input,
+              ':twitter': input.slice(1),
             }
           }))
           ctx.session = {...ctx.session, intent: undefined}
