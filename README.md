@@ -7,7 +7,6 @@ This repository contains:
 1. The bot [main program](./index.js)
 2. The contract [interface](./abis) used by the bot
 3. Get the function [source code](./lambda) of the condition interface
-4. A set of [test scripts](./test)
 
 ## Table of Contents
 
