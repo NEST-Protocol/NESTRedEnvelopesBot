@@ -120,7 +120,7 @@ You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
-      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('Follow us', 'https://github.com/NEST-Protocol')],
+      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.callback('For Developer', 'for-developer')],
     ]))
   } catch (e) {
     console.log(e)
@@ -145,12 +145,52 @@ You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
-      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.url('Follow us', 'https://github.com/NEST-Protocol')],
+      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.callback('For Developer', 'for-developer')],
     ]))
   } catch (e) {
     console.log(e)
     ctx.answerCbQuery("Some error occurred, please try again later.")
   }
+})
+
+bot.action('for-developer', async (ctx) => {
+  await lmt.removeTokens(1)
+  ctx.editMessageText(`*Another Revolution in Blockchain*
+
+NEST ecosystem is a paradigm revolution to the traditional
+market mechanism, providing the blockchain world with a
+whole new range of development tools and creative new assets.
+
+*NEST PVM*
+
+NEST Probability Virtual Machine (PVM) is a virtual
+machine-like structure based on the basic function
+library. Developers can develop various exciting
+applications based on the function library, similar
+to Ethereum virtual machine (EVM) programming.
+More [PVM Mechanism](https://nestprotocol.org/docs/Concept/PVM/)
+
+*NEST Oracle*
+
+NEST oracle is the only truly decentralized oracle
+on the market today.
+More [How to Mining](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-mining/)
+More [How to Call Price](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-call-price)
+
+More [Developer Doc](https://nestprotocol.org/docs/PVM-Technical-Reference/)
+
+Welcome follow our [Github](https://github.com/NEST-Protocol).
+We will also develop some targeted airdrop tools, like [this bot](https://github.com/NEST-Protocol/NESTRedEnvelopesBot).
+`, {
+    parse_mode: 'Markdown',
+    disable_web_page_preview: true,
+    ...Markup.inlineKeyboard([
+      [Markup.button.url('Follow Github', 'https://github.com/NEST-Protocol')],
+      [Markup.button.url('Developer Doc', 'https://nestprotocol.org/docs/PVM-Technical-Reference/')],
+      [Markup.button.url('New Issues', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues/new')],
+      [Markup.button.callback('« Back', 'menu')],
+    ])
+  })
 })
 
 bot.action('get-user-referrals', async (ctx) => {
@@ -854,7 +894,7 @@ auth: ${config.auth}
           await lmt.removeTokens(1)
           ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.url('Follow us', 'https://github.com/NEST-Protocol')],
+            [Markup.button.callback('For Developer', 'for-developer')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
@@ -889,7 +929,7 @@ auth: ${config.auth}
           await lmt.removeTokens(1)
           ctx.reply(`Your twitter has updated. ${input.slice(1)}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.url('Follow us', 'https://github.com/NEST-Protocol')],
+            [Markup.button.callback('For Developer', 'for-developer')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
