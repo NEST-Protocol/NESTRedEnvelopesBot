@@ -199,7 +199,6 @@ bot.action('get-user-referrals', async (ctx) => {
       await ctx.answerCbQuery("You have no referrals yet.")
       return
     }
-    await ctx.answerCbQuery()
     await lmt.removeTokens(1)
     ctx.editMessageText(`My Referrals:
 
@@ -272,7 +271,6 @@ const editReplyL1MenuContent = async (ctx) => {
     ]))
     return
   }
-  await ctx.answerCbQuery()
   await lmt.removeTokens(1)
   await ctx.editMessageText('NEST Prize Admin Portal', Markup.inlineKeyboard([
     [Markup.button.callback('Send', 'set-config')],
@@ -351,7 +349,6 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     }
     const openAmount = openResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
-    await ctx.answerCbQuery()
     await lmt.removeTokens(1)
     await ctx.editMessageText(`*NEST Prize Liquidate*
 
@@ -468,7 +465,6 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
       for (const item of pendingList) {
         data += `${item.wallet},${item.amount}\n`
       }
-      await ctx.answerCbQuery()
       await lmt.removeTokens(1)
       await ctx.replyWithDocument({
         source: Buffer.from(data),
@@ -552,7 +548,6 @@ bot.action('pending', editReplyL2PendingContent)
 //
 bot.action('set-config', async (ctx) => {
   ctx.session = {...ctx.session, intent: 'config'}
-  await ctx.answerCbQuery()
   await lmt.removeTokens(1)
   await ctx.editMessageText(`Enter NEST Prize config with json format.
   
