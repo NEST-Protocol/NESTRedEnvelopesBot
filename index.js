@@ -235,14 +235,12 @@ bot.command('admin', async (ctx) => {
 })
 
 bot.action('set-user-wallet', async (ctx) => {
-  await ctx.answerCbQuery()
   ctx.session = {...ctx.session, intent: 'set-user-wallet'}
   await lmt.removeTokens(1)
   await ctx.editMessageText('Please send your wallet address:')
 })
 
 bot.action('set-user-twitter', async (ctx) => {
-  await ctx.answerCbQuery()
   ctx.session = {...ctx.session, intent: 'set-user-twitter'}
   await lmt.removeTokens(1)
   await ctx.editMessageText('Please send your twitter username with @:')
@@ -820,7 +818,8 @@ bot.on('message', async (ctx) => {
   }
   // DM message
   else {
-    const intent = ctx.session?.intent
+    const intent = ctx.session?.intent || undefined
+    console.log("intent", intent)
     if (intent === 'config') {
       try {
         const config = JSON.parse(ctx.message.text)
@@ -865,7 +864,8 @@ auth: ${config.auth}
         await lmt.removeTokens(1)
         ctx.reply('Sorry, I cannot understand your config. Please try again.')
       }
-    } else if (intent === 'set-user-wallet') {
+    }
+    else if (intent === 'set-user-wallet') {
       if (isAddress(input)) {
         try {
           await ddbDocClient.send(new UpdateCommand({
@@ -900,8 +900,9 @@ auth: ${config.auth}
           reply_to_message_id: ctx.message.message_id,
         })
       }
-    } else if (intent === 'set-user-twitter') {
-      if (input.startsWith('@') && input.length > 1) {
+    }
+    else if (intent === 'set-user-twitter') {
+      if (input.startsWith('@')) {
         try {
           await ddbDocClient.send(new UpdateCommand({
             TableName: 'nest-prize-users',
