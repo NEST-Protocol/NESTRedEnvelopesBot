@@ -13,8 +13,6 @@ exports.handler = async (event) => {
     }
   }
   
-  let twitterId
-  
   try {
     const req = await axios({
       method: 'GET',
