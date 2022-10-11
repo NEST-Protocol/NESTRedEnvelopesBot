@@ -14,26 +14,44 @@ exports.handler = async (event) => {
   }
   
   try {
-    const req = await axios({
-      method: 'GET',
-      url: `https://api.twitter.com/2/users/by/username/${twitter}`,
-      headers: {
-        'Authorization': `Bearer ${bearToken}`
+    const [targetReq, twitterReq] = await Promise.all([
+      axios({
+        method: 'GET',
+        url: `https://api.twitter.com/2/users/by/username/${target}`,
+        headers: {
+          'Authorization': `Bearer ${bearToken}`
+        }
+      }),
+      axios({
+        method: 'GET',
+        url: `https://api.twitter.com/2/users/by/username/${twitter}`,
+        headers: {
+          'Authorization': `Bearer ${bearToken}`
+        }
+      })
+    ])
+    
+    const targetId = targetReq.data.data.id || undefined
+    const twitterId = twitterReq.data.data.id || undefined
+    
+    if (targetId === undefined || twitterId === undefined) {
+      return {
+        statusCode: 200,
+        body: false
       }
-    })
-    const twitterId = req.data.data.id
+    }
     
     try {
       const req = await axios({
         method: 'GET',
-        url: `https://api.twitter.com/2/users/:id/following?max_results=1000`,
+        url: `https://api.twitter.com/2/users/${twitterId}/following?max_results=1000`,
         headers: {
           'Authorization': `Bearer ${bearToken}`
         }
       })
       
       const following = req.data.data || []
-      const isFollowing = following.some((item) => item.id === target)
+      const isFollowing = following.some((item) => item.id === targetId)
       if (!isFollowing) {
         return {
           statusCode: 200,
