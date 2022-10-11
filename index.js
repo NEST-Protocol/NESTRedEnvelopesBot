@@ -118,9 +118,11 @@ https://t.me/NEST_Community/1609`)
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}
 You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 
-Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}`, Markup.inlineKeyboard([
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
+
+Welcome to click the '🤩 For Developer' button below to join our developer community!`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
-      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.callback('For Developer', 'for-developer')],
+      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.callback('🤩 For Developer', 'for-developer')],
     ]))
   } catch (e) {
     console.log(e)
@@ -145,7 +147,7 @@ You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
-      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.callback('For Developer', 'for-developer')],
+      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.callback('🤩 For Developer', 'for-developer')],
     ]))
   } catch (e) {
     console.log(e)
@@ -187,10 +189,8 @@ Welcome follow our [Github](https://github.com/NEST-Protocol). We will also deve
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
     ...Markup.inlineKeyboard([
-      [Markup.button.url('Follow Github', 'https://github.com/NEST-Protocol')],
-      [Markup.button.url('Developer Doc', 'https://nestprotocol.org/docs/PVM-Technical-Reference/')],
-      [Markup.button.url('New Issues', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues/new')],
-      [Markup.button.callback('« Back', 'menu')],
+      [Markup.button.url('Follow Github', 'https://github.com/NEST-Protocol'), Markup.button.url('Developer Doc', 'https://nestprotocol.org/docs/PVM-Technical-Reference/')],
+      [Markup.button.url('New Issues', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues/new'), Markup.button.callback('« Back', 'menu')],
     ])
   })
 })
@@ -896,7 +896,7 @@ auth: ${config.auth}
           await lmt.removeTokens(1)
           ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.callback('For Developer', 'for-developer')],
+            [Markup.button.callback('🤩 For Developer', 'for-developer')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
@@ -931,7 +931,7 @@ auth: ${config.auth}
           await lmt.removeTokens(1)
           ctx.reply(`Your twitter has updated. ${input.slice(1)}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.callback('For Developer', 'for-developer')],
+            [Markup.button.callback('🤩 For Developer', 'for-developer')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
