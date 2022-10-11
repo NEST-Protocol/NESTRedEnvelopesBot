@@ -3,7 +3,7 @@ const axios = require("axios");
 const bearToken = process.env.BEAR_TOKEN
 
 exports.handler = async (event) => {
-  const tweet = event.queryStringParameters?.tweet ?? undefined
+  const tweet = event?.queryStringParameters?.tweet ?? undefined
   const twitter = JSON.parse(event?.body)?.twitter ?? undefined
   
   if (tweet === undefined || twitter === undefined) {

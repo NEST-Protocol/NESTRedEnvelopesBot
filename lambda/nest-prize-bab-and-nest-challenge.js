@@ -14,8 +14,8 @@ const NEST = new ethers.Contract(NEST_ADDRESS, erc20abi, provider)
 const BABT = new ethers.Contract(BABT_ADDRESS, erc721abi, provider)
 
 exports.handler = async (event) => {
-  const nest_min_value = event.queryStringParameters?.nest ?? undefined
-//   const user_id = JSON.parse(event.body)?.user_id ?? undefined
+  const nest_min_value = event?.queryStringParameters?.nest ?? undefined
+//   const user_id = JSON.parse(event?.body)?.user_id ?? undefined
   const wallet = JSON.parse(event?.body)?.wallet ?? undefined
   
   if (nest_min_value === undefined || wallet === undefined) {
