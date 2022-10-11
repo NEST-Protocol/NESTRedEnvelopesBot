@@ -639,8 +639,6 @@ Click snatch button!`, {
               balance: config.amount, // left balance of NEST Prize
               status: 'open', // open, pending, processing
               creator: ctx.from.id,
-              created_at: new Date().getTime(),
-              updated_at: new Date().getTime(),
               record: [],
             },
           }))
@@ -719,7 +717,6 @@ Please pay attention to the group news. Good luck next time.`)
             UpdateExpression: 'set #status = :status',
             ExpressionAttributeNames: {'#status': 'status'},
             ExpressionAttributeValues: {
-              ':updated_at': new Date().getTime(),
               ':status': 'pending',
             }
           })).catch(e => console.log(e))
@@ -774,12 +771,11 @@ Please pay attention to the group news. Good luck next time.`)
             chat_id: ctx.update.callback_query.message.chat.id,
             message_id: ctx.update.callback_query.message.message_id,
           },
-          UpdateExpression: 'set balance = balance - :amount, updated_at = :updated_at, #record = list_append(#record, :record), #status = :status',
+          UpdateExpression: 'set balance = balance - :amount, #record = list_append(#record, :record), #status = :status',
           ConditionExpression: 'balance >= :amount',
           ExpressionAttributeNames: {'#record': 'record', '#status': 'status'},
           ExpressionAttributeValues: {
             ':amount': amount,
-            ':updated_at': new Date().getTime(),
             ':record': [{
               user_id: ctx.update.callback_query.from.id,
               username: ctx.update.callback_query.from.username,
