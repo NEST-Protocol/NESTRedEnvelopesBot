@@ -20,7 +20,14 @@ exports.handler = async (event) => {
     const data = req.data.result || []
     
     const res = data.some((tx) => {
-      return (tx.from).toLowerCase() === wallet.toLowerCase() && tx.methodId === '0x15ee0aad' && (new Date().getTime()/1000 - Number(tx.timeStamp) < 86400)
+      const now = new Date()
+      const txDate = new Date(tx.timeStamp * 1000)
+      
+      return tx.from.toLowerCase() === wallet.toLowerCase() &&
+          tx.methodId === '0x15ee0aad' &&
+          now.getFullYear() === txDate.getFullYear() &&
+          now.getMonth() === txDate.getMonth() &&
+          now.getDate() === txDate.getDate()
     })
     
     if (res) {
@@ -35,7 +42,7 @@ exports.handler = async (event) => {
       body: false,
     };
   }
-
+  
   
   return {
     statusCode: 200,
