@@ -145,7 +145,9 @@ bot.action('menu', async (ctx) => {
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}
 You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 
-Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}`, Markup.inlineKeyboard([
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
+
+Welcome to click the '🤩 For Developer' button below to join our developer community!`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
       [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.callback('🤩 For Developer', 'for-developer')],
     ]))
