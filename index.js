@@ -168,19 +168,21 @@ machine-like structure based on the basic function
 library. Developers can develop various exciting
 applications based on the function library, similar
 to Ethereum virtual machine (EVM) programming.
+
+Github repository: [NEST-PVM-V1.0](https://github.com/NEST-Protocol/NEST-PVM-V1.0)
+
 More [PVM Mechanism](https://nestprotocol.org/docs/Concept/PVM/)
 
 *NEST Oracle*
 
-NEST oracle is the only truly decentralized oracle
-on the market today.
-More [How to Mining](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-mining/)
-More [How to Call Price](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-call-price)
+NEST oracle is the only truly decentralized oracle on the market today.
+Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0)
+
+[How to Mining](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-mining/), [How to Call Price](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-call-price)
 
 More [Developer Doc](https://nestprotocol.org/docs/PVM-Technical-Reference/)
 
-Welcome follow our [Github](https://github.com/NEST-Protocol).
-We will also develop some targeted airdrop tools, like [this bot](https://github.com/NEST-Protocol/NESTRedEnvelopesBot).
+Welcome follow our [Github](https://github.com/NEST-Protocol). We will also develop some targeted airdrop tools, like [this bot](https://github.com/NEST-Protocol/NESTRedEnvelopesBot).
 `, {
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
