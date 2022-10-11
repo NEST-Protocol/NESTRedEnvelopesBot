@@ -886,6 +886,10 @@ Please pay attention to the group news. Good luck next time.`)
 //
 bot.on('message', async (ctx) => {
   const input = ctx.message.text
+  const chat_id = ctx.message.chat.id
+  if (chat_id < 0) {
+    return
+  }
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
