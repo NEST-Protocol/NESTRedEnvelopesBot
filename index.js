@@ -853,7 +853,7 @@ auth: ${config.auth}
               ])
             }
         )
-        ctx.session = {intent: undefined, config: config}
+        ctx.session = {...ctx.session, intent: undefined, config: config}
       } catch (e) {
         console.log(e)
         await lmt.removeTokens(1)
