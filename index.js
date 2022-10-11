@@ -827,7 +827,7 @@ bot.on('message', async (ctx) => {
   else {
     const intent = ctx.session?.intent || undefined
     if (intent === undefined) {
-      ctx.reply('Sorry, I forgot your intention. 3 seconds later, reply to me with the same content, thank you.')
+      ctx.reply('Sorry, I forgot your intention. 10 seconds later, reply to me with the same content, thank you.')
     }
     else if (intent === 'setConfig') {
       try {
