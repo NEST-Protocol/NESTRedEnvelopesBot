@@ -55,28 +55,40 @@ bot.start(async (ctx) => {
     return
   }
   await lmt.removeTokens(1)
-  ctx.reply(`BAB Token increase the diversity of incentive and validation methods of the NEST community, thus, we are introducing a daily timely giveaway for BAB Token holders. Total prize of $30,000 NEST tokens. For a period of 4 months.
+  ctx.reply(`NEST TOKEN + Binance BAB TOKEN Giveaway
 
-How to join?
-1. Join: https://t.me/NEST_BABGiveaway
-2. Join: https://t.me/NESTRedEnvelopesBot
+Join the giveaway group and get daily NEST token  Timely giveaways.
+
+Conditions are.
+Wallet address has >400 NEST tokens and has Binance BAB tokens.
+
+Reward.
+
+1.Everyone gets at least 10 NEST per day.
+2.Invite 1 person to participate, 10 NEST.
+*FCFS 1000 people
+
+How do I join?
+1. Buy 400 NEST and own 1 BAB token
+2. Join：https://t.me/NEST_BABGiveaway
+3. Join: https://t.me/NESTRedEnvelopesBot
 Add your wallet address in the bot.
-3. Click: on the giveaway link at the pin of the group.
-4. Click: snatch
+4. Click: on the giveaway link at the pin of the group.
+5. Click: snatch
 
-If you are a newbie, you must complete the first 3 steps. When you're done you just need to click snatch to get the giveaway!
+How to invite?
+1.Join: @NESTRedEnvelopesBot
+2.Click: My ref info
+* Invite others to our BAB giveaway via your invite link!
 
+Invitation rewards, issued every Monday.Your NEST must be obtained on NEST SWAP or pancakes.
 
-Rewards：
-Receive random or fixed NEST token as giveaway rewards or quiz rewards on daily base and will receive exclusive NFTs in the future.
+NEST TOKEN BUY
+https://finance.nestprotocol.org/#/swap
+https://pancakeswap.finance/
 
-What are BAB tokens?
-https://developers.binance.com/docs/babt/introduction
-How do I get BAB tokens?
-https://www.binance.com/en/support/faq/bacaf9595b52440ea2b023195ba4a09c
-
-More giveaways: Conditions 200 NEST + 1 BAB
-https://t.me/NEST_Community/1609`)
+BAB TOKEN GET
+https://www.binance.com/en/support/faq/bacaf9595b52440ea2b023195ba4a09c`)
   if (ctx.startPayload && Number(ctx.startPayload) !== ctx.update.message.from.id) {
     // Update new username and new invite code, not myself
     await ddbDocClient.send(new UpdateCommand({
@@ -103,7 +115,7 @@ https://t.me/NEST_Community/1609`)
       }
     }))
   }
-  ctx.session = {...ctx.session, intent: undefined}
+  ctx.session = {}
   // query user in db
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
@@ -121,12 +133,11 @@ You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
 
 Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
-      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.callback('🤩 For Developer', 'for-developer')],
+      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Update Twitter', 'setUserTwitter')],
+      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩 For Developer', 'forDeveloper')],
     ]))
   } catch (e) {
-    console.log(e)
-    ctx.answerCbQuery("Some error occurred, please try again later.")
+    ctx.reply("Some error occurred, please try /start again later.")
   }
 })
 
@@ -148,8 +159,8 @@ You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
 Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'set-user-wallet'), Markup.button.callback('Update Twitter', 'set-user-twitter')],
-      [Markup.button.callback('My Referrals', 'get-user-referrals'), Markup.button.callback('🤩 For Developer', 'for-developer')],
+      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Update Twitter', 'setUserTwitter')],
+      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩 For Developer', 'forDeveloper')],
     ]))
   } catch (e) {
     console.log(e)
@@ -157,7 +168,7 @@ Welcome to click the 🤩 button below to join our developer community!`, Markup
   }
 })
 
-bot.action('for-developer', async (ctx) => {
+bot.action('forDeveloper', async (ctx) => {
   await lmt.removeTokens(1)
   ctx.editMessageText(`*Another Revolution in Blockchain*
 
@@ -185,7 +196,7 @@ Welcome follow our [Github](https://github.com/NEST-Protocol). We will also deve
   })
 })
 
-bot.action('get-user-referrals', async (ctx) => {
+bot.action('getUserReferrals', async (ctx) => {
   try {
     const result = await ddbDocClient.send(new QueryCommand({
       TableName: 'nest-prize-users',
@@ -233,14 +244,14 @@ bot.command('admin', async (ctx) => {
   await replyL1MenuContent(ctx)
 })
 
-bot.action('set-user-wallet', async (ctx) => {
-  ctx.session = {...ctx.session, intent: 'set-user-wallet'}
+bot.action('setUserWallet', async (ctx) => {
+  ctx.session = {intent: 'setUserWallet'}
   await lmt.removeTokens(1)
   await ctx.editMessageText('Please send your wallet address:')
 })
 
-bot.action('set-user-twitter', async (ctx) => {
-  ctx.session = {...ctx.session, intent: 'set-user-twitter'}
+bot.action('setUserTwitter', async (ctx) => {
+  ctx.session = {intent: 'setUserTwitter'}
   await lmt.removeTokens(1)
   await ctx.editMessageText('Please send your twitter username with @:')
 })
@@ -257,7 +268,7 @@ bot.action('set-user-twitter', async (ctx) => {
 const replyL1MenuContent = async (ctx) => {
   await lmt.removeTokens(1)
   ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
-    [Markup.button.callback('Send', 'set-config')],
+    [Markup.button.callback('Send', 'setConfig')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
 }
@@ -273,7 +284,7 @@ const editReplyL1MenuContent = async (ctx) => {
   }
   await lmt.removeTokens(1)
   await ctx.editMessageText('NEST Prize Admin Portal', Markup.inlineKeyboard([
-    [Markup.button.callback('Send', 'set-config')],
+    [Markup.button.callback('Send', 'setConfig')],
     [Markup.button.callback('Liquidate', 'liquidate-info')],
   ]))
 }
@@ -546,8 +557,8 @@ bot.action('pending', editReplyL2PendingContent)
 //    #       #          #     # #        #      #     # #    # #   ## #      # #    #
 //    ####### #######     #####  ######   #       #####   ####  #    # #      #  ####
 //
-bot.action('set-config', async (ctx) => {
-  ctx.session = {...ctx.session, intent: 'config'}
+bot.action('setConfig', async (ctx) => {
+  ctx.session = {intent: 'setConfig'}
   await lmt.removeTokens(1)
   await ctx.editMessageText(`Enter NEST Prize config with json format.
   
@@ -588,7 +599,7 @@ bot.action('send', async (ctx) => {
     ]))
     return
   }
-  const config = ctx.session?.config
+  const config = ctx.session?.config || undefined
   if (config) {
     try {
       // send message to chat_id, record chat_id and message_id to dynamodb
@@ -635,6 +646,7 @@ Click snatch button!`, {
               record: [],
             },
           }))
+          ctx.session = {}
           await ctx.answerCbQuery('NEST Prize Sent Success!')
           await editReplyL1MenuContent(ctx)
         } catch (e) {
@@ -814,8 +826,10 @@ bot.on('message', async (ctx) => {
   // DM message
   else {
     const intent = ctx.session?.intent || undefined
-    console.log("intent", intent)
-    if (intent === 'config') {
+    if (intent === undefined) {
+      ctx.reply('Sorry, I forgot your intention. 3 seconds later, reply to me with the same content, thank you.')
+    }
+    else if (intent === 'setConfig') {
       try {
         const config = JSON.parse(ctx.message.text)
         if (config.token !== 'NEST') {
@@ -853,14 +867,14 @@ auth: ${config.auth}
               ])
             }
         )
-        ctx.session = {...ctx.session, intent: undefined, config: config}
+        ctx.session = {config: config}
       } catch (e) {
         console.log(e)
         await lmt.removeTokens(1)
         ctx.reply('Sorry, I cannot understand your config. Please try again.')
       }
     }
-    else if (intent === 'set-user-wallet') {
+    else if (intent === 'setUserWallet') {
       if (isAddress(input)) {
         try {
           await ddbDocClient.send(new UpdateCommand({
@@ -873,11 +887,11 @@ auth: ${config.auth}
               ':wallet': input,
             }
           }))
-          ctx.session = {...ctx.session, intent: undefined}
+          ctx.session = {}
           await lmt.removeTokens(1)
           ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.callback('🤩 For Developer', 'for-developer')],
+            [Markup.button.callback('🤩 For Developer', 'forDeveloper')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
@@ -896,7 +910,7 @@ auth: ${config.auth}
         })
       }
     }
-    else if (intent === 'set-user-twitter') {
+    else if (intent === 'setUserTwitter') {
       if (input.startsWith('@')) {
         try {
           await ddbDocClient.send(new UpdateCommand({
@@ -909,11 +923,11 @@ auth: ${config.auth}
               ':twitter': input.slice(1),
             }
           }))
-          ctx.session = {...ctx.session, intent: undefined}
+          ctx.session = {}
           await lmt.removeTokens(1)
           ctx.reply(`Your twitter has updated. ${input.slice(1)}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.callback('🤩 For Developer', 'for-developer')],
+            [Markup.button.callback('🤩 For Developer', 'forDeveloper')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
