@@ -166,23 +166,18 @@ market mechanism, providing the blockchain world with a
 whole new range of development tools and creative new assets.
 
 *NEST PVM*
-
 NEST Probability Virtual Machine (PVM) is a virtual
 machine-like structure based on the basic function
 library. Developers can develop various exciting
 applications based on the function library, similar
 to Ethereum virtual machine (EVM) programming.
 
-Github repository: [NEST-PVM-V1.0](https://github.com/NEST-Protocol/NEST-PVM-V1.0)
-
-More [PVM Mechanism](https://nestprotocol.org/docs/Concept/PVM/)
+Github repository: [NEST-PVM-V1.0](https://github.com/NEST-Protocol/NEST-PVM-V1.0). More [PVM Mechanism](https://nestprotocol.org/docs/Concept/PVM/)
 
 *NEST Oracle*
-
 NEST oracle is the only truly decentralized oracle on the market today.
-Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0)
 
-[How to Mining](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-mining/), [How to Call Price](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-call-price)
+Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0). [How to Mining](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-mining/), [How to Call Price](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-call-price)
 
 More [Developer Doc](https://nestprotocol.org/docs/PVM-Technical-Reference/)
 
