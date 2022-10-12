@@ -157,9 +157,7 @@ bot.action('forDeveloper', async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText(`*Another Revolution in Blockchain*
 
-NEST ecosystem is a paradigm revolution to the traditional
-market mechanism, providing the blockchain world with a
-whole new range of development tools and creative new assets.
+NEST ecosystem is a paradigm revolution to the traditional market mechanism, providing the blockchain world with a whole new range of development tools and creative new assets.
 
 *NEST PVM*
 NEST Probability Virtual Machine (PVM) is a virtual machine-like structure based on the basic function library. Developers can develop various exciting applications based on the function library, similar to Ethereum virtual machine (EVM) programming.
@@ -170,7 +168,8 @@ NEST oracle is the only truly decentralized oracle on the market today.
 Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0). [How to Mining](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-mining/), [How to Call Price](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-call-price)
 
 More [Developer Doc](https://nestprotocol.org/docs/PVM-Technical-Reference/)
-Welcome follow our [Github](https://github.com/NEST-Protocol). We will also develop some targeted airdrop tools, like [this bot](https://github.com/NEST-Protocol/NESTRedEnvelopesBot).
+
+*Welcome follow our [Github](https://github.com/NEST-Protocol). We will also develop some targeted airdrop tools, like [this bot](https://github.com/NEST-Protocol/NESTRedEnvelopesBot).*
 `, {
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
@@ -212,10 +211,7 @@ ${result.Items.map((item) => {
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
-      [Markup.button.callback('My Referrals', 'getUserReferrals')],
-    ]))
+    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -256,10 +252,7 @@ bot.action('setUserWallet', async (ctx) => {
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'setUserWallet')],
-    ]))
+    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -281,10 +274,7 @@ bot.action('setUserTwitter', async (ctx) => {
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
-      [Markup.button.callback('Update Twitter', 'setUserTwitter')],
-    ]))
+    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -384,10 +374,7 @@ Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmo
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
-      [Markup.button.callback('Liquidate', 'liquidateInfo')],
-    ]))
+    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -440,10 +427,7 @@ bot.action('liquidate', async (ctx) => {
     
     if (pendingList.length === 0) {
       await lmt.removeTokens(1)
-      await ctx.answerCbQuery()
-      await ctx.editMessageText("No pending NEST Prize found to send.", Markup.inlineKeyboard([
-        [Markup.button.callback('« Back', 'liquidateInfo')],
-      ]))
+      await ctx.answerCbQuery("No pending NEST Prize found to send.")
       return
     }
     
@@ -484,14 +468,12 @@ bot.action('liquidate', async (ctx) => {
     } catch (e) {
       console.log(e)
       await lmt.removeTokens(1)
-      await ctx.answerCbQuery()
-      ctx.reply("Send csv file failed, please try again later.")
+      await ctx.answerCbQuery("Send csv file failed, please try again later.")
     }
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-    ctx.reply("Fetch pending NEST Prize failed, please try again later.")
+    await ctx.answerCbQuery("Fetch pending NEST Prize failed, please try again later.")
   }
 })
 
@@ -538,7 +520,6 @@ bot.action('pending', async (ctx) => {
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
     await ctx.editMessageText(`Stop All Snatching Prize Success!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate')],
       [Markup.button.callback('« Back', 'liquidateInfo')],
     ]))
   } catch (e) {
@@ -582,10 +563,7 @@ For example: {"token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1
     })
   } catch (e) {
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-    await ctx.editMessageText('Some error occurred.', Markup.inlineKeyboard([
-      [Markup.button.callback('Send', 'setConfig')],
-    ]))
+    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -626,9 +604,7 @@ Click snatch button!`,
         } else {
           await lmt.removeTokens(1)
           await ctx.answerCbQuery()
-          res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
-
-Click snatch button!`, {
+          res = await ctx.telegram.sendMessage(config.chatId, config.text, {
             parse_mode: 'Markdown',
             protect_content: true,
             ...Markup.inlineKeyboard([
@@ -673,10 +649,7 @@ Click snatch button!`, {
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
-      [Markup.button.callback('Checked, Send Now!', 'send')],
-    ]))
+    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -704,7 +677,7 @@ bot.action('snatch', async (ctx) => {
         }
       }))
       if (queryPrizeRes.Item === undefined) {
-        ctx.answerCbQuery("The NEST Prize is not found.")
+        ctx.answerCbQuery("The NEST Prize has not found.")
         return
       }
       const prize = queryPrizeRes.Item
@@ -844,7 +817,6 @@ bot.on('message', async (ctx) => {
     }))
     const intent = queryUserRes.Item?.intent || undefined
     if (intent === undefined) {
-      ctx.reply('Sorry, I forgot your intention. 10 seconds later, reply to me with the same content, thank you.')
     } else if (intent === 'setConfig') {
       try {
         const config = JSON.parse(input)
