@@ -8,17 +8,9 @@ const {RateLimiter} = require("limiter");
 // Command
 // start - submit or update wallet address
 // admin - admin portal to send prize
+// getid - get telegram chat id
 
-//
-//    #####
-//   #     #  ####  #    # ###### #  ####
-//   #       #    # ##   # #      # #    #
-//   #       #    # # #  # #####  # #
-//   #       #    # #  # # #      # #  ###
-//   #     # #    # #   ## #      # #    #
-//    #####   ####  #    # #      #  ####
-//
-
+// limit of send message to different chat
 const lmt = new RateLimiter({
   tokensPerInterval: 30,
   interval: 'second',
@@ -39,15 +31,6 @@ if (token === undefined) {
 
 const bot = new Telegraf(token)
 
-//
-//    #####
-//   #     # #####   ##   #####  #####
-//   #         #    #  #  #    #   #
-//    #####    #   #    # #    #   #
-//         #   #   ###### #####    #
-//   #     #   #   #    # #   #    #
-//    #####    #   #    # #    #   #
-//
 bot.start(async (ctx) => {
   const chatId = ctx.update.message.chat.id
   if (chatId < 0) {
@@ -132,12 +115,12 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.
 
 Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Update Twitter', 'setUserTwitter')],
-      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩 For Developer', 'forDeveloper')],
+      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
     ]))
   } catch (e) {
     await lmt.removeTokens(1)
-    await ctx.reply("Some error occurred, please try again later.", Markup.inlineKeyboard([
-        [Markup.button.callback('« Back', 'menu')],
+    await ctx.reply("Some error occurred.", Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'menu')],
     ]))
   }
 })
@@ -152,6 +135,7 @@ bot.action('menu', async (ctx) => {
       },
     }))
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.editMessageText(`Welcome to NEST Prize!
 
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}
@@ -161,19 +145,21 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_quer
 
 Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Update Twitter', 'setUserTwitter')],
-      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩 For Developer', 'forDeveloper')],
+      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
     ]))
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.editMessageText("Some error occurred, please try again later.", Markup.inlineKeyboard([
-        [Markup.button.callback('« Back', 'menu')],
+    await ctx.answerCbQuery()
+    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'menu')],
     ]))
   }
 })
 
 bot.action('forDeveloper', async (ctx) => {
   await lmt.removeTokens(1)
+  await ctx.answerCbQuery()
   await ctx.editMessageText(`*Another Revolution in Blockchain*
 
 NEST ecosystem is a paradigm revolution to the traditional
@@ -215,6 +201,7 @@ bot.action('getUserReferrals', async (ctx) => {
       return
     }
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.editMessageText(`My Referrals:
 
 ${result.Items.map((item) => {
@@ -230,8 +217,9 @@ ${result.Items.map((item) => {
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.editMessageText("Some error occurred, please try again later.", Markup.inlineKeyboard([
-       [Markup.button.callback('My Referrals', 'getUserReferrals')],
+    await ctx.answerCbQuery()
+    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
+      [Markup.button.callback('My Referrals', 'getUserReferrals')],
     ]))
   }
 })
@@ -248,7 +236,11 @@ bot.command('admin', async (ctx) => {
     ]))
     return
   }
-  await replyL1MenuContent(ctx)
+  await lmt.removeTokens(1)
+  await ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
+    [Markup.button.callback('Send', 'setConfig')],
+    [Markup.button.callback('Liquidate', 'liquidateInfo')],
+  ]))
 })
 
 bot.action('setUserWallet', async (ctx) => {
@@ -264,11 +256,13 @@ bot.action('setUserWallet', async (ctx) => {
       }
     }))
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.editMessageText('Please send your wallet address:')
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.editMessageText("Some error occurred, please try again later.", Markup.inlineKeyboard([
+    await ctx.answerCbQuery()
+    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'setUserWallet')],
     ]))
   }
@@ -287,64 +281,42 @@ bot.action('setUserTwitter', async (ctx) => {
       }
     }))
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.editMessageText('Please send your twitter username with @:')
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.editMessageText("Some error occurred, please try again later.", Markup.inlineKeyboard([
+    await ctx.answerCbQuery()
+    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
       [Markup.button.callback('Update Twitter', 'setUserTwitter')],
     ]))
   }
 })
 
-//
-//   #         #      #     #
-//   #        ##      ##   ## ###### #    # #    #
-//   #       # #      # # # # #      ##   # #    #
-//   #         #      #  #  # #####  # #  # #    #
-//   #         #      #     # #      #  # # #    #
-//   #         #      #     # #      #   ## #    #
-//   ####### #####    #     # ###### #    #  ####
-//
-const replyL1MenuContent = async (ctx) => {
-  await lmt.removeTokens(1)
-  ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
-    [Markup.button.callback('Send', 'setConfig')],
-    [Markup.button.callback('Liquidate', 'liquidateInfo')],
-  ]))
-}
-
-
-bot.action('backToL1MenuContent', async (ctx) => {
+bot.action('admin', async (ctx) => {
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
     return
   }
   await lmt.removeTokens(1)
+  await ctx.answerCbQuery()
   await ctx.editMessageText('NEST Prize Admin Portal', Markup.inlineKeyboard([
     [Markup.button.callback('Send', 'setConfig')],
     [Markup.button.callback('Liquidate', 'liquidateInfo')],
   ]))
 })
 
-//
-//    #        #####     #                                                       ###
-//    #       #     #    #       #  ####  #    # # #####    ##   ##### ######     #  #    # ######  ####
-//    #             #    #       # #    # #    # # #    #  #  #    #   #          #  ##   # #      #    #
-//    #        #####     #       # #    # #    # # #    # #    #   #   #####      #  # #  # #####  #    #
-//    #       #          #       # #  # # #    # # #    # ######   #   #          #  #  # # #      #    #
-//    #       #          #       # #   #  #    # # #    # #    #   #   #          #  #   ## #      #    #
-//    ####### #######    ####### #  ### #  ####  # #####  #    #   #   ######    ### #    # #       ####
-//
-const editReplyL2LiquidateInfoContent = async (ctx) => {
+bot.action('liquidateInfo', async (ctx) => {
   // query number of NEST Prize status is pending
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -401,6 +373,7 @@ const editReplyL2LiquidateInfoContent = async (ctx) => {
     const openAmount = openResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     const pendingAmount = pendingResult.Items.reduce((acc, cur) => acc + cur.config.amount - cur.balance, 0)
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.editMessageText(`*NEST Prize Liquidate*
 
 Number of open NEST Prize: ${openResult.Count}, had snatched: ${openAmount} NEST.
@@ -410,33 +383,24 @@ Number of pending NEST Prize: ${pendingResult.Count}, had snatched: ${pendingAmo
       ...Markup.inlineKeyboard([
         [Markup.button.callback('Stop All Snatching Prize', 'pending', openResult.Count === 0)],
         [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate', pendingResult.Count === 0)],
-        [Markup.button.callback('« Back', 'backToL1MenuContent')],
+        [Markup.button.callback('« Back', 'admin')],
       ])
     })
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.editMessageText("Some error occurred, please try again later.", Markup.inlineKeyboard([
-        [Markup.button.callback('Liquidate', 'liquidateInfo')],
+    await ctx.answerCbQuery()
+    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
+      [Markup.button.callback('Liquidate', 'liquidateInfo')],
     ]))
   }
-}
+})
 
-bot.action('liquidateInfo', editReplyL2LiquidateInfoContent)
-
-//
-//    #        #####     #
-//    #       #     #    #       #  ####  #    # # #####    ##   ##### ######
-//    #             #    #       # #    # #    # # #    #  #  #    #   #
-//    #        #####     #       # #    # #    # # #    # #    #   #   #####
-//    #             #    #       # #  # # #    # # #    # ######   #   #
-//    #       #     #    #       # #   #  #    # # #    # #    #   #   #
-//    #######  #####     ####### #  ### #  ####  # #####  #    #   #   ######
-//
-const editReplyL2DoLiquidateContent = async (ctx) => {
+bot.action('liquidate', async (ctx) => {
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -480,8 +444,8 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
     }
     
     if (pendingList.length === 0) {
-      await ctx.answerCbQuery("No pending NEST Prize found to send.")
       await lmt.removeTokens(1)
+      await ctx.answerCbQuery()
       await ctx.editMessageText("No pending NEST Prize found to send.", Markup.inlineKeyboard([
         [Markup.button.callback('« Back', 'liquidateInfo')],
       ]))
@@ -517,6 +481,7 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
         data += `${item.wallet},${item.amount}\n`
       }
       await lmt.removeTokens(1)
+      await ctx.answerCbQuery()
       await ctx.replyWithDocument({
         source: Buffer.from(data),
         filename: `pending.csv`,
@@ -524,22 +489,22 @@ const editReplyL2DoLiquidateContent = async (ctx) => {
     } catch (e) {
       console.log(e)
       await lmt.removeTokens(1)
+      await ctx.answerCbQuery()
       ctx.reply("Send csv file failed, please try again later.")
     }
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     ctx.reply("Fetch pending NEST Prize failed, please try again later.")
   }
-}
+})
 
-bot.action('liquidate', editReplyL2DoLiquidateContent)
-
-// Pending
 bot.action('pending', async (ctx) => {
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -576,25 +541,17 @@ bot.action('pending', async (ctx) => {
       })).catch((e) => console.log(e))
     }
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.editMessageText(`Stop All Snatching Prize Success!`, Markup.inlineKeyboard([
       [Markup.button.callback('Liquidate All Snatched Prize', 'liquidate')],
       [Markup.button.callback('« Back', 'liquidateInfo')],
     ]))
   } catch (e) {
     console.log(e)
-    ctx.reply("Some error occurred, please try again later.")
+    ctx.reply("Some error occurred.")
   }
 })
 
-//
-//    #        #####      #####                   #####
-//    #       #     #    #     # ###### #####    #     #  ####  #    # ###### #  ####
-//    #             #    #       #        #      #       #    # ##   # #      # #    #
-//    #        #####      #####  #####    #      #       #    # # #  # #####  # #
-//    #       #                # #        #      #       #    # #  # # #      # #  ###
-//    #       #          #     # #        #      #     # #    # #   ## #      # #    #
-//    ####### #######     #####  ######   #       #####   ####  #    # #      #  ####
-//
 bot.action('setConfig', async (ctx) => {
   try {
     await ddbDocClient.send(new UpdateCommand({
@@ -608,6 +565,7 @@ bot.action('setConfig', async (ctx) => {
       }
     }))
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.editMessageText(`Enter NEST Prize config with json format.
   
 *parameters:*
@@ -624,30 +582,23 @@ auth: auth uri
 For example: {"token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1, "text": "This is a NEST Prize. @NESTRedEnvelopesBot", "chatId": "@nesttestredenvelopes", "cover": "", "auth": ""}`, {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('« Back', 'backToL1MenuContent')],
+        [Markup.button.callback('« Back', 'admin')],
       ])
     })
   } catch (e) {
     await lmt.removeTokens(1)
-    await ctx.editMessageText('Some error occurred, please try again later.', Markup.inlineKeyboard([
+    await ctx.answerCbQuery()
+    await ctx.editMessageText('Some error occurred.', Markup.inlineKeyboard([
       [Markup.button.callback('Send', 'setConfig')],
     ]))
   }
 })
 
-//
-//   #        #####      #####
-//   #       #     #    #     # ###### #    # #####
-//   #             #    #       #      ##   # #    #
-//   #        #####      #####  #####  # #  # #    #
-//   #             #          # #      #  # # #    #
-//   #       #     #    #     # #      #   ## #    #
-//   #######  #####      #####  ###### #    # #####
-//
 bot.action('send', async (ctx) => {
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -679,6 +630,7 @@ Click snatch button!`,
           })
         } else {
           await lmt.removeTokens(1)
+          await ctx.answerCbQuery()
           res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
 
 Click snatch button!`, {
@@ -686,13 +638,13 @@ Click snatch button!`, {
             protect_content: true,
             ...Markup.inlineKeyboard([
               [Markup.button.callback('Snatch!', 'snatch')],
-              [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot'), Markup.button.url('🤩 Star Project', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
+              [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot'), Markup.button.url('🤩 Star', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
             ])
           })
         }
-    
-        const message_id = res.message_id
-        const chat_id = res.chat.id
+        
+        const message_id = res?.message_id || undefined
+        const chat_id = res?.chat.id || undefined
         if (message_id && chat_id) {
           try {
             await ddbDocClient.send(new PutCommand({
@@ -707,37 +659,32 @@ Click snatch button!`, {
                 record: [],
               },
             }))
-            await ctx.reply('NEST Prize Sent Success!')
+            await ctx.answerCbQuery()
+            await ctx.editMessageText('NEST Prize Sent Success!', Markup.inlineKeyboard([
+              [Markup.button.callback('« Back', 'admin')],
+            ]))
           } catch (e) {
             console.log(e)
-            ctx.reply("Some error occurred, please try again later.")
+            await ctx.answerCbQuery("Some error occurred.")
           }
         }
       } catch (e) {
         console.log(e)
-        ctx.reply('Sorry, I cannot send message to target chat.')
+        await ctx.answerCbQuery("Sorry, I cannot send message to target chat.")
       }
     } else {
-      ctx.reply('Sorry, I cannot understand your config. Please try again.')
+      ctx.answerCbQuery('Sorry, I cannot understand your config. Please try again.')
     }
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.editMessageText("Some error occurred, please try again later.", Markup.inlineKeyboard([
+    await ctx.answerCbQuery()
+    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
       [Markup.button.callback('Checked, Send Now!', 'send')],
     ]))
   }
 })
 
-//
-//     #####
-//   #     # #    #   ##   #####  ####  #    #
-//   #       ##   #  #  #    #   #    # #    #
-//    #####  # #  # #    #   #   #      ######
-//         # #  # # ######   #   #      #    #
-//   #     # #   ## #    #   #   #    # #    #
-//    #####  #    # #    #   #    ####  #    #
-//
 bot.action('snatch', async (ctx) => {
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
@@ -767,17 +714,16 @@ bot.action('snatch', async (ctx) => {
       }
       const prize = queryPrizeRes.Item
       if (prize.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
-        await ctx.answerCbQuery('You have already snatched this NEST Prize!')
+        await ctx.answerCbQuery('You have already snatched this Prize!')
         return
       }
       if (prize.record.some(record => record.wallet === user.wallet)) {
-        await ctx.answerCbQuery('This wallet have already snatched this NEST Prize!')
+        await ctx.answerCbQuery('This wallet have already snatched this Prize!')
         return
       }
       // check if NEST Prize is open
       if (prize.status !== 'open' || prize.balance <= 0) {
-        await ctx.answerCbQuery(`Sorry, you are late. All NEST Prize have been given away.
-Please pay attention to the group news. Good luck next time.`)
+        await ctx.answerCbQuery(`Sorry, you are late.`)
         if (prize.status === 'open') {
           ddbDocClient.send(new UpdateCommand({
             TableName: 'nest-prize',
@@ -794,9 +740,7 @@ Please pay attention to the group news. Good luck next time.`)
         }
         return
       }
-      // check auth api
       if (prize.config.auth) {
-        // check user auth
         try {
           const res = await axios(prize.config.auth, {
             method: 'POST',
@@ -810,11 +754,11 @@ Please pay attention to the group news. Good luck next time.`)
             }
           })
           if (!res.data) {
-            await ctx.answerCbQuery(`Sorry, you can't get this NEST Prize. Please read this rule carefully.`)
+            await ctx.answerCbQuery(`Sorry, you can't. Please read this rule carefully.`)
             return
           }
         } catch (e) {
-          await ctx.answerCbQuery(`Sorry, some error occurred. Please try again later.`)
+          await ctx.answerCbQuery(`Sorry, please try again later.`)
           return
         }
       }
@@ -856,34 +800,42 @@ Please pay attention to the group news. Good luck next time.`)
             ':status': status,
           },
         }))
-        await ctx.answerCbQuery(`Congratulations, you have got ${amount} NEST.`)
         await lmt.removeTokens(1)
-        await ctx.reply(`🎉 ${ctx.update.callback_query.from?.username ? `@${ctx.update.callback_query.from.username}` : ctx.update.callback_query.from.id} have got ${amount} NEST!`, {
-          reply_to_message_id: ctx.update.callback_query.message.message_id,
+        await ctx.answerCbQuery(`You have got ${amount} NEST!`)
+        
+        if (prize.record.length > 0 && (prize.record.length % 9 === 0 || prize.record.length === prize.config.quantity - 1)) {
+          await ctx.reply(`🎉🎉🎉 *${prize.record.length + 1} users have snatched this Prize!*
+
+The latest 10 snatchers are:
+${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.amount} NEST!`).join('\n')}
+@${ctx.update.callback_query.from.username} have got ${amount} NEST!
+`,
+              {
+                parse_mode: 'Markdown',
+                reply_to_message_id: ctx.update.callback_query.message.message_id,
+              })
+        }
+        await ctx.telegram.sendMessage(ctx.update.callback_query.from.id, `🎉 *You has snatched ${amount} NEST!*
+
+${prize.config.text}
+
+From: ${ctx.update.callback_query.message.chat.title} @${ctx.update.callback_query.message.chat.username}`, {
+          parse_mode: "Markdown",
         })
       } catch (e) {
         console.log(e)
-        ctx.answerCbQuery("Sorry, you didn't get it, try again!")
+        ctx.answerCbQuery("Some error occurred.")
       }
     } catch (e) {
       console.log(e)
-      ctx.answerCbQuery("Some error occurred, please try again later.")
+      ctx.answerCbQuery("Some error occurred.")
     }
   } catch (e) {
     console.log(e)
-    ctx.answerCbQuery("Some error occurred, please try again later.")
+    ctx.answerCbQuery("Some error occurred.")
   }
 })
 
-//
-//   #######           #     #
-//   #     # #    #    ##   ## ######  ####   ####    ##    ####  ######
-//   #     # ##   #    # # # # #      #      #       #  #  #    # #
-//   #     # # #  #    #  #  # #####   ####   ####  #    # #      #####
-//   #     # #  # #    #     # #           #      # ###### #  ### #
-//   #     # #   ##    #     # #      #    # #    # #    # #    # #
-//   ####### #    #    #     # ######  ####   ####  #    #  ####  ######
-//
 bot.on('message', async (ctx) => {
   const input = ctx.message.text
   const chat_id = ctx.message.chat.id
@@ -934,7 +886,7 @@ auth: ${config.auth}
               parse_mode: 'Markdown',
               ...Markup.inlineKeyboard([
                 [Markup.button.callback('Checked, Send Now!', 'send')],
-                [Markup.button.callback('« Back', 'backToL1MenuContent')],
+                [Markup.button.callback('« Back', 'admin')],
               ])
             }
         )
@@ -952,7 +904,7 @@ auth: ${config.auth}
       } catch (e) {
         console.log(e)
         await lmt.removeTokens(1)
-        ctx.reply('Sorry, I cannot understand your config. Please try again.')
+        ctx.reply('Sorry, I cannot understand your config.')
       }
     } else if (intent === 'setUserWallet') {
       if (isAddress(input)) {
@@ -968,13 +920,13 @@ auth: ${config.auth}
             }
           }))
           await lmt.removeTokens(1)
-          ctx.reply(`Your wallet address has updated. ${input}`, Markup.inlineKeyboard([
+          ctx.reply(`Your wallet address has updated: ${input}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.callback('🤩 For Developer', 'forDeveloper')],
+            [Markup.button.callback('🤩', 'forDeveloper')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
-          ctx.reply('Some error occurred, please try again later.', {
+          ctx.reply('Some error occurred.', {
             reply_to_message_id: ctx.message.message_id,
             ...Markup.inlineKeyboard([
               [Markup.button.callback('« Back', 'menu')],
@@ -1002,13 +954,13 @@ auth: ${config.auth}
             }
           }))
           await lmt.removeTokens(1)
-          ctx.reply(`Your twitter has updated. ${input.slice(1)}`, Markup.inlineKeyboard([
+          ctx.reply(`Your twitter has updated: ${input.slice(1)}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.callback('🤩 For Developer', 'forDeveloper')],
+            [Markup.button.callback('🤩', 'forDeveloper')],
           ]))
         } catch (e) {
           await lmt.removeTokens(1)
-          ctx.reply('Some error occurred, please try again later.', {
+          ctx.reply('Some error occurred.', {
             reply_to_message_id: ctx.message.message_id,
             ...Markup.inlineKeyboard([
               [Markup.button.callback('« Back', 'menu')],
@@ -1025,19 +977,10 @@ auth: ${config.auth}
     }
   } catch (e) {
     await lmt.removeTokens(1)
-    ctx.reply('Some error occurred, please try again later.')
+    ctx.reply('Some error occurred.')
   }
 })
 
-//
-//    #     #
-//    #     #   ##   #    # #####  #      ###### #####
-//    #     #  #  #  ##   # #    # #      #      #    #
-//    ####### #    # # #  # #    # #      #####  #    #
-//    #     # ###### #  # # #    # #      #      #####
-//    #     # #    # #   ## #    # #      #      #   #
-//    #     # #    # #    # #####  ###### ###### #    #
-//
 exports.handler = async (event, context, callback) => {
   const tmp = JSON.parse(event.body);
   await bot.handleUpdate(tmp);
