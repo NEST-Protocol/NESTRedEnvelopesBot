@@ -125,7 +125,6 @@ Welcome to click the 🤩 button below to join our developer community!`, Markup
 })
 
 bot.action('menu', async (ctx) => {
-  await lmt.removeTokens(1)
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
@@ -149,10 +148,7 @@ Welcome to click the 🤩 button below to join our developer community!`, Markup
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-    await ctx.editMessageText("Some error occurred.", Markup.inlineKeyboard([
-      [Markup.button.callback('« Back', 'menu')],
-    ]))
+    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -802,9 +798,8 @@ bot.action('snatch', async (ctx) => {
         await lmt.removeTokens(1)
         await ctx.answerCbQuery(`You have got ${amount} NEST!`)
         if ((prize.record.length + 1) % 10 === 0 || prize.record.length === prize.config.quantity - 1) {
-          await ctx.reply(`🎉🎉🎉 *${prize.record.length + 1} users have snatched this Prize!*
-
-The latest 10 snatchers are:
+          await ctx.reply(`🎉🎉🎉 The latest 10 snatchers are:
+          
 ${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.amount} NEST!`).join('\n')}
 @${ctx.update.callback_query.from.username} have got ${amount} NEST!
 `,
