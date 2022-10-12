@@ -8,7 +8,6 @@ const {RateLimiter} = require("limiter");
 // Command
 // start - submit or update wallet address
 // admin - admin portal to send prize
-// getid - get telegram chat id
 
 // limit of send message to different chat
 const lmt = new RateLimiter({
@@ -803,7 +802,7 @@ bot.action('snatch', async (ctx) => {
         await lmt.removeTokens(1)
         await ctx.answerCbQuery(`You have got ${amount} NEST!`)
         
-        if (prize.record.length > 0 && (prize.record.length % 9 === 0 || prize.record.length === prize.config.quantity - 1)) {
+        if ((prize.record.length + 1) % 10 === 0 || prize.record.length === prize.config.quantity - 1) {
           await ctx.reply(`🎉🎉🎉 *${prize.record.length + 1} users have snatched this Prize!*
 
 The latest 10 snatchers are:
