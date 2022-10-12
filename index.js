@@ -783,8 +783,6 @@ ${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.
         }
         ctx.telegram.sendMessage(ctx.update.callback_query.from.id, `🎉 *You has snatched ${amount} NEST!*
 
-${prize.config.text}
-
 From: ${ctx.update.callback_query.message.chat.title} @${ctx.update.callback_query.message.chat.username}`, {
           parse_mode: "Markdown",
         }).catch((e) => console.log(e))
