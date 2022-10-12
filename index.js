@@ -801,7 +801,6 @@ bot.action('snatch', async (ctx) => {
         }))
         await lmt.removeTokens(1)
         await ctx.answerCbQuery(`You have got ${amount} NEST!`)
-        
         if ((prize.record.length + 1) % 10 === 0 || prize.record.length === prize.config.quantity - 1) {
           await ctx.reply(`🎉🎉🎉 *${prize.record.length + 1} users have snatched this Prize!*
 
@@ -814,13 +813,13 @@ ${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.
                 reply_to_message_id: ctx.update.callback_query.message.message_id,
               })
         }
-        await ctx.telegram.sendMessage(ctx.update.callback_query.from.id, `🎉 *You has snatched ${amount} NEST!*
+        ctx.telegram.sendMessage(ctx.update.callback_query.from.id, `🎉 *You has snatched ${amount} NEST!*
 
 ${prize.config.text}
 
 From: ${ctx.update.callback_query.message.chat.title} @${ctx.update.callback_query.message.chat.username}`, {
           parse_mode: "Markdown",
-        })
+        }).catch((e) => console.log(e))
       } catch (e) {
         console.log(e)
         ctx.answerCbQuery("Some error occurred.")
