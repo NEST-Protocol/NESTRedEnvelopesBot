@@ -14,19 +14,35 @@ exports.handler = async (event) => {
   }
   
   try {
+    const twitterTokenReq = await axios({
+      method: 'GET',
+      url: `https://work.parasset.top/workbench-api/twitter/token`,
+      headers: {
+        'Authorization': `Bearer ${bearToken}`
+      }
+    })
+    const twitterToken = twitterTokenReq.data?.data || undefined
+  
+    if (twitterToken === undefined) {
+      return {
+        statusCode: 200,
+        body: false
+      }
+    }
+    
     const [targetReq, twitterReq] = await Promise.all([
       axios({
         method: 'GET',
         url: `https://api.twitter.com/2/users/by/username/${target}`,
         headers: {
-          'Authorization': `Bearer ${bearToken}`
+          'Authorization': `Bearer ${twitterToken}`
         }
       }),
       axios({
         method: 'GET',
         url: `https://api.twitter.com/2/users/by/username/${twitter}`,
         headers: {
-          'Authorization': `Bearer ${bearToken}`
+          'Authorization': `Bearer ${twitterToken}`
         }
       })
     ])
@@ -40,25 +56,16 @@ exports.handler = async (event) => {
         body: false
       }
     }
-    
-    try {
-      const req = await axios({
-        method: 'GET',
-        url: `https://api.twitter.com/2/users/${twitterId}/following?max_results=1000`,
-        headers: {
-          'Authorization': `Bearer ${bearToken}`
-        }
-      })
-      
-      const following = req.data.data || []
-      const isFollowing = following.some((item) => item.id === targetId)
-      if (!isFollowing) {
-        return {
-          statusCode: 200,
-          body: false,
-        };
+    const req = await axios({
+      method: 'GET',
+      url: `https://api.twitter.com/2/users/${twitterId}/following?max_results=1000`,
+      headers: {
+        'Authorization': `Bearer ${twitterToken}`
       }
-    } catch (e) {
+    })
+    const following = req.data.data || []
+    const isFollowing = following.some((item) => item.id === targetId)
+    if (!isFollowing) {
       return {
         statusCode: 200,
         body: false,
