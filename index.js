@@ -36,40 +36,32 @@ bot.start(async (ctx) => {
     return
   }
   await lmt.removeTokens(1)
-  ctx.reply(`NEST TOKEN + Binance BAB TOKEN Giveaway
+  ctx.reply(`BAB Token increase the diversity of incentive and validation methods of the NEST community, thus, we are introducing a daily timely giveaway for BAB Token holders. Total prize of $30,000 NEST tokens. For a period of 4 months.
 
-Join the giveaway group and get daily NEST token  Timely giveaways.
-
-Conditions are.
-Wallet address has >400 NEST tokens and has Binance BAB tokens.
-
-Reward.
-
-1.Everyone gets at least 10 NEST per day.
-2.Invite 1 person to participate, 10 NEST.
-*FCFS 1000 people
-
-How do I join?
-1. Buy 400 NEST and own 1 BAB token
-2. Join：https://t.me/NEST_BABGiveaway
-3. Join: https://t.me/NESTRedEnvelopesBot
+How to join?
+1. Join: https://t.me/NEST_BABGiveaway
+2. Join: https://t.me/NESTRedEnvelopesBot
 Add your wallet address in the bot.
-4. Click: on the giveaway link at the pin of the group.
-5. Click: snatch
+3. Click: on the giveaway link at the pin of the group.
+4. Click: snatch
 
-How to invite?
-1.Join: @NESTRedEnvelopesBot
-2.Click: My ref info
-* Invite others to our BAB giveaway via your invite link!
+If you are a newbie, you must complete the first 3 steps. When you're done you just need to click snatch to get the giveaway!
 
-Invitation rewards, issued every Monday.Your NEST must be obtained on NEST SWAP or pancakes.
 
-NEST TOKEN BUY
-https://finance.nestprotocol.org/#/swap
-https://pancakeswap.finance/
+Rewards：
+Receive random or fixed NEST token as giveaway rewards or quiz rewards on daily base and will receive exclusive NFTs in the future.
 
-BAB TOKEN GET
-https://www.binance.com/en/support/faq/bacaf9595b52440ea2b023195ba4a09c`)
+Distribution time: All rewards are distributed every 3 days
+
+What are BAB tokens?
+https://developers.binance.com/docs/babt/introduction
+How do I get BAB tokens?
+https://www.binance.com/en/support/faq/bacaf9595b52440ea2b023195ba4a09c
+
+More giveaways: Conditions 400 NEST + 1 BAB
+https://t.me/NEST_Community/1609
+
+BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
   if (ctx.startPayload && Number(ctx.startPayload) !== ctx.update.message.from.id) {
     // Update new username and new invite code, not myself
     await ddbDocClient.send(new UpdateCommand({
@@ -169,7 +161,7 @@ Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Orac
 
 More [Developer Doc](https://nestprotocol.org/docs/PVM-Technical-Reference/)
 
-*Welcome follow our [Github](https://github.com/NEST-Protocol). We will also develop some targeted airdrop tools, like [this bot](https://github.com/NEST-Protocol/NESTRedEnvelopesBot).*
+Welcome follow our [Github](https://github.com/NEST-Protocol). We will also develop some targeted airdrop tools, like [this bot](https://github.com/NEST-Protocol/NESTRedEnvelopesBot).
 `, {
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
