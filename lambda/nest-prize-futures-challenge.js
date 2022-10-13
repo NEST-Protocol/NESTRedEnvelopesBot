@@ -2,13 +2,12 @@ const axios = require("axios");
 
 const apiKey = process.env.APIKEY
 exports.handler = async (event) => {
-  const user_id = JSON.parse(event?.body)?.user_id ?? undefined
   const wallet = JSON.parse(event?.body)?.wallet ?? undefined
   const lever = event?.queryStringParameters?.lever ?? undefined
   const amount = event?.queryStringParameters?.amount ?? undefined
   const total = event?.queryStringParameters?.total ?? undefined
   
-  if (user_id === undefined && wallet === undefined) {
+  if (wallet === undefined) {
     return {
       statusCode: 200,
       body: false
@@ -32,7 +31,7 @@ exports.handler = async (event) => {
           now.getDate() === txDate.getDate()
     })
     
-    if (lever === undefined || amount === undefined || total === undefined) {
+    if (lever === undefined && amount === undefined && total === undefined) {
       return {
         statusCode: 200,
         body: buyTx.length > 0
