@@ -31,6 +31,13 @@ exports.handler = async (event) => {
           now.getDate() === txDate.getDate()
     })
     
+    if (buyTx.length === 0) {
+      return {
+        statusCode: 200,
+        body: false
+      }
+    }
+    
     if (lever === undefined && amount === undefined && total === undefined) {
       return {
         statusCode: 200,
@@ -38,7 +45,7 @@ exports.handler = async (event) => {
       }
     }
     
-    if (lever) {
+    if (lever !== undefined) {
       return {
         statusCode: 200,
         body: buyTx.some((tx) => {
@@ -49,7 +56,7 @@ exports.handler = async (event) => {
       }
     }
     
-    if (amount) {
+    if (amount !== undefined) {
       return {
         statusCode: 200,
         body: buyTx.some((tx) => {
@@ -60,12 +67,12 @@ exports.handler = async (event) => {
       }
     }
     
-    if (total) {
+    if (total !== undefined) {
       const totalAmount = buyTx.reduce((acc, tx) => {
         const input = tx.input
         const txAmount = parseInt(input.slice(202, 266), 16) / 1e18
         return acc + txAmount
-      })
+      }, 0)
       return {
         statusCode: 200,
         body: totalAmount >= parseInt(total)
@@ -77,7 +84,6 @@ exports.handler = async (event) => {
       body: false,
     };
   }
-  
   
   return {
     statusCode: 200,
