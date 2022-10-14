@@ -32,7 +32,8 @@ const bot = new Telegraf(token)
 
 bot.start(async (ctx) => {
   const chatId = ctx.update.message.chat.id
-  if (chatId < 0) {
+  const isBot = ctx.update.message.from.is_bot
+  if (chatId < 0 || isBot) {
     return
   }
   await lmt.removeTokens(1)
@@ -117,6 +118,10 @@ Welcome to click the 🤩 button below to join our developer community!`, Markup
 })
 
 bot.action('menu', async (ctx) => {
+  const isBot = ctx.update.callback_query.from.is_bot
+  if (isBot) {
+    return
+  }
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
@@ -145,6 +150,10 @@ Welcome to click the 🤩 button below to join our developer community!`, Markup
 })
 
 bot.action('forDeveloper', async (ctx) => {
+  const isBot = ctx.update.callback_query.from.is_bot
+  if (isBot) {
+    return
+  }
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
   await ctx.editMessageText(`*Another Revolution in Blockchain*
@@ -173,6 +182,10 @@ Welcome follow our [Github](https://github.com/NEST-Protocol). We will also deve
 })
 
 bot.action('getUserReferrals', async (ctx) => {
+  const isBot = ctx.update.callback_query.from.is_bot
+  if (isBot) {
+    return
+  }
   try {
     const result = await ddbDocClient.send(new QueryCommand({
       TableName: 'nest-prize-users',
@@ -209,9 +222,6 @@ ${result.Items.map((item) => {
 
 bot.command('admin', async (ctx) => {
   const chat_id = ctx.chat.id;
-  if (chat_id < 0) {
-    return
-  }
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
@@ -227,6 +237,10 @@ bot.command('admin', async (ctx) => {
 })
 
 bot.action('setUserWallet', async (ctx) => {
+  const isBot = ctx.update.callback_query.from.is_bot
+  if (isBot) {
+    return
+  }
   try {
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
@@ -249,6 +263,10 @@ bot.action('setUserWallet', async (ctx) => {
 })
 
 bot.action('setUserTwitter', async (ctx) => {
+  const isBot = ctx.update.callback_query.from.is_bot
+  if (isBot) {
+    return
+  }
   try {
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
@@ -289,6 +307,10 @@ bot.action('admin', async (ctx) => {
 })
 
 bot.action('liquidateInfo', async (ctx) => {
+  const isBot = ctx.update.callback_query.from.is_bot
+  if (isBot) {
+    return
+  }
   // query number of NEST Prize status is pending
   const chat_id = ctx.update.callback_query.from.id
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
@@ -521,6 +543,15 @@ bot.action('pending', async (ctx) => {
 })
 
 bot.action('setConfig', async (ctx) => {
+  const chat_id = ctx.update.callback_query.from.id
+  if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
+    await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
+    await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
+      [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
+    ]))
+    return
+  }
   try {
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
@@ -646,6 +677,10 @@ Click snatch button!`,
 })
 
 bot.action('snatch', async (ctx) => {
+  const isBot = ctx.update.callback_query.from.is_bot
+  if (isBot) {
+    return
+  }
   try {
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
@@ -795,7 +830,8 @@ From: ${ctx.update.callback_query.message.chat.title} @${ctx.update.callback_que
 bot.on('message', async (ctx) => {
   const input = ctx.message.text
   const chat_id = ctx.message.chat.id
-  if (chat_id < 0) {
+  const isBot = ctx.message.from.is_bot
+  if (chat_id < 0 || isBot) {
     return
   }
   try {
