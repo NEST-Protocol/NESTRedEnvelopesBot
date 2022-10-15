@@ -97,6 +97,15 @@ BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
         user_id: ctx.update.message.from.id,
       },
     }))
+    const hCaptcha = queryUserRes.Item?.hCaptcha || undefined
+    if (hCaptcha === undefined) {
+      await lmt.removeTokens(1)
+      await ctx.reply(`Please commit the hCaptcha challenge first!`, Markup.inlineKeyboard([
+        Markup.button.url('I am human!', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.message.from.id}`),
+      ]))
+      return
+    }
+    
     await lmt.removeTokens(1)
     ctx.reply(`Welcome to NEST Prize!
 
