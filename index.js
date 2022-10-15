@@ -97,14 +97,6 @@ BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
         user_id: ctx.update.message.from.id,
       },
     }))
-    const hCaptcha = queryUserRes.Item?.hCaptcha || undefined
-    if (hCaptcha === undefined) {
-      await lmt.removeTokens(1)
-      await ctx.reply(`Please commit the hCaptcha challenge first!`, Markup.inlineKeyboard([
-        Markup.button.url('I am human!', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.message.from.id}`),
-      ]))
-      return
-    }
     
     await lmt.removeTokens(1)
     ctx.reply(`Welcome to NEST Prize!
@@ -251,6 +243,27 @@ bot.action('setUserWallet', async (ctx) => {
     return
   }
   try {
+    const queryUserRes = await ddbDocClient.send(new GetCommand({
+      TableName: 'nest-prize-users',
+      Key: {
+        user_id: ctx.update.callback_query.from.id,
+      },
+    }))
+    const hCaptcha = queryUserRes.Item?.hCaptcha || undefined
+    if (hCaptcha === undefined) {
+      await lmt.removeTokens(1)
+      try {
+        await ctx.editMessageText(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+          [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
+          [Markup.button.callback('» Next', 'setUserWallet'), Markup.button.callback('« Back', 'menu')],
+        ]))
+      } catch (e) {
+        await ctx.answerCbQuery('Verify First!')
+      }
+ 
+      return
+    }
+    
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
       Key: {
@@ -277,6 +290,26 @@ bot.action('setUserTwitter', async (ctx) => {
     return
   }
   try {
+    const queryUserRes = await ddbDocClient.send(new GetCommand({
+      TableName: 'nest-prize-users',
+      Key: {
+        user_id: ctx.update.callback_query.from.id,
+      },
+    }))
+    const hCaptcha = queryUserRes.Item?.hCaptcha || undefined
+    if (hCaptcha === undefined) {
+      await lmt.removeTokens(1)
+      try {
+        await ctx.editMessageText(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+          [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
+          [Markup.button.callback('» Next', 'setUserTwitter'), Markup.button.callback('« Back', 'menu')],
+        ]))
+      } catch (e) {
+        await ctx.answerCbQuery('Verify First!')
+      }
+      return
+    }
+    
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
       Key: {
@@ -914,9 +947,10 @@ auth: ${config.auth}
             Key: {
               user_id: ctx.message.from.id,
             },
-            UpdateExpression: 'SET wallet = :wallet',
+            UpdateExpression: 'SET wallet = :wallet, hCaptcha = :hCaptcha',
             ExpressionAttributeValues: {
               ':wallet': input,
+              ':hCaptcha': null,
             }
           }))
           await lmt.removeTokens(1)
@@ -948,9 +982,10 @@ auth: ${config.auth}
             Key: {
               user_id: ctx.message.from.id,
             },
-            UpdateExpression: 'SET twitter = :twitter',
+            UpdateExpression: 'SET twitter = :twitter, hCaptcha = :hCaptcha',
             ExpressionAttributeValues: {
               ':twitter': input.slice(1),
+              ':hCaptcha': null,
             }
           }))
           await lmt.removeTokens(1)
