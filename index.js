@@ -780,7 +780,11 @@ bot.action('snatch', async (ctx) => {
       },
     }))
     if (queryUserRes.Item === undefined || queryUserRes.Item?.wallet === undefined) {
-      await ctx.answerCbQuery('Please Submit Wallet First!')
+      await ctx.answerCbQuery('Please Update Wallet First!')
+      return
+    }
+    if (queryUserRes.Item?.twitter_id === undefined) {
+      await ctx.answerCbQuery('Please Update Twitter First!')
       return
     }
     const user = queryUserRes.Item
