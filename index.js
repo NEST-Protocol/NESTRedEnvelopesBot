@@ -30,6 +30,19 @@ if (token === undefined) {
 
 const bot = new Telegraf(token)
 
+const botName = "NESTRedEnvelopesBot"
+
+function hashCode(str) {
+  let hash = 0, i, chr, len;
+  if (str.length === 0) return hash;
+  for (i = 0, len = str.length; i < len; i++) {
+    chr  = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash;
+}
+
 bot.start(async (ctx) => {
   const chatId = ctx.update.message.chat.id
   const isBot = ctx.update.message.from.is_bot
@@ -102,12 +115,12 @@ BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
     ctx.reply(`Welcome to NEST Prize!
 
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}
-You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
+You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
 
 Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Update Twitter', 'setUserTwitter')],
+      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Bind Twitter', 'setUserTwitter')],
       [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
     ]))
   } catch (e) {
@@ -135,7 +148,7 @@ bot.action('menu', async (ctx) => {
     await ctx.editMessageText(`Welcome to NEST Prize!
 
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}
-You twitter: ${queryUserRes?.Item?.twitter || 'Not set yet'}
+You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
@@ -255,7 +268,7 @@ bot.action('setUserWallet', async (ctx) => {
       try {
         await ctx.editMessageText(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
           [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
-          [Markup.button.callback('» Next', 'setUserWallet'), Markup.button.callback('« Back', 'menu')],
+          [Markup.button.callback('» Next', 'setUserWallet')],
         ]))
       } catch (e) {
         await ctx.answerCbQuery('Verify First!')
@@ -302,31 +315,66 @@ bot.action('setUserTwitter', async (ctx) => {
       try {
         await ctx.editMessageText(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
           [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
-          [Markup.button.callback('» Next', 'setUserTwitter'), Markup.button.callback('« Back', 'menu')],
+          [Markup.button.callback('» Next', 'setUserTwitter')],
         ]))
       } catch (e) {
         await ctx.answerCbQuery('Verify First!')
       }
       return
     }
-    
-    await ddbDocClient.send(new UpdateCommand({
-      TableName: 'nest-prize-users',
-      Key: {
-        user_id: ctx.update.callback_query.from.id,
-      },
-      UpdateExpression: 'set intent = :intent',
-      ExpressionAttributeValues: {
-        ':intent': 'setUserTwitter',
-      }
-    }))
-    await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-    await ctx.editMessageText('Please send your twitter username with @:')
+    try {
+      await ctx.editMessageText("Click Authorize button to bind your twitter, then click 'I have Authorized' to update.", Markup.inlineKeyboard([
+        [Markup.button.url('Authorize', `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=dU9nMk54dnQzc0UtNjNwbDRrWno6MTpjaQ&redirect_uri=https://nestdapp.io/twitter&scope=tweet.read%20tweet.write%20users.read%20follows.read%20follows.write%20like.read%20like.write%20offline.access&state=${hashCode(botName)}_${ctx.update.callback_query.from.id}&code_challenge=challenge&code_challenge_method=plain`)],
+        [Markup.button.callback('I have Authorized', 'checkTwitter')],
+      ]))
+    } catch (e) {
+      await ctx.answerCbQuery()
+    }
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
     await ctx.answerCbQuery("Some error occurred.")
+  }
+})
+
+bot.action('checkTwitter', async (ctx) => {
+  try {
+    const res = await axios({
+      method: 'GET',
+      timeout: 3000,
+      url: `https://work.parasset.top/workbench-api/twitter/userInfo?cond=${ctx.update.callback_query.from.id}`,
+      headers: {
+        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
+    })
+    if (res.data?.data.length === 0) {
+      ctx.editMessageText("You haven't authorized yet, please click the 'Authorize' button to authorize.", Markup.inlineKeyboard([
+        [Markup.button.url('Authorize', `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=dU9nMk54dnQzc0UtNjNwbDRrWno6MTpjaQ&redirect_uri=https://nestdapp.io/twitter&scope=tweet.read%20tweet.write%20users.read%20follows.read%20follows.write%20like.read%20like.write%20offline.access&state=${hashCode(botName)}_${ctx.update.callback_query.from.id}&code_challenge=challenge&code_challenge_method=plain`)],
+        [Markup.button.callback('I have Authorized', 'checkTwitter')],
+      ]))
+    } else {
+      const access_token = res.data.data[0].access_token
+      const twitter_name = res.data.data[0].twitter_name
+      const twitter_id = res.data.data[0].twitter_id
+      await ddbDocClient.send(new UpdateCommand({
+        TableName: 'nest-prize-users',
+        Key: {
+          user_id: ctx.update.callback_query.from.id,
+        },
+        UpdateExpression: 'set twitter_name = :twitter_name, twitter_id = :twitter_id, twitter_token = :twitter_token, hCaptcha = :hCaptcha',
+        ExpressionAttributeValues: {
+          ':twitter_name': twitter_name,
+          ':twitter_id': twitter_id,
+          ':twitter_token': access_token,
+          ':hCaptcha': null,
+        }
+      }))
+      ctx.editMessageText("You have authorized successfully.", Markup.inlineKeyboard([
+        [Markup.button.callback('« Back', 'menu')],
+      ]))
+    }
+  } catch (e) {
+    ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -971,41 +1019,6 @@ auth: ${config.auth}
       } else {
         await lmt.removeTokens(1)
         ctx.reply('Please input a valid wallet address.', {
-          reply_to_message_id: ctx.message.message_id,
-        })
-      }
-    } else if (intent === 'setUserTwitter') {
-      if (input.startsWith('@')) {
-        try {
-          await ddbDocClient.send(new UpdateCommand({
-            TableName: 'nest-prize-users',
-            Key: {
-              user_id: ctx.message.from.id,
-            },
-            UpdateExpression: 'SET twitter = :twitter, hCaptcha = :hCaptcha',
-            ExpressionAttributeValues: {
-              ':twitter': input.slice(1),
-              ':hCaptcha': null,
-            }
-          }))
-          await lmt.removeTokens(1)
-          ctx.reply(`Your twitter has updated: ${input.slice(1)}`, Markup.inlineKeyboard([
-            [Markup.button.callback('« Back', 'menu')],
-            [Markup.button.callback('🤩', 'forDeveloper')],
-          ]))
-        } catch (e) {
-          await lmt.removeTokens(1)
-          ctx.reply('Some error occurred.', {
-            reply_to_message_id: ctx.message.message_id,
-            ...Markup.inlineKeyboard([
-              [Markup.button.callback('« Back', 'menu')],
-              [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
-            ])
-          })
-        }
-      } else {
-        await lmt.removeTokens(1)
-        ctx.reply('Please input a valid twitter account with @.', {
           reply_to_message_id: ctx.message.message_id,
         })
       }

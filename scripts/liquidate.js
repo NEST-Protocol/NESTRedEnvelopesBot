@@ -87,7 +87,7 @@ const main = async () => {
         data += `${item.wallet},${item.amount}\n`
       }
       // save data to csv
-      fs.writeFileSync('/tmp/nest-prize.csv', data)
+      fs.writeFileSync('/Users/teihate/Desktop/nest-prize.csv', data)
       
     } catch (e) {
       console.log("Send csv file failed, please try again later.")
