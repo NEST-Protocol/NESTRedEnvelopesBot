@@ -55,7 +55,7 @@ bot.start(async (ctx) => {
 How to join?
 1. Join: https://t.me/NEST_BABGiveaway
 2. Join: https://t.me/NESTRedEnvelopesBot
-Add your wallet address in the bot.
+Add your BNB BEP20 address and authorize your Twitter account
 3. Click: on the giveaway link at the pin of the group.
 4. Click: snatch
 
@@ -120,7 +120,7 @@ You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
 
 Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Update Twitter', 'setUserTwitter')],
+      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Authorize Twitter', 'setUserTwitter')],
       [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
     ]))
   } catch (e) {
@@ -153,7 +153,7 @@ You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
 Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Update Twitter', 'setUserTwitter')],
+      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Authorize Twitter', 'setUserTwitter')],
       [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
     ]))
   } catch (e) {
@@ -784,7 +784,7 @@ bot.action('snatch', async (ctx) => {
       return
     }
     if (queryUserRes.Item?.twitter_id === undefined) {
-      await ctx.answerCbQuery('Please Update Twitter First!')
+      await ctx.answerCbQuery('Please Authorize Twitter First!')
       return
     }
     const user = queryUserRes.Item
