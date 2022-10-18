@@ -120,7 +120,7 @@ You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
 
 Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Bind Twitter', 'setUserTwitter')],
+      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Update Twitter', 'setUserTwitter')],
       [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
     ]))
   } catch (e) {
@@ -354,7 +354,7 @@ bot.action('checkTwitter', async (ctx) => {
       ]))
     } else {
       const access_token = res.data.data[0].access_token
-      const twitter_name = res.data.data[0].twitter_name.replice(/@/g, '')
+      const twitter_name = res.data.data[0].twitter_name.replace('@', '')
       const twitter_id = res.data.data[0].twitter_id
       await ddbDocClient.send(new UpdateCommand({
         TableName: 'nest-prize-users',
