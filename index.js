@@ -354,7 +354,7 @@ bot.action('checkTwitter', async (ctx) => {
       ]))
     } else {
       const access_token = res.data.data[0].access_token
-      const twitter_name = res.data.data[0].twitter_name
+      const twitter_name = res.data.data[0].twitter_name.replice(/@/g, '')
       const twitter_id = res.data.data[0].twitter_id
       await ddbDocClient.send(new UpdateCommand({
         TableName: 'nest-prize-users',
@@ -832,7 +832,7 @@ bot.action('snatch', async (ctx) => {
             data: JSON.stringify({
               "user_id": ctx.update.callback_query.from.id,
               "wallet": user?.wallet || null,
-              "twitter": user?.twitter || null,
+              "twitter": user?.twitter_name || null,
             }),
             headers: {
               'Content-Type': 'application/json',
