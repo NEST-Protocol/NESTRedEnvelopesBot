@@ -83,7 +83,7 @@ Feel free to dive in! [Open an issue](https://github.com/NEST-Protocol/NESTRedEn
 
 This project exists thanks to all the people who contribute.
 
-[@kitty-tin](https://github.com/kitty-tin)
+[@kitty-tin](https://github.com/kitty-tin), [@wll2143](https://github.com/wll2143)
 
 ## License
 
