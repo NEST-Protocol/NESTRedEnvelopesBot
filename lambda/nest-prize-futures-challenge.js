@@ -46,24 +46,32 @@ exports.handler = async (event) => {
     }
     
     if (lever !== undefined) {
-      return {
-        statusCode: 200,
-        body: buyTx.some((tx) => {
-          const input = tx.input
-          const txLever = parseInt(input.slice(74, 138), 16)
-          return txLever === parseInt(lever)
-        })
+      const res = buyTx.some((tx) => {
+        const input = tx.input
+        const txLever = parseInt(input.slice(74, 138), 16)
+        return txLever === parseInt(lever)
+      })
+      
+      if (!res) {
+        return {
+          statusCode: 200,
+          body: false
+        }
       }
     }
     
     if (amount !== undefined) {
-      return {
-        statusCode: 200,
-        body: buyTx.some((tx) => {
-          const input = tx.input
-          const txAmount = parseInt(input.slice(202, 266), 16) / 1e18
-          return txAmount >= parseInt(amount)
-        })
+      const res = buyTx.some((tx) => {
+        const input = tx.input
+        const txAmount = parseInt(input.slice(202, 266), 16) / 1e18
+        return txAmount >= parseInt(amount)
+      })
+      
+      if (!res) {
+        return {
+          statusCode: 200,
+          body: false
+        }
       }
     }
     
@@ -73,9 +81,12 @@ exports.handler = async (event) => {
         const txAmount = parseInt(input.slice(202, 266), 16) / 1e18
         return acc + txAmount
       }, 0)
-      return {
-        statusCode: 200,
-        body: totalAmount >= parseInt(total)
+      
+      if (totalAmount < parseInt(total)) {
+        return {
+          statusCode: 200,
+          body: false
+        }
       }
     }
   } catch (e) {
@@ -87,6 +98,6 @@ exports.handler = async (event) => {
   
   return {
     statusCode: 200,
-    body: false,
+    body: true,
   };
 };
