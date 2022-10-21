@@ -39,7 +39,7 @@ ${result.Item.config.text}
 NEST Prize Result:
 
 🎉🎉🎉
-${result.Item.record.map((i, index) => `${index + 1}. @${i.username} have got ${i.amount} NEST!`).join("\n")}
+${result.Item.record.reverse().map((i, index) => `${result.Item.record.length - index}. @${i.username} have got ${i.amount} NEST!`).join("\n")}
 `
     }
   } catch (e) {
