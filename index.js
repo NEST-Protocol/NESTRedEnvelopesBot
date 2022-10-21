@@ -901,6 +901,7 @@ For the real-time list of all snatcher, please click [here](https://y2qpo4q6i7wb
 `,
               {
                 parse_mode: 'Markdown',
+                disable_web_page_preview: true,
                 reply_to_message_id: ctx.update.callback_query.message.message_id,
               })
         }
