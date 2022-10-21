@@ -889,13 +889,27 @@ bot.action('snatch', async (ctx) => {
         }))
         await lmt.removeTokens(1)
         await ctx.answerCbQuery(`You have got ${amount} NEST!`)
+        if (prize.record.length === 0) {
+          await ctx.reply(`🐑 *Here is the Leader Sheep!*
+
+@${ctx.update.callback_query.from.username} have got ${amount} NEST!
+
+Click [here](https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}) to check all snatchers.
+`,
+              {
+                parse_mode: 'Markdown',
+                disable_web_page_preview: true,
+                reply_to_message_id: ctx.update.callback_query.message.message_id,
+              })
+        }
+        
         if ((prize.record.length + 1) % 10 === 0 || prize.record.length === prize.config.quantity - 1) {
           await ctx.reply(`🎉🎉🎉 *The latest 10 snatchers are*:
           
 ${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.amount} NEST!`).join('\n')}
 @${ctx.update.callback_query.from.username} have got ${amount} NEST!
 
-For the real-time list of all snatcher, please click [here](https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}).
+Click [here](https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}) to check all snatchers.
 `,
               {
                 parse_mode: 'Markdown',
