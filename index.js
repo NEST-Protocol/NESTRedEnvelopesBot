@@ -705,9 +705,7 @@ bot.action('send', async (ctx) => {
         if (config.cover !== '') {
           await lmt.removeTokens(1)
           res = await ctx.telegram.sendPhoto(config.chatId, config.cover, {
-            caption: `${config.text}
-
-Click snatch button!`,
+            caption: config.text,
             parse_mode: 'Markdown',
             protect_content: true,
             ...Markup.inlineKeyboard([
