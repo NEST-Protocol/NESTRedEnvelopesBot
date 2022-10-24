@@ -17,14 +17,14 @@ exports.handler = async (event) => {
   try {
     const req = await axios({
       method: 'GET',
-      url: `https://api.bscscan.com/api?module=account&action=txlist&address=0x8e32C33814271bD64D5138bE9d47Cd55025074CD&startblock=0&endblock=99999999&page=1&offset=1000&sort=desc&apikey=${apiKey}`,
+      url: `https://api.bscscan.com/api?module=account&action=txlist&address=${wallet}&startblock=0&endblock=99999999&page=1&offset=1000&sort=desc&apikey=${apiKey}`,
     })
     const data = req.data.result || []
     const buyTx = data.filter((tx) => {
       const txDate = new Date(tx.timeStamp * 1000)
       return tx.methodId === '0x15ee0aad' &&
           tx.isError === '0' &&
-          tx.from.toLowerCase() === wallet.toLowerCase() &&
+          tx.to.toLowerCase() === "0x8e32C33814271bD64D5138bE9d47Cd55025074CD".toLowerCase() &&
           txDate < new Date(to) &&
           txDate > new Date(from)
     })
