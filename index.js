@@ -36,7 +36,7 @@ function hashCode(str) {
   let hash = 0, i, chr, len;
   if (str.length === 0) return hash;
   for (i = 0, len = str.length; i < len; i++) {
-    chr  = str.charCodeAt(i);
+    chr = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + chr;
     hash |= 0;
   }
@@ -122,6 +122,7 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.
 Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
       [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Authorize Twitter', 'setUserTwitter')],
       [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+      [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
     ]))
   } catch (e) {
     await lmt.removeTokens(1)
@@ -161,6 +162,26 @@ Welcome to click the 🤩 button below to join our developer community!`, Markup
     await lmt.removeTokens(1)
     await ctx.answerCbQuery("Some error occurred.")
   }
+})
+
+bot.action('NESTFiEvents', async (ctx) => {
+  await lmt.removeTokens(1)
+  await ctx.answerCbQuery()
+  await ctx.editMessageText(`NESTFi Events`, Markup.inlineKeyboard([
+      [Markup.button.url('Hamburger', 'https://t.me/NEST_BABGiveaway/141868')],
+      [Markup.button.callback('« Back', 'menu')],
+  ]))
+})
+
+bot.action('pizza', async (ctx) => {
+  await lmt.removeTokens(1)
+  await ctx.answerCbQuery()
+  await ctx.editMessageText(`Pizza
+
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
+`, Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'NESTFiEvents')],
+  ]))
 })
 
 bot.action('forDeveloper', async (ctx) => {
@@ -273,7 +294,7 @@ bot.action('setUserWallet', async (ctx) => {
       } catch (e) {
         await ctx.answerCbQuery('Verify First!')
       }
- 
+      
       return
     }
     
