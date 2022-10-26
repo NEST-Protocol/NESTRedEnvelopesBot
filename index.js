@@ -114,20 +114,17 @@ BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
     }))
     
     await lmt.removeTokens(1)
-    ctx.reply(`*Welcome to NEST Prize*
+    ctx.reply(`Welcome to NEST Prize
 
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}, /setwallet
 You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
 
-Welcome to click the 🤩 button below to join our developer community. /help.`, {
-      parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard([
-        [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
-        [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
-      ])
-    })
+Welcome to click the 🤩 button below to join our developer community. /help.`, Markup.inlineKeyboard([
+      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+      [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
+    ]))
   } catch (e) {
     await lmt.removeTokens(1)
     await ctx.reply("Some error occurred.", Markup.inlineKeyboard([
@@ -150,20 +147,17 @@ bot.action('menu', async (ctx) => {
     }))
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
-    await ctx.editMessageText(`*Welcome to NEST Prize*
+    await ctx.editMessageText(`Welcome to NEST Prize
 
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}, /setwallet
 You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
 
-Welcome to click the 🤩 button below to join our developer community. /help.`, {
-      parse_mode: 'Markdown',
-      ...Markup.inlineKeyboard([
-        [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
-        [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
-      ])
-    })
+Welcome to click the 🤩 button below to join our developer community. /help.`, Markup.inlineKeyboard([
+      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+      [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
+    ]))
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
