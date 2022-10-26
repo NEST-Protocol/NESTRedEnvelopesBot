@@ -297,6 +297,10 @@ ${result.Items.map((item) => {
 })
 
 bot.command('help', async (ctx) => {
+  const chat_id = ctx.chat.id
+  if (chat_id < 0) {
+    return
+  }
   await lmt.removeTokens(1)
   ctx.reply(`I can help you to get NEST Prizes.
   
@@ -317,7 +321,7 @@ You can control me by sending these commands:
 
 bot.command('admin', async (ctx) => {
   const chat_id = ctx.chat.id;
-  if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
+  if (chat_id < 0 || WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
@@ -332,6 +336,10 @@ bot.command('admin', async (ctx) => {
 })
 
 bot.command('setwallet', async (ctx) => {
+  const chat_id = ctx.chat.id
+  if (chat_id < 0) {
+    return
+  }
   await lmt.removeTokens(1)
   try {
     await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
@@ -344,6 +352,10 @@ bot.command('setwallet', async (ctx) => {
 })
 
 bot.command('settwitter', async (ctx) => {
+  const chat_id = ctx.chat.id
+  if (chat_id < 0) {
+    return
+  }
   await lmt.removeTokens(1)
   try {
     await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
