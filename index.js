@@ -965,6 +965,8 @@ bot.action('snatch', async (ctx) => {
 @${ctx.update.callback_query.from.username} have got ${amount} NEST!
 
 Click [here](https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}) to check all snatchers.
+
+🌟Star NEST contract registry: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0)!
 `,
               {
                 parse_mode: 'Markdown',
@@ -980,6 +982,8 @@ ${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.
 @${ctx.update.callback_query.from.username} have got ${amount} NEST!
 
 Click [here](https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}) to check all snatchers.
+
+🌟Star NEST contract registry: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0)!
 `,
               {
                 parse_mode: 'Markdown',
