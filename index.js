@@ -67,7 +67,7 @@ If you are a newbie, you must complete the first 3 steps. When you're done you j
 Rewards：
 Receive random or fixed NEST token as giveaway rewards or quiz rewards on daily base and will receive exclusive NFTs in the future.
 
-Distribution time: All rewards are distributed every 3 days
+Distribution time: All rewards are distributed every 7 days
 
 What are BAB tokens?
 https://developers.binance.com/docs/babt/introduction
