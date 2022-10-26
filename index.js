@@ -954,7 +954,7 @@ bot.action('snatch', async (ctx) => {
         await lmt.removeTokens(1)
         await ctx.answerCbQuery(`You have got ${amount} NEST!`)
         if (prize.record.length === 0) {
-          await ctx.reply(`🐑 *Here is the Leader Sheep*!
+          await ctx.reply(`🐑 *Here is the Leader Sheep*
 
 @${ctx.update.callback_query.from.username} have got ${amount} NEST!
 
