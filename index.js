@@ -152,7 +152,7 @@ bot.action('menu', async (ctx) => {
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}, /setwallet
 You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
 
-Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
 Welcome to click the 🤩 button below to join our developer community. /help.`, Markup.inlineKeyboard([
       [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
