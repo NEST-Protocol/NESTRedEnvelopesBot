@@ -6,8 +6,10 @@ const axios = require('axios')
 const {RateLimiter} = require("limiter");
 
 // Command
-// start - submit or update wallet address
-// admin - admin portal to send prize
+// start - show the menu
+// admin - admin portal
+// setwallet - change your wallet address
+// settwitter - change your twitter address
 
 // limit of send message to different chat
 const lmt = new RateLimiter({
@@ -112,18 +114,20 @@ BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
     }))
     
     await lmt.removeTokens(1)
-    ctx.reply(`Welcome to NEST Prize!
+    ctx.reply(`*Welcome to NEST Prize*
 
-You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}
-You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}
+You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}, /setwallet
+You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
 
-Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Authorize Twitter', 'setUserTwitter')],
-      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
-      [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
-    ]))
+Welcome to click the 🤩 button below to join our developer community. /help.`, {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
+      ])
+    })
   } catch (e) {
     await lmt.removeTokens(1)
     await ctx.reply("Some error occurred.", Markup.inlineKeyboard([
@@ -146,18 +150,20 @@ bot.action('menu', async (ctx) => {
     }))
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
-    await ctx.editMessageText(`Welcome to NEST Prize!
+    await ctx.editMessageText(`*Welcome to NEST Prize*
 
-You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}
-You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}
+You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}, /setwallet
+You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
 
-Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
 
-Welcome to click the 🤩 button below to join our developer community!`, Markup.inlineKeyboard([
-      [Markup.button.callback('Update Wallet', 'setUserWallet'), Markup.button.callback('Authorize Twitter', 'setUserTwitter')],
-      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
-      [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
-    ]))
+Welcome to click the 🤩 button below to join our developer community. /help.`, {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
+      ])
+    })
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
@@ -285,6 +291,25 @@ ${result.Items.map((item) => {
   }
 })
 
+bot.command('help', async (ctx) => {
+  await lmt.removeTokens(1)
+  ctx.reply(`I can help you to get NEST Prizes.
+  
+/start - show the menu
+
+You can control me by sending these commands:
+
+*Edit Info*
+/setwallet - change your wallet address
+/settwitter - change your twitter account
+
+*Admin Portal*
+/admin - send prizes
+  `, {
+    parse_mode: 'Markdown',
+  })
+})
+
 bot.command('admin', async (ctx) => {
   const chat_id = ctx.chat.id;
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
@@ -299,6 +324,30 @@ bot.command('admin', async (ctx) => {
     [Markup.button.callback('Send', 'setConfig')],
     [Markup.button.callback('Liquidate', 'liquidateInfo')],
   ]))
+})
+
+bot.command('setwallet', async (ctx) => {
+  await lmt.removeTokens(1)
+  try {
+    await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.message.from.id}`)],
+      [Markup.button.callback('» Next', 'setUserWallet')],
+    ]))
+  } catch (e) {
+    await ctx.reply('Verify First!')
+  }
+})
+
+bot.command('settwitter', async (ctx) => {
+  await lmt.removeTokens(1)
+  try {
+    await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.message.from.id}`)],
+      [Markup.button.callback('» Next', 'setUserTwitter')],
+    ]))
+  } catch (e) {
+    await ctx.reply('Verify First!')
+  }
 })
 
 bot.action('setUserWallet', async (ctx) => {
@@ -324,7 +373,6 @@ bot.action('setUserWallet', async (ctx) => {
       } catch (e) {
         await ctx.answerCbQuery('Verify First!')
       }
-      
       return
     }
     
@@ -758,7 +806,6 @@ bot.action('send', async (ctx) => {
           res = await ctx.telegram.sendPhoto(config.chatId, config.cover, {
             caption: config.text,
             parse_mode: 'Markdown',
-            protect_content: true,
             ...Markup.inlineKeyboard([
               [Markup.button.callback('Snatch!', 'snatch')],
             ])
@@ -768,7 +815,6 @@ bot.action('send', async (ctx) => {
           await ctx.answerCbQuery()
           res = await ctx.telegram.sendMessage(config.chatId, config.text, {
             parse_mode: 'Markdown',
-            protect_content: true,
             ...Markup.inlineKeyboard([
               [Markup.button.callback('Snatch!', 'snatch')],
               [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot'), Markup.button.url('🤩 Star', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
@@ -1035,6 +1081,7 @@ cover: ${config.cover}
 auth: ${config.auth}
 `, {
               parse_mode: 'Markdown',
+              disable_web_page_preview: true,
               ...Markup.inlineKeyboard([
                 [Markup.button.callback('Checked, Send Now!', 'send')],
                 [Markup.button.callback('« Back', 'admin')],
