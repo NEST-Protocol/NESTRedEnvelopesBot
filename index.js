@@ -168,7 +168,45 @@ Welcome to click the 🤩 button below to join our developer community. /help.`,
 bot.action('NESTFiEvents', async (ctx) => {
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
-  await ctx.editMessageText(`TBD`,
+  await ctx.editMessageText(`To celebrate the NEST Fi product upgrade, NEST DAO is offering over 5 million NEST tokens to cook 3 delicious meals and beers for everyone. The new upgrade is based entirely on suggestions from the community and we have increased the leverage multiplier to 20x and added candlesticks. The advantages we have always had are: no holding costs and using oracle to access price information.
+
+Hamburger (First Order Bonus)
+
+Conditions (70 NEST per person)
+1. 1000 NEST accumulated on open futures positions
+2. Leverage greater than 5X
+3. Position opening time greater than 5 minutes
+*No need to close an order to receive
+
+Collection method: https://t.me/NEST_BABGiveaway/141868
+Futures website: https://finance.nestprotocol.org
+Product communication group: https://t.me/nestficommunity
+
+Pizza (Invitation Bonus)
+1. 20 NEST for each person you invite to complete 1000 NEST futures trades. (Bonus pool: 1,000,000 NEST)
+2. For each person you invite, you will receive a bonus of 1% of the amount of each open position. (Bonus Pool: 200,000 NEST)
+
+Butter chicken (Volume Bonus)
+Requirements: 1. You will receive one draw per trade volume of 1000 NEST. 2. The order must be greater than 5 minutes in duration and must be 5 times leveraged
+Reward: Minimum 30 NEST per draw, maximum 100 NEST.
+
+Beer (Whitelist Reward)
+Rules: Invite 10 people to complete the Hamburger mission and make a total personal transaction of more than 50,000 NEST to the whitelist. You will receive a monthly fixed percentage bonus and ranking bonus
+
+Reward:
+3% of the total monthly trading volume is awarded to the whitelist owners. Of this 3% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
+
+For example, if 2,000 people all complete 50,000 NEST of futures volume, then the total volume for that month is 100 million. 3% is used as a bonus, so that is a bonus pool of 3 million. 90% of this 3 million is distributed based on ranking and 10% is distributed equally to everyone.
+
+The ranking is based on the sum of the following additional points
+
++5 points for invitations greater than 10 people, +2 points for invitees’ transactions greater than 100,000 NEST, +2 points for individual transactions greater than 50,000 NEST
+
+Total trading volume refers to the total trading volume of all those who participated in the event
+Trading volume only counts open NEST, not close NEST
+All delicious meals are done in our kitchen robot!
+
+https://t.me/NESTRedEnvelopesBot`,
       Markup.inlineKeyboard([
         [Markup.button.url('Hamburger', 'https://t.me/NEST_BABGiveaway/141868')],
         [Markup.button.callback('Pizza', 'pizza')],
