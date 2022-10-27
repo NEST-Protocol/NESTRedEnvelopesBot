@@ -46,8 +46,8 @@ function hashCode(str) {
 }
 
 bot.start(async (ctx) => {
-  const chatId = ctx.update.message.chat.id
-  const isBot = ctx.update.message.from.is_bot
+  const chatId = ctx.chat.id
+  const isBot = ctx.from.is_bot
   if (chatId < 0 || isBot) {
     return
   }
@@ -78,17 +78,17 @@ More giveaways: Conditions 400 NEST + 1 BAB
 https://t.me/NEST_Community/1609
 
 BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
-  if (ctx.startPayload && Number(ctx.startPayload) !== ctx.update.message.from.id) {
+  if (ctx.startPayload && Number(ctx.startPayload) !== ctx.from.id) {
     // Update new username and new invite code, not myself
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
       Key: {
-        user_id: ctx.update.message.from.id,
+        user_id: ctx.from.id,
       },
       UpdateExpression: 'set invite_code = :invite_code, username = :username',
       ExpressionAttributeValues: {
         ':invite_code': Number(ctx.startPayload),
-        ':username': ctx.update.message.from.username || '',
+        ':username': ctx.from.username || '',
       }
     }))
   } else {
@@ -96,11 +96,11 @@ BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
       Key: {
-        user_id: ctx.update.message.from.id,
+        user_id: ctx.from.id,
       },
       UpdateExpression: 'set username = :username',
       ExpressionAttributeValues: {
-        ':username': ctx.update.message.from.username || '',
+        ':username': ctx.from.username || '',
       }
     }))
   }
@@ -109,7 +109,7 @@ BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
     const queryUserRes = await ddbDocClient.send(new GetCommand({
       TableName: 'nest-prize-users',
       Key: {
-        user_id: ctx.update.message.from.id,
+        user_id: ctx.from.id,
       },
     }))
     
@@ -119,7 +119,7 @@ BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}, /setwallet
 You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
 
-Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.message.from.id}
+Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.from.id}
 
 Welcome to click the 🤩 button below to join our developer community. /help.`, Markup.inlineKeyboard([
       [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
@@ -343,7 +343,7 @@ bot.command('setwallet', async (ctx) => {
   await lmt.removeTokens(1)
   try {
     await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.message.from.id}`)],
+      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
       [Markup.button.callback('» Next', 'setUserWallet')],
     ]))
   } catch (e) {
@@ -359,7 +359,7 @@ bot.command('settwitter', async (ctx) => {
   await lmt.removeTokens(1)
   try {
     await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.message.from.id}`)],
+      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
       [Markup.button.callback('» Next', 'setUserTwitter')],
     ]))
   } catch (e) {
