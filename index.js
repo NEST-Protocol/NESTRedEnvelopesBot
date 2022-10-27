@@ -980,7 +980,7 @@ bot.action('snatch', async (ctx) => {
       await ctx.answerCbQuery('Please Update Wallet First!')
       return
     }
-    if (queryUserRes.Item?.twitter_id === undefined) {
+    if (queryUserRes.Item?.twitter_id === undefined || queryUserRes.Item?.twitter_id === '') {
       await ctx.answerCbQuery('Please Authorize Twitter First!')
       return
     }
