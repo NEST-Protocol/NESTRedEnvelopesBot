@@ -358,8 +358,8 @@ bot.command('settwitter', async (ctx) => {
   }
   await lmt.removeTokens(1)
   try {
-    await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
+    await ctx.reply(`Please follow our twitter and click the 'Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+      [Markup.button.url('🐦 Follow', 'https://twitter.com/NEST_Protocol'), Markup.button.url('🤖️ Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
       [Markup.button.callback('» Next', 'setUserTwitter')],
     ]))
   } catch (e) {
@@ -429,8 +429,8 @@ bot.action('setUserTwitter', async (ctx) => {
     if (hCaptcha === undefined) {
       await lmt.removeTokens(1)
       try {
-        await ctx.editMessageText(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-          [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
+        await ctx.editMessageText(`Please follow our twitter and click the '🤖️ Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+          [Markup.button.url('🐦 Follow', 'https://twitter.com/NEST_Protocol'), Markup.button.url('🤖️ Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
           [Markup.button.callback('» Next', 'setUserTwitter')],
         ]))
       } catch (e) {
