@@ -133,6 +133,77 @@ Welcome to click the 🤩 button below to join our developer community. /help.`,
   }
 })
 
+bot.command('help', async (ctx) => {
+  const chat_id = ctx.chat.id
+  if (chat_id < 0) {
+    return
+  }
+  await lmt.removeTokens(1)
+  ctx.reply(`I can help you to get NEST Prizes.
+  
+/start - show the menu
+
+You can control me by sending these commands:
+
+*Edit Info*
+/setwallet - change your wallet address
+/settwitter - change your twitter account
+
+*Admin Portal*
+/admin - send prizes
+  `, {
+    parse_mode: 'Markdown',
+  })
+})
+
+bot.command('admin', async (ctx) => {
+  const chat_id = ctx.chat.id;
+  if (chat_id < 0 || WHITELIST.findIndex((id) => id === chat_id) === -1) {
+    await lmt.removeTokens(1)
+    await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
+      [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
+    ]))
+    return
+  }
+  await lmt.removeTokens(1)
+  await ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
+    [Markup.button.callback('Send', 'setConfig')],
+    [Markup.button.callback('Liquidate', 'liquidateInfo')],
+  ]))
+})
+
+bot.command('setwallet', async (ctx) => {
+  const chat_id = ctx.chat.id
+  if (chat_id < 0) {
+    return
+  }
+  await lmt.removeTokens(1)
+  try {
+    await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
+      [Markup.button.callback('» Next', 'setUserWallet')],
+    ]))
+  } catch (e) {
+    await ctx.reply('Verify First!')
+  }
+})
+
+bot.command('settwitter', async (ctx) => {
+  const chat_id = ctx.chat.id
+  if (chat_id < 0) {
+    return
+  }
+  await lmt.removeTokens(1)
+  try {
+    await ctx.reply(`Please follow our twitter and click the 'Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+      [Markup.button.url('🐦 Follow', 'https://twitter.com/NEST_Protocol'), Markup.button.url('🤖️ Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
+      [Markup.button.callback('» Next', 'setUserTwitter')],
+    ]))
+  } catch (e) {
+    await ctx.reply('Verify First!')
+  }
+})
+
 bot.action('menu', async (ctx) => {
   const isBot = ctx.update.callback_query.from.is_bot
   if (isBot) {
@@ -206,20 +277,71 @@ Total trading volume refers to the total trading volume of all those who partici
 Trading volume only counts open NEST, not close NEST
 All delicious meals are done in our kitchen robot!
 
-https://t.me/NESTRedEnvelopesBot`,
-      Markup.inlineKeyboard([
-        [Markup.button.url('Hamburger', 'https://t.me/NEST_BABGiveaway/141868')],
-        [Markup.button.callback('Pizza', 'pizza')],
-        [Markup.button.callback('« Back', 'menu')]
-      ]))
+https://t.me/NESTRedEnvelopesBot`, Markup.inlineKeyboard([
+    [Markup.button.url('🍔 Hamburger', 'https://t.me/NEST_BABGiveaway/141868'), Markup.button.callback('🍕 Pizza', 'pizza')],
+    [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🍺 Beer', 'beer')],
+    [Markup.button.callback('« Back', 'menu')]
+  ]))
 })
 
 bot.action('pizza', async (ctx) => {
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
-  await ctx.editMessageText(`Pizza
+  await ctx.editMessageText(`Invitees conditions
+  
+1. 1000 NEST accumulated on open futures positions
+2. Leverage greater than 5X
+3. Position opening time greater than 5 minutes
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
+
+Complete pizza:
+(TBD)
+`, Markup.inlineKeyboard([
+    [Markup.button.callback('« Back', 'NESTFiEvents')]
+  ]))
+})
+
+bot.action('butterChicken', async (ctx) => {
+  await lmt.removeTokens(1)
+  await ctx.answerCbQuery()
+  await ctx.editMessageText(`Conditions
+
+1. 1000 NEST accumulated on open futures positions
+2. Leverage greater than 5X
+3. Position opening time greater than 5 minutes
+
+One lottery for each completion, no limit
+
+Reward: Minimum 30 NEST per draw, maximum 100 NEST.
+
+Complete Butter chicken:
+(TBD)
+`, Markup.inlineKeyboard([
+    [Markup.button.callback('Draw', 'butterChickenDraw')],
+    [Markup.button.callback('« Back', 'NESTFiEvents')]
+  ]))
+})
+
+bot.action('butterChickenDraw', async (ctx) => {
+  await lmt.removeTokens(1)
+  await ctx.answerCbQuery("TBD")
+})
+
+bot.action('beer', async (ctx) => {
+  await lmt.removeTokens(1)
+  await ctx.answerCbQuery()
+  await ctx.editMessageText(`Conditions
+
+1. Invite 10 people to complete the Hamburger mission and make a total personal transaction of more than 50,000 NEST to the whitelist.
+2. You will receive a monthly fixed percentage bonus and ranking bonus
+
+Reward:
+5% of the total monthly trading volume is awarded to the whitelist owners. Of this 5% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
+
+Complete Beer:
+Invite 10 people to complete the Hamburger mission. (TBD)
+make a total personal transaction of more than 50,000 NEST. (TBD)
 `, Markup.inlineKeyboard([
     [Markup.button.callback('« Back', 'NESTFiEvents')]
   ]))
@@ -293,77 +415,6 @@ ${result.Items.map((item) => {
     console.log(e)
     await lmt.removeTokens(1)
     await ctx.answerCbQuery("Some error occurred.")
-  }
-})
-
-bot.command('help', async (ctx) => {
-  const chat_id = ctx.chat.id
-  if (chat_id < 0) {
-    return
-  }
-  await lmt.removeTokens(1)
-  ctx.reply(`I can help you to get NEST Prizes.
-  
-/start - show the menu
-
-You can control me by sending these commands:
-
-*Edit Info*
-/setwallet - change your wallet address
-/settwitter - change your twitter account
-
-*Admin Portal*
-/admin - send prizes
-  `, {
-    parse_mode: 'Markdown',
-  })
-})
-
-bot.command('admin', async (ctx) => {
-  const chat_id = ctx.chat.id;
-  if (chat_id < 0 || WHITELIST.findIndex((id) => id === chat_id) === -1) {
-    await lmt.removeTokens(1)
-    await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
-      [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
-    ]))
-    return
-  }
-  await lmt.removeTokens(1)
-  await ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
-    [Markup.button.callback('Send', 'setConfig')],
-    [Markup.button.callback('Liquidate', 'liquidateInfo')],
-  ]))
-})
-
-bot.command('setwallet', async (ctx) => {
-  const chat_id = ctx.chat.id
-  if (chat_id < 0) {
-    return
-  }
-  await lmt.removeTokens(1)
-  try {
-    await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
-      [Markup.button.callback('» Next', 'setUserWallet')],
-    ]))
-  } catch (e) {
-    await ctx.reply('Verify First!')
-  }
-})
-
-bot.command('settwitter', async (ctx) => {
-  const chat_id = ctx.chat.id
-  if (chat_id < 0) {
-    return
-  }
-  await lmt.removeTokens(1)
-  try {
-    await ctx.reply(`Please follow our twitter and click the 'Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-      [Markup.button.url('🐦 Follow', 'https://twitter.com/NEST_Protocol'), Markup.button.url('🤖️ Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
-      [Markup.button.callback('» Next', 'setUserTwitter')],
-    ]))
-  } catch (e) {
-    await ctx.reply('Verify First!')
   }
 })
 
