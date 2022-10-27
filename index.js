@@ -121,10 +121,18 @@ You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.from.id}
 
-Welcome to click the 🤩 button below to join our developer community. /help.`, Markup.inlineKeyboard([
-      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
-      [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
-    ]))
+Giveaway events, click on NESTFi Events.
+
+/help
+
+----------------
+🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!`, {
+      disable_web_page_preview: true,
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
+      ])
+    })
   } catch (e) {
     await lmt.removeTokens(1)
     await ctx.reply("Some error occurred.", Markup.inlineKeyboard([
@@ -140,7 +148,7 @@ bot.command('help', async (ctx) => {
   }
   await lmt.removeTokens(1)
   ctx.reply(`I can help you to get NEST Prizes.
-  
+
 /start - show the menu
 
 You can control me by sending these commands:
@@ -225,10 +233,18 @@ You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
-Welcome to click the 🤩 button below to join our developer community. /help.`, Markup.inlineKeyboard([
-      [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
-      [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
-    ]))
+Giveaway events, click on NESTFi Events.
+
+/help
+
+----------------
+🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!`, {
+      disable_web_page_preview: true,
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
+      ])
+    })
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
@@ -297,9 +313,16 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_quer
 
 Complete pizza:
 (TBD)
-`, Markup.inlineKeyboard([
-    [Markup.button.callback('« Back', 'NESTFiEvents')]
-  ]))
+
+----------------
+🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
+`, {
+    parse_mode: 'Markdown',
+    disable_web_page_preview: true,
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'NESTFiEvents')]
+    ])
+  })
 })
 
 bot.action('butterChicken', async (ctx) => {
@@ -317,10 +340,17 @@ Reward: Minimum 30 NEST per draw, maximum 100 NEST.
 
 Complete Butter chicken:
 (TBD)
-`, Markup.inlineKeyboard([
-    [Markup.button.callback('Draw', 'butterChickenDraw')],
-    [Markup.button.callback('« Back', 'NESTFiEvents')]
-  ]))
+
+----------------
+🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
+`, {
+    parse_mode: 'Markdown',
+    disable_web_page_preview: true,
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('Draw', 'butterChickenDraw')],
+      [Markup.button.callback('« Back', 'NESTFiEvents')]
+    ])
+  })
 })
 
 bot.action('butterChickenDraw', async (ctx) => {
@@ -342,9 +372,16 @@ Reward:
 Complete Beer:
 Invite 10 people to complete the Hamburger mission. (TBD)
 make a total personal transaction of more than 50,000 NEST. (TBD)
-`, Markup.inlineKeyboard([
-    [Markup.button.callback('« Back', 'NESTFiEvents')]
-  ]))
+
+----------------
+🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
+`, {
+    parse_mode: 'Markdown',
+    disable_web_page_preview: true,
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'NESTFiEvents')]
+    ])
+  })
 })
 
 bot.action('forDeveloper', async (ctx) => {
@@ -356,8 +393,6 @@ bot.action('forDeveloper', async (ctx) => {
   await ctx.answerCbQuery()
   await ctx.editMessageText(`*Another Revolution in Blockchain*
 
-NEST ecosystem is a paradigm revolution to the traditional market mechanism, providing the blockchain world with a whole new range of development tools and creative new assets.
-
 *NEST PVM*
 NEST Probability Virtual Machine (PVM) is a virtual machine-like structure based on the basic function library. Developers can develop various exciting applications based on the function library, similar to Ethereum virtual machine (EVM) programming.
 Github repository: [NEST-PVM-V1.0](https://github.com/NEST-Protocol/NEST-PVM-V1.0). More [PVM Mechanism](https://nestprotocol.org/docs/Concept/PVM/)
@@ -366,9 +401,8 @@ Github repository: [NEST-PVM-V1.0](https://github.com/NEST-Protocol/NEST-PVM-V1.
 NEST oracle is the only truly decentralized oracle on the market today.
 Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0). [How to Mining](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-mining/), [How to Call Price](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-call-price)
 
-More [Developer Doc](https://nestprotocol.org/docs/PVM-Technical-Reference/)
-
-Welcome follow our [Github](https://github.com/NEST-Protocol). We will also develop some targeted airdrop tools, like [this bot](https://github.com/NEST-Protocol/NESTRedEnvelopesBot).
+----------------
+🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
 `, {
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
