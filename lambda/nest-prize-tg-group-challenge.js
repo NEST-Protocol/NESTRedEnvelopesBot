@@ -3,7 +3,7 @@ const axios = require("axios");
 const botToken = process.env.BOT_TOKEN
 exports.handler = async (event) => {
   const user_id = JSON.parse(event.body)?.user_id ?? undefined
-  const chat_id = JSON.parse(event.body)?.chat_id ?? undefined
+  const chat_id = event?.queryStringParameters?.chat_id ?? undefined
   
   if (user_id === undefined && chat_id === undefined) {
     return {
