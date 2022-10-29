@@ -19,6 +19,8 @@ const lmt = new RateLimiter({
 
 const WHITELIST = [2130493951, 552791389, 1859030053]
 
+const bearToken = process.env.NEST_API_TOKEN
+
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
 });
@@ -976,15 +978,40 @@ bot.action('snatch', async (ctx) => {
         user_id: ctx.update.callback_query.from.id,
       },
     }))
-    if (queryUserRes.Item === undefined || queryUserRes.Item?.wallet === undefined) {
+    const user = queryUserRes?.Item || undefined
+    if (user === undefined || user?.wallet === undefined) {
       await ctx.answerCbQuery('Please Update Wallet First!')
       return
     }
-    if (queryUserRes.Item?.twitter_id === undefined || queryUserRes.Item?.twitter_id === '') {
+    if (user?.twitter_id === undefined || user?.twitter_id === '') {
       await ctx.answerCbQuery('Please Authorize Twitter First!')
       return
     }
-    const user = queryUserRes.Item
+    const twitterTokenReq = await axios({
+      method: 'GET',
+      url: `https://work.parasset.top/workbench-api/twitter/token`,
+      headers: {
+        'Authorization': `Bearer ${bearToken}`
+      }
+    })
+    const twitterToken = twitterTokenReq.data?.data || undefined
+    if (twitterToken === undefined) {
+      await ctx.answerCbQuery('Twitter api error!')
+      return
+    }
+    const req = await axios({
+      method: 'GET',
+      url: `https://api.twitter.com/2/users/${user.twitter_id}/following?max_results=1000`,
+      headers: {
+        'Authorization': `Bearer ${twitterToken}`
+      }
+    })
+    const following = req.data.data || []
+    const isFollowing = following.some((item) => item.id === "1399188846214991877")
+    if (!isFollowing) {
+      await ctx.answerCbQuery('Please Follow @NEST_Protocol twitter First!')
+      return
+    }
     try {
       const queryPrizeRes = await ddbDocClient.send(new GetCommand({
         TableName: 'nest-prize',
