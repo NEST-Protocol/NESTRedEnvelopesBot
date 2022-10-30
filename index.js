@@ -987,31 +987,6 @@ bot.action('snatch', async (ctx) => {
       await ctx.answerCbQuery('Please Authorize Twitter First!')
       return
     }
-    const twitterTokenReq = await axios({
-      method: 'GET',
-      url: `https://work.parasset.top/workbench-api/twitter/token`,
-      headers: {
-        'Authorization': `Bearer ${bearToken}`
-      }
-    })
-    const twitterToken = twitterTokenReq.data?.data || undefined
-    if (twitterToken === undefined) {
-      await ctx.answerCbQuery('Twitter api error!')
-      return
-    }
-    const req = await axios({
-      method: 'GET',
-      url: `https://api.twitter.com/2/users/${user.twitter_id}/following?max_results=1000`,
-      headers: {
-        'Authorization': `Bearer ${twitterToken}`
-      }
-    })
-    const following = req.data.data || []
-    const isFollowing = following.some((item) => item.id === "1399188846214991877")
-    if (!isFollowing) {
-      await ctx.answerCbQuery('Please Follow @NEST_Protocol twitter First!')
-      return
-    }
     try {
       const queryPrizeRes = await ddbDocClient.send(new GetCommand({
         TableName: 'nest-prize',
