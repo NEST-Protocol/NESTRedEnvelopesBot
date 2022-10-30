@@ -19,8 +19,6 @@ const lmt = new RateLimiter({
 
 const WHITELIST = [2130493951, 552791389, 1859030053]
 
-const bearToken = process.env.NEST_API_TOKEN
-
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
 });
