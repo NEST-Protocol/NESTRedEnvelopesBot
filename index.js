@@ -61,23 +61,21 @@ Add your BNB BEP20 address and authorize your Twitter account
 3. Click: on the giveaway link at the pin of the group.
 4. Click: snatch
 
-If you are a newbie, you must complete the first 3 steps. When you're done you just need to click snatch to get the giveaway!
+If you are a newcomer, you must complete the first 3 steps. When you're done you just need to click snatch to get the giveaway
 
 
 Rewards：
 Receive random or fixed NEST token as giveaway rewards or quiz rewards on daily base and will receive exclusive NFTs in the future.
 
-Distribution time: All rewards are distributed every 7 days
+Invite 1 person reward: 10 NEST
 
-What are BAB tokens?
-https://developers.binance.com/docs/babt/introduction
-How do I get BAB tokens?
-https://www.binance.com/en/support/faq/bacaf9595b52440ea2b023195ba4a09c
+How to invite?
+1.Join: @NESTRedEnvelopesBot
+2.Click: My ref info
+* Invite others to our BAB giveaway via your invite link!
 
 More giveaways: Conditions 400 NEST + 1 BAB
-https://t.me/NEST_Community/1609
-
-BNB Twitter link: https://twitter.com/BNBCHAIN/status/1573885005016743938`)
+https://t.me/NEST_Community/1609`)
   if (ctx.startPayload && Number(ctx.startPayload) !== ctx.from.id) {
     // Update new username and new invite code, not myself
     await ddbDocClient.send(new UpdateCommand({
