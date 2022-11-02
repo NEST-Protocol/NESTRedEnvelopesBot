@@ -305,6 +305,9 @@ bot.action('pizza', async (ctx) => {
     const res = await axios({
       method: 'get',
       url: `https://work.parasset.top/workbench-api/activity/user/invite/detail?chatId=${ctx.update.callback_query.from.id}`,
+      headers: {
+        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
     })
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
@@ -369,6 +372,9 @@ bot.action('beer', async (ctx) => {
     const res = await axios({
       method: 'get',
       url: `https://work.parasset.top/workbench-api/activity/user/whitelist/state?chatId=${ctx.update.callback_query.from.id}`,
+      headers: {
+        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
     })
     
     if (res.data.code === 0) {
@@ -600,6 +606,9 @@ bot.action('settlement', async (ctx) => {
     const res = await axios({
       method: 'get',
       url: `https://work.parasset.top/workbench-api/activity/user/settle/detail?chatId=${ctx.update.callback_query.from.id}`,
+      headers: {
+        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
     })
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
