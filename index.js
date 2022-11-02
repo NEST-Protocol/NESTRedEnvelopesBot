@@ -380,7 +380,7 @@ bot.action('beer', async (ctx) => {
 2. You will receive a monthly fixed percentage bonus and ranking bonus
 
 Reward:
-5% of the total monthly trading volume is awarded to the whitelist owners. Of this 5% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
+3% of the total monthly trading volume is awarded to the whitelist owners. Of this 3% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
 
 Complete Beer:
 Invite 10 people to complete the Hamburger mission. ${res.data.data?.inviteState ? '✅' : '❌'}
@@ -607,9 +607,9 @@ bot.action('settlement', async (ctx) => {
       ctx.editMessageText(`Month’s giveaway pool: ${res.data.data.pool} NEST
 
 My this month point: ${res.data.data.credit.total}
-1. Successful Invite 0 users: +${res.data.data.credit.detail.invite}
+1. Successful Invite ${res.data.data.invite.validCount} users: +${res.data.data.credit.detail.invite}
 2. Invitee: +${res.data.data.credit.detail.inviterTx}
-3. My transaction: +${res.data.data.credit.detail.myTx}
+3. My transaction amount ${res.data.data?.myTx || '0'} NEST: +${res.data.data.credit.detail.myTx}
 
 My this month giveaway: ${res.data.data.balance.total} NEST
 1. Invite ${res.data.data.invite.validCount} users, get ${res.data.data.balance.detail.invite} NEST
