@@ -295,14 +295,21 @@ All delicious meals are done in our kitchen robot!
 https://t.me/NESTRedEnvelopesBot`, Markup.inlineKeyboard([
     [Markup.button.url('🍔 Hamburger', 'https://t.me/NEST_BABGiveaway/141868'), Markup.button.callback('🍕 Pizza', 'pizza')],
     [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🍺 Beer', 'beer')],
+    [Markup.button.callback('Settlement', 'settlement')],
     [Markup.button.callback('« Back', 'menu')]
   ]))
 })
 
 bot.action('pizza', async (ctx) => {
-  await lmt.removeTokens(1)
-  await ctx.answerCbQuery()
-  await ctx.editMessageText(`Invitees conditions
+  try {
+    const res = await axios({
+      method: 'get',
+      url: `https://work.parasset.top/workbench-api/activity/user/invite/detail?chatId=${ctx.update.callback_query.from.id}`,
+    })
+    if (res.data.code === 0) {
+      await lmt.removeTokens(1)
+      await ctx.answerCbQuery()
+      await ctx.editMessageText(`Invitees conditions
   
 1. 1000 NEST accumulated on open futures positions
 2. Leverage greater than 5X
@@ -311,17 +318,23 @@ bot.action('pizza', async (ctx) => {
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
 Complete pizza:
-(TBD)
+${res.data.data?.detail?.map((item) => (`@${item.username} ${item.state ? '√' : '×'}`)).join('/n')}
 
 ----------------
 🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
 `, {
-    parse_mode: 'Markdown',
-    disable_web_page_preview: true,
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('« Back', 'NESTFiEvents')]
-    ])
-  })
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true,
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback('« Back', 'NESTFiEvents')]
+        ])
+      })
+    } else {
+      await ctx.answerCbQuery('Some error occurred.')
+    }
+  } catch (e) {
+    await ctx.answerCbQuery('Some error occurred.')
+  }
 })
 
 bot.action('butterChicken', async (ctx) => {
@@ -358,9 +371,16 @@ bot.action('butterChickenDraw', async (ctx) => {
 })
 
 bot.action('beer', async (ctx) => {
-  await lmt.removeTokens(1)
-  await ctx.answerCbQuery()
-  await ctx.editMessageText(`Conditions
+  try {
+    const res = await axios({
+      method: 'get',
+      url: `https://work.parasset.top/workbench-api/activity/user/whitelist/state?chatId=${ctx.update.callback_query.from.id}`,
+    })
+    
+    if (res.data.code === 0) {
+      await lmt.removeTokens(1)
+      await ctx.answerCbQuery()
+      await ctx.editMessageText(`Conditions
 
 1. Invite 10 people to complete the Hamburger mission and make a total personal transaction of more than 50,000 NEST to the whitelist.
 2. You will receive a monthly fixed percentage bonus and ranking bonus
@@ -369,18 +389,24 @@ Reward:
 5% of the total monthly trading volume is awarded to the whitelist owners. Of this 5% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
 
 Complete Beer:
-Invite 10 people to complete the Hamburger mission. (TBD)
-make a total personal transaction of more than 50,000 NEST. (TBD)
+Invite 10 people to complete the Hamburger mission. ${res.data.data?.inviteState ? '√' : '×'}
+make a total personal transaction of more than 50,000 NEST. ${res.data.data?.txState ? '√' : '×'}
 
 ----------------
 🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
 `, {
-    parse_mode: 'Markdown',
-    disable_web_page_preview: true,
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('« Back', 'NESTFiEvents')]
-    ])
-  })
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true,
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback('« Back', 'NESTFiEvents')]
+        ])
+      })
+    } else {
+      await ctx.answerCbQuery('Some error occurred.')
+    }
+  } catch (e) {
+    ctx.answerCbQuery('Some error occurred.')
+  }
 })
 
 bot.action('forDeveloper', async (ctx) => {
@@ -575,6 +601,37 @@ bot.action('checkTwitter', async (ctx) => {
     }
   } catch (e) {
     ctx.answerCbQuery("Some error occurred.")
+  }
+})
+
+bot.action('settlement', async (ctx) => {
+  try {
+    const res = await axios({
+      method: 'get',
+      url: `https://work.parasset.top/workbench-api/activity/user/settle/detail?chatId=${ctx.update.callback_query.from.id}`,
+    })
+    if (res.data.code === 0) {
+      await lmt.removeTokens(1)
+      ctx.answerCbQuery()
+      ctx.editMessageText(`Total Pool Balance: ${res.data.data.pool} NEST
+
+My Credit: ${res.data.data.credit.total}
+1. Invite ${res.data.data.invite.validCount} users: ${res.data.data.credit.detail.invite}
+2. Invite users has tx: ${res.data.data.credit.detail.inviterTx}
+3. My tx: ${res.data.data.credit.detail.myTx}
+
+My Reward: ${res.data.data.balance.total} NEST
+1. Invite ${res.data.data.invite.validCount} users, get ${res.data.data.balance.detail.invite} NEST
+2. Payback rewards, get ${res.data.data.balance.detail.back} NEST
+3. White list rewards, get ${res.data.data.balance.detail.whitelist} NEST
+`, Markup.button.callback('« Back', 'NESTFiEvents'))
+    
+    } else {
+      await ctx.answerCbQuery("Some error occurred.")
+    }
+  } catch (e) {
+    console.log(e)
+    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
