@@ -318,10 +318,7 @@ bot.action('pizza', async (ctx) => {
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
 Complete pizza:
-${res.data.data?.detail?.map((item) => (`@${item.username} ${item.state ? '√' : '×'}`)).join('/n')}
-
-----------------
-🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
+${res.data.data?.detail?.map((item) => (`@${item.username} ${item.state ? '✅' : '❌'}`)).join('/n')}
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
@@ -352,9 +349,6 @@ Reward: Minimum 30 NEST per draw, maximum 100 NEST.
 
 Complete Butter chicken:
 (TBD)
-
-----------------
-🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
 `, {
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
@@ -389,11 +383,8 @@ Reward:
 5% of the total monthly trading volume is awarded to the whitelist owners. Of this 5% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
 
 Complete Beer:
-Invite 10 people to complete the Hamburger mission. ${res.data.data?.inviteState ? '√' : '×'}
-make a total personal transaction of more than 50,000 NEST. ${res.data.data?.txState ? '√' : '×'}
-
-----------------
-🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
+Invite 10 people to complete the Hamburger mission. ${res.data.data?.inviteState ? '✅' : '❌'}
+make a total personal transaction of more than 50,000 NEST. ${res.data.data?.txState ? '✅' : '❌'}
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
@@ -613,7 +604,7 @@ bot.action('settlement', async (ctx) => {
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
       ctx.answerCbQuery()
-      ctx.editMessageText(`Total Pool Balance: ${res.data.data.pool} NEST
+      ctx.editMessageText(`Total Prize Pool: ${res.data.data.pool} NEST
 
 My Credit: ${res.data.data.credit.total}
 1. Invite ${res.data.data.invite.validCount} users: ${res.data.data.credit.detail.invite}
@@ -624,8 +615,9 @@ My Reward: ${res.data.data.balance.total} NEST
 1. Invite ${res.data.data.invite.validCount} users, get ${res.data.data.balance.detail.invite} NEST
 2. Payback rewards, get ${res.data.data.balance.detail.back} NEST
 3. White list rewards, get ${res.data.data.balance.detail.whitelist} NEST
-`, Markup.button.callback('« Back', 'NESTFiEvents'))
-    
+`, Markup.inlineKeyboard([
+        [Markup.button.callback('« Back', 'NESTFiEvents')],
+      ]))
     } else {
       await ctx.answerCbQuery("Some error occurred.")
     }
