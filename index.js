@@ -604,17 +604,17 @@ bot.action('settlement', async (ctx) => {
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
       ctx.answerCbQuery()
-      ctx.editMessageText(`Total Prize Pool: ${res.data.data.pool} NEST
+      ctx.editMessageText(`Month’s giveaway pool: ${res.data.data.pool} NEST
 
-My Credit: ${res.data.data.credit.total}
-1. Invite ${res.data.data.invite.validCount} users: ${res.data.data.credit.detail.invite}
-2. Invite users has tx: ${res.data.data.credit.detail.inviterTx}
-3. My tx: ${res.data.data.credit.detail.myTx}
+My this month point: ${res.data.data.credit.total}
+1. Successful Invite 0 users: +${res.data.data.credit.detail.invite}
+2. Invitee: +${res.data.data.credit.detail.inviterTx}
+3. My transaction: +${res.data.data.credit.detail.myTx}
 
-My Reward: ${res.data.data.balance.total} NEST
+My this month giveaway: ${res.data.data.balance.total} NEST
 1. Invite ${res.data.data.invite.validCount} users, get ${res.data.data.balance.detail.invite} NEST
-2. Payback rewards, get ${res.data.data.balance.detail.back} NEST
-3. White list rewards, get ${res.data.data.balance.detail.whitelist} NEST
+2. Payback giveaway, get ${res.data.data.balance.detail.back} NEST
+3. White list giveaway, get ${res.data.data.balance.detail.whitelist} NEST ${res.data.data.whitelist ? '' : '(You are not whitelisted)'}
 `, Markup.inlineKeyboard([
         [Markup.button.callback('« Back', 'NESTFiEvents')],
       ]))
