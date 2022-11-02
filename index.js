@@ -975,7 +975,7 @@ bot.action('send', async (ctx) => {
           await ctx.answerCbQuery()
           res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
 
-Complete your first futures order and get 70 NEST!`, {
+Complete your first futures order and [get 70 NEST](https://t.me/NEST_BABGiveaway/158139)!`, {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
               [Markup.button.callback('Snatch!', 'snatch')],
@@ -1155,7 +1155,7 @@ bot.action('snatch', async (ctx) => {
 
 Click [here](https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}) to check all snatchers.
 
-Complete your first futures order and get 70 NEST!
+Complete your first futures order and [get 70 NEST](https://t.me/NEST_BABGiveaway/158139)!
 🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
 `,
               {
@@ -1173,7 +1173,7 @@ ${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.
 
 Click [here](https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}) to check all snatchers.
 
-Complete your first futures order and get 70 NEST!
+Complete your first futures order and [get 70 NEST](https://t.me/NEST_BABGiveaway/158139)!
 🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
 `,
               {
