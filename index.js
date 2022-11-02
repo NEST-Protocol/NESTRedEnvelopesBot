@@ -52,30 +52,31 @@ bot.start(async (ctx) => {
     return
   }
   await lmt.removeTokens(1)
-  ctx.reply(`BAB Token increase the diversity of incentive and validation methods of the NEST community, thus, we are introducing a daily timely giveaway for BAB Token holders. Total prize of $30,000 NEST tokens. For a period of 4 months.
+  ctx.reply(`Total prize of $30,000 NEST tokens. For a period of 4 months.
 
 How to join?
 1. Join: https://t.me/NEST_BABGiveaway
 2. Join: https://t.me/NESTRedEnvelopesBot
-Add your BNB BEP20 address and authorize your Twitter account
+Add your wallet address in the bot.update your twitter.
 3. Click: on the giveaway link at the pin of the group.
 4. Click: snatch
 
-If you are a newcomer, you must complete the first 3 steps. When you're done you just need to click snatch to get the giveaway
+video teaching
+https://t.me/NEST_BABGiveaway/146058
 
+If you are a newbie, you must complete the first 3 steps. When you're done you just need to click snatch to get the giveaway!
 
-Rewards：
-Receive random or fixed NEST token as giveaway rewards or quiz rewards on daily base and will receive exclusive NFTs in the future.
+Rewards：Weekly Airdrop $2000$NEST
+1. Have BAB NFT or have 100 NEST, you can get 3 NEST per day.
+2.Grab 10,000 NEST random giveaways per day!
+3.Invite a reward 10 NEST
 
-Invite 1 person reward: 10 NEST
-
-How to invite?
-1.Join: @NESTRedEnvelopesBot
-2.Click: My ref info
-* Invite others to our BAB giveaway via your invite link!
+Distribution time: All rewards are distributed every 7 days
 
 More giveaways: Conditions 400 NEST + 1 BAB
-https://t.me/NEST_Community/1609`)
+https://t.me/NEST_Community/1609
+BNB chain support
+https://twitter.com/BNBCHAIN/status/1573885005016743938`)
   if (ctx.startPayload && Number(ctx.startPayload) !== ctx.from.id) {
     // Update new username and new invite code, not myself
     await ddbDocClient.send(new UpdateCommand({
