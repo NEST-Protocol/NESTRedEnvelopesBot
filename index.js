@@ -264,7 +264,7 @@ Conditions (70 NEST per person)
 3. Position opening time greater than 5 minutes
 *No need to close an order to receive
 
-Collection method: https://t.me/NEST_BABGiveaway/141868
+Collection method: https://t.me/NEST_BABGiveaway/158139
 Futures website: https://finance.nestprotocol.org
 Product communication group: https://t.me/nestficommunity
 
@@ -293,7 +293,7 @@ Trading volume only counts open NEST, not close NEST
 All delicious meals are done in our kitchen robot!
 
 https://t.me/NESTRedEnvelopesBot`, Markup.inlineKeyboard([
-    [Markup.button.url('🍔 Hamburger', 'https://t.me/NEST_BABGiveaway/141868'), Markup.button.callback('🍕 Pizza', 'pizza')],
+    [Markup.button.url('🍔 Hamburger', 'https://t.me/NEST_BABGiveaway/158139'), Markup.button.callback('🍕 Pizza', 'pizza')],
     [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🍺 Beer', 'beer')],
     [Markup.button.callback('Settlement', 'settlement')],
     [Markup.button.callback('« Back', 'menu')]
@@ -973,7 +973,9 @@ bot.action('send', async (ctx) => {
         } else {
           await lmt.removeTokens(1)
           await ctx.answerCbQuery()
-          res = await ctx.telegram.sendMessage(config.chatId, config.text, {
+          res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
+
+Complete your first futures order and get 70 NEST!`, {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
               [Markup.button.callback('Snatch!', 'snatch')],
