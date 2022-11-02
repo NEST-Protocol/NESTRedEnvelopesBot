@@ -604,7 +604,8 @@ bot.action('settlement', async (ctx) => {
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
       ctx.answerCbQuery()
-      ctx.editMessageText(`Month’s giveaway pool: ${res.data.data.pool} NEST
+      ctx.editMessageText(`Month’s giveaway pool: ${Number(res.data.data.pool).toLocaleString()} NEST
+Month's total transaction amount: ${Number(res.data.data.pool / 0.03).toLocaleString()} NEST
 
 My this month point: ${res.data.data.credit.total}
 1. Successful Invite ${res.data.data.invite.validCount} users: +${res.data.data.credit.detail.invite}
