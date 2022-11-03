@@ -38,7 +38,7 @@ const main = async () => {
         },
       })).catch((e) => console.log(e))
     }
-    console.log("Stop All Snatching Prize Success!")
+    console.log("Stop All Snatching Prize Success!", result.Count)
   } catch (e) {
     console.log(e)
     console.log("Some error occurred.")
