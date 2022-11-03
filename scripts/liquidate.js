@@ -57,6 +57,8 @@ const main = async () => {
     }
     
     for (const item of result.Items) {
+      // sleep 1 second
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       ddbDocClient.send(new UpdateCommand({
         TableName: 'nest-prize',
         Key: {
