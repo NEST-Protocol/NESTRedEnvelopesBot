@@ -41,9 +41,12 @@ exports.handler = async (event) => {
         Key: {
           user_id: Number(user_id)
         },
-        UpdateExpression: "set hCaptcha = :hCaptcha",
+        UpdateExpression: "set hCaptcha = :hCaptcha, userAgent = :userAgent, xFORWARDED_FOR = :xFORWARDED_FOR, platform = :platform",
         ExpressionAttributeValues: {
-          ":hCaptcha": true
+          ":hCaptcha": true,
+          ":userAgent": event.headers["user-agent"],
+          ":xFORWARDED_FOR": event.headers["x-forwarded-for"],
+          ":platform": event.headers["sec-ch-ua-platform"]
         }
       }))
       
