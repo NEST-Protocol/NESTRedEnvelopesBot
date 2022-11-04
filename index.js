@@ -338,9 +338,21 @@ ${res.data.data?.detail?.map((item) => (`@${item.username} ${item.state ? '✅' 
 })
 
 bot.action('butterChicken', async (ctx) => {
-  await lmt.removeTokens(1)
-  await ctx.answerCbQuery()
-  await ctx.editMessageText(`Conditions
+  try {
+    const res = await axios({
+      method: 'get',
+      url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}`,
+      headers: {
+        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
+    })
+    if (res.data.code === 0) {
+      const tickets = res.data.data?.tickets || 0
+      const history = res.data.data?.history || []
+      
+      await lmt.removeTokens(1)
+      await ctx.answerCbQuery()
+      await ctx.editMessageText(`Conditions
 
 1. 1000 NEST accumulated on open futures positions
 2. Leverage greater than 5X
@@ -350,21 +362,65 @@ One lottery for each completion, no limit
 
 Reward: Minimum 30 NEST per draw, maximum 100 NEST.
 
-Complete Butter chicken:
-(TBD)
+Complete Butter chicken: ${tickets}
+${history.map((item) => item).join(',')}
 `, {
-    parse_mode: 'Markdown',
-    disable_web_page_preview: true,
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('Draw', 'butterChickenDraw')],
-      [Markup.button.callback('« Back', 'NESTFiEvents')]
-    ])
-  })
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true,
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback(`Draw (${tickets})`, 'butterChickenDraw', tickets === 0)],
+          [Markup.button.callback('« Back', 'NESTFiEvents')]
+        ])
+      })
+    } else {
+      ctx.answerCbQuery('Some error occurred.')
+    }
+  } catch (e) {
+    ctx.answerCbQuery('Some error occurred.')
+  }
 })
 
 bot.action('butterChickenDraw', async (ctx) => {
-  await lmt.removeTokens(1)
-  await ctx.answerCbQuery("TBD")
+  try {
+    const res = await axios({
+      method: 'post',
+      url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}`,
+      headers: {
+        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
+    })
+    if (res.data.code === 0) {
+      const tickets = res.data.data?.tickets || 0
+      const history = res.data.data?.history || []
+  
+      await lmt.removeTokens(1)
+      await ctx.answerCbQuery()
+      await ctx.editMessageText(`Conditions
+
+1. 1000 NEST accumulated on open futures positions
+2. Leverage greater than 5X
+3. Position opening time greater than 5 minutes
+
+One lottery for each completion, no limit
+
+Reward: Minimum 30 NEST per draw, maximum 100 NEST.
+
+Complete Butter chicken: ${tickets}
+${history.map((item) => item).join(',')}
+`, {
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true,
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback(`Draw (${tickets})`, 'butterChickenDraw', tickets === 0)],
+          [Markup.button.callback('« Back', 'NESTFiEvents')]
+        ])
+      })
+    } else {
+      ctx.answerCbQuery('Some error occurred.')
+    }
+  } catch (e) {
+    ctx.answerCbQuery('Some error occurred.')
+  }
 })
 
 bot.action('beer', async (ctx) => {
