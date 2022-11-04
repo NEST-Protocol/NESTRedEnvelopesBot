@@ -73,7 +73,7 @@ Rewards：Weekly Airdrop $2000$NEST
 
 Distribution time: All rewards are distributed every 7 days
 
-More giveaways: Conditions 400 NEST + 1 BAB
+More giveaways: Conditions 400 NEST + 1 BAB  （10 NEST per day）
 https://t.me/NEST_Community/1609
 BNB chain support
 https://twitter.com/BNBCHAIN/status/1573885005016743938`)
