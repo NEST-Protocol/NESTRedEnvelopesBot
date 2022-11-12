@@ -437,14 +437,15 @@ bot.action('beer', async (ctx) => {
       await ctx.answerCbQuery()
       await ctx.editMessageText(`Conditions
 
-1. Invite 10 people to complete the Hamburger mission and make a total personal transaction of more than 50,000 NEST to the whitelist.
+1. Invite 5 people to complete the Hamburger and have a total personal futures volume of 50,000 NEST or a total personal futures volume of 80,000 NEST.
 2. You will receive a monthly fixed percentage bonus and ranking bonus
+(All trading volumes must meet 5x leverage, 5 minutes)
 
 Reward:
 3% of the total monthly trading volume is awarded to the whitelist owners. Of this 3% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
 
 Complete Beer:
-Invite 10 people to complete the Hamburger mission. ${res.data.data?.inviteState ? '✅' : '❌'}
+Invite 5 people to complete the Hamburger mission or make a total personal transaction of more than 80,000 NEST. ${res.data.data?.inviteState ? '✅' : '❌'}
 make a total personal transaction of more than 50,000 NEST. ${res.data.data?.txState ? '✅' : '❌'}
 `, {
         parse_mode: 'Markdown',
