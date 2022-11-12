@@ -6,7 +6,7 @@ const NETWORK_URL = 'https://bsc-dataseed.binance.org/'
 
 const NEST_ADDRESS = '0x98f8669f6481ebb341b522fcd3663f79a3d1a6a7'
 
-const NCI_ADDRESS = ''
+const NCI_ADDRESS = '0xCBB79049675F06AFF618CFEB74c2B0Bf411E064a'
 
 const provider = new ethers.providers.JsonRpcProvider(NETWORK_URL)
 
