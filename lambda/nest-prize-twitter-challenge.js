@@ -49,7 +49,7 @@ exports.handler = async (event) => {
       }),
       axios({
         method: 'GET',
-        url: `https://api.twitter.com/2/users/${twitterId}/tweets?max_results=50&expansions=referenced_tweets.id.author_id`,
+        url: `https://api.twitter.com/2/users/${twitterId}/tweets?expansions=referenced_tweets.id.author_id`,
         headers: {
           'Authorization': `Bearer ${twitterToken}`
         }
