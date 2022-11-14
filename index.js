@@ -447,7 +447,7 @@ Reward:
 Complete Beer:
 Invite 5 people to complete the Hamburger mission and make a total personal transaction of more than 50,000 NEST. ${res.data.data?.inviteState ? '✅' : '❌'}
 or
-make a total personal transaction of more than 50,000 NEST. ${res.data.data?.txState ? '✅' : '❌'}
+make a total personal transaction of more than 80,000 NEST. ${res.data.data?.txState ? '✅' : '❌'}
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
