@@ -58,7 +58,7 @@ exports.handler = async (event) => {
     }
     const req = await axios({
       method: 'GET',
-      url: `https://api.twitter.com/2/users/${twitterId}/following?max_results=1000`,
+      url: `https://api.twitter.com/2/users/${twitterId}/following?max_results=50`,
       headers: {
         'Authorization': `Bearer ${twitterToken}`
       }
