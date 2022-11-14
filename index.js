@@ -861,6 +861,10 @@ bot.action('snatch', async (ctx) => {
       await ctx.answerCbQuery('Please Update Wallet First!')
       return
     }
+    if (user?.blocked) {
+      await ctx.answerCbQuery('Sorry, you are blocked.')
+      return
+    }
     if (user?.twitter_id === undefined || user?.twitter_id === '') {
       await ctx.answerCbQuery('Please Authorize Twitter First!')
       return
@@ -1036,6 +1040,11 @@ bot.on('message', async (ctx) => {
       }
     }))
     const intent = queryUserRes.Item?.intent || undefined
+    if (queryUserRes.Item?.blocked) {
+      await ctx.reply("Sorry, you are blocked.")
+      return
+    }
+    
     if (intent === undefined) {
     } else if (intent === 'setConfig') {
       try {
