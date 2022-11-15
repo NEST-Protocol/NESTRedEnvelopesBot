@@ -201,13 +201,59 @@ bot.command('settwitter', async (ctx) => {
   }
   await lmt.removeTokens(1)
   try {
-    await ctx.reply(`Please follow our twitter and click the 'Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-      [Markup.button.url('🐦 Follow', 'https://twitter.com/NEST_Protocol'), Markup.button.url('🤖️ Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
-      [Markup.button.callback('» Next', 'setUserTwitter')],
+    await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
+      [Markup.button.callback('» Next', 'inputUserTwitter')],
     ]))
   } catch (e) {
     await ctx.reply('Verify First!')
   }
+  // try {
+  //   await ctx.reply(`Please follow our twitter and click the 'Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+  //     [Markup.button.url('🐦 Follow', 'https://twitter.com/NEST_Protocol'), Markup.button.url('🤖️ Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
+  //     [Markup.button.callback('» Next', 'setUserTwitter')],
+  //   ]))
+  // } catch (e) {
+  //   await ctx.reply('Verify First!')
+  // }
+})
+
+bot.action('inputUserTwitter', async (ctx) => {
+  const isBot = ctx.update.callback_query.from.is_bot
+  if (isBot) {
+    return
+  }
+  const queryUserRes = await ddbDocClient.send(new GetCommand({
+    TableName: 'nest-prize-users',
+    Key: {
+      user_id: ctx.update.callback_query.from.id,
+    },
+  }))
+  const hCaptcha = queryUserRes.Item?.hCaptcha || undefined
+  if (hCaptcha === undefined) {
+    await lmt.removeTokens(1)
+    try {
+      await ctx.editMessageText(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
+        [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
+        [Markup.button.callback('» Next', 'inputUserTwitter')],
+      ]))
+    } catch (e) {
+      await ctx.answerCbQuery('Verify First!')
+    }
+    return
+  }
+  await ddbDocClient.send(new UpdateCommand({
+    TableName: 'nest-prize-users',
+    Key: {
+      user_id: ctx.update.callback_query.from.id,
+    },
+    UpdateExpression: 'set intent = :intent',
+    ExpressionAttributeValues: {
+      ':intent': 'setUserTwitter',
+    }
+  }))
+  await lmt.removeTokens(1)
+  await ctx.reply('Please input your twitter name with @')
 })
 
 bot.action('menu', async (ctx) => {
@@ -233,14 +279,12 @@ Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_quer
 
 Giveaway events, click on NESTFi Events.
 
-/help
-
-----------------
-🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!`, {
+/help`, {
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
         [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
         [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
+        [Markup.button.url('Star Github', 'https://github.com/NEST-Protocol/NEST-Oracle-V4.0')]
       ])
     })
   } catch (e) {
@@ -391,7 +435,7 @@ bot.action('butterChickenDraw', async (ctx) => {
     if (res.data.code === 0) {
       const tickets = res.data.data?.tickets || 0
       const history = res.data.data?.history || []
-  
+      
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
       await ctx.editMessageText(`Conditions
@@ -479,15 +523,13 @@ Github repository: [NEST-PVM-V1.0](https://github.com/NEST-Protocol/NEST-PVM-V1.
 *NEST Oracle*
 NEST oracle is the only truly decentralized oracle on the market today.
 Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0). [How to Mining](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-mining/), [How to Call Price](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-call-price)
-
-----------------
-🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
 `, {
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
     ...Markup.inlineKeyboard([
       [Markup.button.url('Follow Github', 'https://github.com/NEST-Protocol'), Markup.button.url('Developer Doc', 'https://nestprotocol.org/docs/PVM-Technical-Reference/')],
       [Markup.button.url('New Issues', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues/new'), Markup.button.callback('« Back', 'menu')],
+      [Markup.button.url('Star Github', 'https://github.com/NEST-Protocol/NEST-Oracle-V4.0')]
     ])
   })
 })
@@ -793,13 +835,12 @@ bot.action('send', async (ctx) => {
         } else {
           await lmt.removeTokens(1)
           await ctx.answerCbQuery()
-          res = await ctx.telegram.sendMessage(config.chatId, `${config.text}
-
-Complete your first futures order and [get 70 NEST](https://t.me/NEST_BABGiveaway/158139)`, {
+          res = await ctx.telegram.sendMessage(config.chatId, config.text, {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
               [Markup.button.callback('Snatch!', 'snatch')],
-              [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot'), Markup.button.url('🤩 Star', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')]
+              [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot'), Markup.button.url('🤩 Star', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
+              [Markup.button.url(`Get 70 NEST`, 'https://t.me/NEST_BABGiveaway/158139')]
             ])
           })
         }
@@ -865,8 +906,8 @@ bot.action('snatch', async (ctx) => {
       await ctx.answerCbQuery('Sorry, you are blocked.')
       return
     }
-    if (user?.twitter_id === undefined || user?.twitter_id === '') {
-      await ctx.answerCbQuery('Please Authorize Twitter First!')
+    if (user?.twitter_name === undefined) {
+      await ctx.answerCbQuery('Please input Twitter First!')
       return
     }
     try {
@@ -976,13 +1017,12 @@ bot.action('snatch', async (ctx) => {
           await ctx.reply(`🐑 *Here is the Leader Sheep*
 
 @${ctx.update.callback_query.from.username} have got ${amount} NEST!
-
-Click [here](https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}) to check all snatchers.
-
-Complete your first futures order and [get 70 NEST](https://t.me/NEST_BABGiveaway/158139)
-🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
 `,
               {
+                ...Markup.inlineKeyboard([
+                  [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`)],
+                  [Markup.button.url('Get 70 NEST', 'https://t.me/NEST_BABGiveaway/158139')],
+                ]),
                 parse_mode: 'Markdown',
                 disable_web_page_preview: true,
                 reply_to_message_id: ctx.update.callback_query.message.message_id,
@@ -994,17 +1034,15 @@ Complete your first futures order and [get 70 NEST](https://t.me/NEST_BABGiveawa
 
 ${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.amount} NEST!`).join('\n')}
 @${ctx.update.callback_query.from.username} have got ${amount} NEST!
-
-Click [here](https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}) to check all snatchers.
-
-Complete your first futures order and [get 70 NEST](https://t.me/NEST_BABGiveaway/158139)
-🌟When [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0) star reaches 1024, there will be surprises!
-`,
-              {
-                parse_mode: 'Markdown',
-                disable_web_page_preview: true,
-                reply_to_message_id: ctx.update.callback_query.message.message_id,
-              })
+`, {
+            ...Markup.inlineKeyboard([
+              [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`)],
+              [Markup.button.url('Get 70 NEST', 'https://t.me/NEST_BABGiveaway/158139')],
+            ]),
+            parse_mode: 'Markdown',
+            disable_web_page_preview: true,
+            reply_to_message_id: ctx.update.callback_query.message.message_id,
+          })
         }
         ctx.telegram.sendMessage(ctx.update.callback_query.from.id, `🎉 *You has snatched ${amount} NEST*
 
@@ -1135,6 +1173,38 @@ auth: ${config.auth}
         ctx.reply('Please input a valid wallet address.', {
           reply_to_message_id: ctx.message.message_id,
         })
+      }
+    } else if (intent === 'setUserTwitter') {
+      if (input.startsWith('@')) {
+        try {
+          await ddbDocClient.send(new UpdateCommand({
+            TableName: 'nest-prize-users',
+            Key: {
+              user_id: ctx.message.from.id,
+            },
+            UpdateExpression: 'SET twitter_name = :tn, hCaptcha = :hCaptcha',
+            ExpressionAttributeValues: {
+              ':tn': input.slice(1),
+              ':hCaptcha': null,
+            }
+          }))
+          await lmt.removeTokens(1)
+          ctx.reply(`Your twitter has updated: ${input}`, Markup.inlineKeyboard([
+            [Markup.button.callback('« Back', 'menu')],
+            [Markup.button.callback('🤩', 'forDeveloper')],
+          ]))
+        } catch (e) {
+          await lmt.removeTokens(1)
+          ctx.reply('Some error occurred.', {
+            reply_to_message_id: ctx.message.message_id,
+            ...Markup.inlineKeyboard([
+              [Markup.button.callback('« Back', 'menu')],
+              [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
+            ])
+          })
+        }
+      } else {
+        ctx.reply('Please input a valid twitter account start with @.')
       }
     }
   } catch (e) {
