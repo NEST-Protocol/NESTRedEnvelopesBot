@@ -176,25 +176,6 @@ bot.action('inputUserTwitter', async (ctx) => {
   if (isBot) {
     return
   }
-  const queryUserRes = await ddbDocClient.send(new GetCommand({
-    TableName: 'nest-prize-users',
-    Key: {
-      user_id: ctx.update.callback_query.from.id,
-    },
-  }))
-  const hCaptcha = queryUserRes.Item?.hCaptcha || undefined
-  if (hCaptcha === undefined) {
-    await lmt.removeTokens(1)
-    try {
-      await ctx.editMessageText(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-        [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
-        [Markup.button.callback('» Next', 'inputUserTwitter')],
-      ]))
-    } catch (e) {
-      await ctx.answerCbQuery('Verify First!')
-    }
-    return
-  }
   await ddbDocClient.send(new UpdateCommand({
     TableName: 'nest-prize-users',
     Key: {
@@ -521,26 +502,6 @@ bot.action('setUserWallet', async (ctx) => {
     return
   }
   try {
-    const queryUserRes = await ddbDocClient.send(new GetCommand({
-      TableName: 'nest-prize-users',
-      Key: {
-        user_id: ctx.update.callback_query.from.id,
-      },
-    }))
-    const hCaptcha = queryUserRes.Item?.hCaptcha || undefined
-    if (hCaptcha === undefined) {
-      await lmt.removeTokens(1)
-      try {
-        await ctx.editMessageText(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-          [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
-          [Markup.button.callback('» Next', 'setUserWallet')],
-        ]))
-      } catch (e) {
-        await ctx.answerCbQuery('Verify First!')
-      }
-      return
-    }
-    
     await ddbDocClient.send(new UpdateCommand({
       TableName: 'nest-prize-users',
       Key: {
@@ -554,46 +515,6 @@ bot.action('setUserWallet', async (ctx) => {
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
     await ctx.editMessageText('Please send your wallet address:')
-  } catch (e) {
-    console.log(e)
-    await lmt.removeTokens(1)
-    await ctx.answerCbQuery("Some error occurred.")
-  }
-})
-
-bot.action('setUserTwitter', async (ctx) => {
-  const isBot = ctx.update.callback_query.from.is_bot
-  if (isBot) {
-    return
-  }
-  try {
-    const queryUserRes = await ddbDocClient.send(new GetCommand({
-      TableName: 'nest-prize-users',
-      Key: {
-        user_id: ctx.update.callback_query.from.id,
-      },
-    }))
-    const hCaptcha = queryUserRes.Item?.hCaptcha || undefined
-    if (hCaptcha === undefined) {
-      await lmt.removeTokens(1)
-      try {
-        await ctx.editMessageText(`Please follow our twitter and click the '🤖️ Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-          [Markup.button.url('🐦 Follow', 'https://twitter.com/NEST_Protocol'), Markup.button.url('🤖️ Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.update.callback_query.from.id}`)],
-          [Markup.button.callback('» Next', 'setUserTwitter')],
-        ]))
-      } catch (e) {
-        await ctx.answerCbQuery('Verify First!')
-      }
-      return
-    }
-    try {
-      await ctx.editMessageText("Click Authorize button to bind your twitter, then click 'I have Authorized' to update.", Markup.inlineKeyboard([
-        [Markup.button.url('Authorize', `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=dU9nMk54dnQzc0UtNjNwbDRrWno6MTpjaQ&redirect_uri=https://nestdapp.io/twitter&scope=tweet.read%20users.read%20follows.read%20like.read%20offline.access&state=${hashCode(botName)}_${ctx.update.callback_query.from.id}&code_challenge=challenge&code_challenge_method=plain`)],
-        [Markup.button.callback('I have Authorized', 'checkTwitter')],
-      ]))
-    } catch (e) {
-      await ctx.answerCbQuery()
-    }
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
