@@ -17,7 +17,7 @@ exports.handler = async (event) => {
     }
   }
   
-  if (!chat_id) {
+  if (chat_id) {
     try {
       const res = await axios({
         method: 'get',
