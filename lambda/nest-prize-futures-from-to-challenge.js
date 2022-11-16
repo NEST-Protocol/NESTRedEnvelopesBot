@@ -1,16 +1,41 @@
 const axios = require("axios");
 
 const apiKey = process.env.APIKEY
+const botToken = process.env.BOT_TOKEN
+
 exports.handler = async (event) => {
   const wallet = JSON.parse(event?.body)?.wallet ?? undefined
   const total = event?.queryStringParameters?.total ?? undefined
   const from = event?.queryStringParameters?.from ?? undefined
   const to = event?.queryStringParameters?.to ?? undefined
+  const chat_id = event?.queryStringParameters?.chat_id ?? undefined
   
   if (wallet === undefined) {
     return {
       statusCode: 200,
       body: false
+    }
+  }
+  
+  if (!chat_id) {
+    try {
+      const res = await axios({
+        method: 'get',
+        timeout: 3000,
+        url: `https://api.telegram.org/bot${botToken}/getChatMember?chat_id=${chat_id}&user_id=${user_id}`
+      })
+    
+      if (res.data?.result?.status === 'left') {
+        return {
+          statusCode: 200,
+          body: false
+        }
+      }
+    } catch (e) {
+      return {
+        statusCode: 200,
+        body: false
+      }
     }
   }
   
