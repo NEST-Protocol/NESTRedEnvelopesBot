@@ -1006,7 +1006,7 @@ bot.action('snatch', async (ctx) => {
               {
                 ...Markup.inlineKeyboard([
                   [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`), Markup.button.url('Get 50 NEST', 'https://t.me/NEST_BABGiveaway/182358')],
-                  [Markup.button.url('Win everything with NEST', 'https://github.com/DoctorLi2042/WinEverything')]
+                  [Markup.button.url('Win everything with NEST', 'https://wineverything.on.fleek.co/')]
                 ]),
                 parse_mode: 'Markdown',
                 disable_web_page_preview: true,
@@ -1022,7 +1022,7 @@ ${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.
 `, {
             ...Markup.inlineKeyboard([
               [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`), Markup.button.url('Get 50 NEST', 'https://t.me/NEST_BABGiveaway/182358')],
-              [Markup.button.url('Win everything with NEST', 'https://github.com/DoctorLi2042/WinEverything')]
+              [Markup.button.url('Win everything with NEST', 'https://wineverything.on.fleek.co/')]
             ]),
             parse_mode: 'Markdown',
             disable_web_page_preview: true,
