@@ -8,8 +8,6 @@ const {RateLimiter} = require("limiter");
 // Command
 // start - show the menu
 // admin - admin portal
-// setwallet - change your wallet address
-// settwitter - change your twitter address
 
 // limit of send message to different chat
 const lmt = new RateLimiter({
@@ -115,8 +113,8 @@ https://twitter.com/BNBCHAIN/status/1573885005016743938`)
     await lmt.removeTokens(1)
     ctx.reply(`Welcome to NEST Prize
 
-You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}, /setwallet
-You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
+You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'},
+You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'},
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.from.id}
 
@@ -126,6 +124,7 @@ Giveaway events, click on NESTFi Events.
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
         [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet')],
         [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
         [Markup.button.url('Star Github', 'https://github.com/NEST-Protocol/NEST-Oracle-V4.0')]
       ])
@@ -150,10 +149,6 @@ bot.command('help', async (ctx) => {
 
 You can control me by sending these commands:
 
-*Edit Info*
-/setwallet - change your wallet address
-/settwitter - change your twitter account
-
 *Admin Portal*
 /admin - send prizes
   `, {
@@ -174,46 +169,6 @@ bot.command('admin', async (ctx) => {
   await ctx.reply(`NEST Prize Admin Portal`, Markup.inlineKeyboard([
     [Markup.button.callback('Send', 'setConfig')],
   ]))
-})
-
-bot.command('setwallet', async (ctx) => {
-  const chat_id = ctx.chat.id
-  if (chat_id < 0) {
-    return
-  }
-  await lmt.removeTokens(1)
-  try {
-    await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
-      [Markup.button.callback('» Next', 'setUserWallet')],
-    ]))
-  } catch (e) {
-    await ctx.reply('Verify First!')
-  }
-})
-
-bot.command('settwitter', async (ctx) => {
-  const chat_id = ctx.chat.id
-  if (chat_id < 0) {
-    return
-  }
-  await lmt.removeTokens(1)
-  try {
-    await ctx.reply(`Please click the 'To Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-      [Markup.button.url('To Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
-      [Markup.button.callback('» Next', 'inputUserTwitter')],
-    ]))
-  } catch (e) {
-    await ctx.reply('Verify First!')
-  }
-  // try {
-  //   await ctx.reply(`Please follow our twitter and click the 'Verify' button to complete the CAPTCHA, then click '» Next' to continue.`, Markup.inlineKeyboard([
-  //     [Markup.button.url('🐦 Follow', 'https://twitter.com/NEST_Protocol'), Markup.button.url('🤖️ Verify', `https://ep6wilhzkgmikzeyhbqbsidorm0biins.lambda-url.ap-northeast-1.on.aws/?user_id=${ctx.from.id}`)],
-  //     [Markup.button.callback('» Next', 'setUserTwitter')],
-  //   ]))
-  // } catch (e) {
-  //   await ctx.reply('Verify First!')
-  // }
 })
 
 bot.action('inputUserTwitter', async (ctx) => {
@@ -270,8 +225,8 @@ bot.action('menu', async (ctx) => {
     await ctx.answerCbQuery()
     await ctx.editMessageText(`Welcome to NEST Prize
 
-You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'}, /setwallet
-You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'}, /settwitter
+You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'},
+You twitter: ${queryUserRes?.Item?.twitter_name || 'Not set yet'},
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
@@ -281,6 +236,7 @@ Giveaway events, click on NESTFi Events.
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
         [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet')],
         [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
         [Markup.button.url('Star Github', 'https://github.com/NEST-Protocol/NEST-Oracle-V4.0')]
       ])
