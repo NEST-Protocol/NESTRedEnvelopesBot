@@ -669,12 +669,11 @@ bot.action('checkTwitter', async (ctx) => {
         Key: {
           user_id: ctx.update.callback_query.from.id,
         },
-        UpdateExpression: 'set twitter_name = :twitter_name, twitter_id = :twitter_id, twitter_token = :twitter_token, hCaptcha = :hCaptcha',
+        UpdateExpression: 'set twitter_name = :twitter_name, twitter_id = :twitter_id, twitter_token = :twitter_token',
         ExpressionAttributeValues: {
           ':twitter_name': twitter_name,
           ':twitter_id': twitter_id,
           ':twitter_token': access_token,
-          ':hCaptcha': null,
         }
       }))
       ctx.editMessageText("You have authorized successfully.", Markup.inlineKeyboard([
@@ -1133,10 +1132,9 @@ auth: ${config.auth}
             Key: {
               user_id: ctx.message.from.id,
             },
-            UpdateExpression: 'SET wallet = :wallet, hCaptcha = :hCaptcha',
+            UpdateExpression: 'SET wallet = :wallet',
             ExpressionAttributeValues: {
               ':wallet': input,
-              ':hCaptcha': null,
             }
           }))
           await lmt.removeTokens(1)
@@ -1168,10 +1166,9 @@ auth: ${config.auth}
             Key: {
               user_id: ctx.message.from.id,
             },
-            UpdateExpression: 'SET twitter_name = :tn, hCaptcha = :hCaptcha',
+            UpdateExpression: 'SET twitter_name = :tn',
             ExpressionAttributeValues: {
               ':tn': input.slice(1),
-              ':hCaptcha': null,
             }
           }))
           await lmt.removeTokens(1)
