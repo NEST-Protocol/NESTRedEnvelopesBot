@@ -977,8 +977,8 @@ amount: ${config.amount},
 max: ${config.max},
 min: ${config.min},
 text: ${config.text},
-chatId: ${config.chatId}
-cover: ${config.cover}
+chatId: ${config.chatId},
+cover: ${config.cover},
 auth: ${config.auth}
 `, {
               disable_web_page_preview: true,
