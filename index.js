@@ -84,10 +84,12 @@ https://twitter.com/BNBCHAIN/status/1573885005016743938`)
       },
       UpdateExpression: 'set invite_code = :invite_code, username = :username',
       ExpressionAttributeValues: {
-        ':invite_code': Number(ctx.startPayload),
+        ':invite_code': Number(ctx.startPayload) || 0,
         ':username': ctx.from.username || '',
       }
-    }))
+    })).catch(() => {
+      console.log('input inviter error')
+    })
   } else {
     // update new username, if not exist, create new one
     await ddbDocClient.send(new UpdateCommand({
@@ -99,7 +101,9 @@ https://twitter.com/BNBCHAIN/status/1573885005016743938`)
       ExpressionAttributeValues: {
         ':username': ctx.from.username || '',
       }
-    }))
+    })).catch(() => {
+      console.log('update user error')
+    })
   }
   // query user in db
   try {
