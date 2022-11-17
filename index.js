@@ -981,7 +981,6 @@ chatId: ${config.chatId}
 cover: ${config.cover}
 auth: ${config.auth}
 `, {
-              parse_mode: 'Markdown',
               disable_web_page_preview: true,
               ...Markup.inlineKeyboard([
                 [Markup.button.callback('Checked, Send Now!', 'send')],
