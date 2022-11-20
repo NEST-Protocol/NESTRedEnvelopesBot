@@ -16,40 +16,28 @@ exports.handler = async (event) => {
   }
   
   try {
-    const res = await axios(`https://lqccmohjauzfdjw3b5xyq452f40uhghw.lambda-url.ap-northeast-1.on.aws/?nest=${nest_min_value}`, {
-      method: 'POST',
-      data: JSON.stringify({
-        "wallet": wallet,
+    const res = await Promise.all([
+      axios(`https://lqccmohjauzfdjw3b5xyq452f40uhghw.lambda-url.ap-northeast-1.on.aws/?nest=${nest_min_value}`, {
+        method: 'POST',
+        data: JSON.stringify({
+          "wallet": wallet,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        }
       }),
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    if (!res.data) {
-      return {
-        statusCode: 200,
-        body: false
-      }
-    }
-  } catch (e) {
-    return {
-      statusCode: 200,
-      body: false
-    }
-  }
-  
-  
-  try {
-    const res = await axios(`https://work.parasset.top/workbench-api/bot/futures/position?from=${from}&to=2022-12-30&level=${lever}&minute=${minute}&total=${total}`, {
-      method: 'POST',
-      data: JSON.stringify({
-        "wallet": wallet,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    if (!res.data) {
+      axios(`https://work.parasset.top/workbench-api/bot/futures/position?from=${from}&to=2022-12-30&level=${lever}&minute=${minute}&total=${total}`, {
+        method: 'POST',
+        data: JSON.stringify({
+          "wallet": wallet,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+    ])
+    
+    if (!res[0].data || !res[1].data) {
       return {
         statusCode: 200,
         body: false
