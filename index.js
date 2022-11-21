@@ -50,31 +50,6 @@ bot.start(async (ctx) => {
     return
   }
   await lmt.removeTokens(1)
-  ctx.reply(`Total prize of $30,000 NEST tokens. For a period of 4 months.
-
-How to join?
-1. Join: https://t.me/NEST_BABGiveaway
-2. Join: https://t.me/NESTRedEnvelopesBot
-Add your wallet address in the bot.update your twitter.
-3. Click: on the giveaway link at the pin of the group.
-4. Click: snatch
-
-video teaching
-https://t.me/NEST_BABGiveaway/146058
-
-If you are a newbie, you must complete the first 3 steps. When you're done you just need to click snatch to get the giveaway!
-
-Rewards：Weekly Airdrop $2000$NEST
-1. Have BAB NFT or have 100 NEST, you can get 3 NEST per day.
-2.Grab 10,000 NEST random giveaways per day!
-3.Invite a reward 10 NEST
-
-Distribution time: All rewards are distributed every 7 days
-
-More giveaways: Conditions 400 NEST + 1 BAB  （10 NEST per day）
-https://t.me/NEST_Community/1609
-BNB chain support
-https://twitter.com/BNBCHAIN/status/1573885005016743938`)
   if (ctx.startPayload && Number(ctx.startPayload) !== ctx.from.id) {
     // Update new username and new invite code, not myself
     await ddbDocClient.send(new UpdateCommand({
@@ -236,38 +211,32 @@ Giveaway events, click on NESTFi Events.
 bot.action('NESTFiEvents', async (ctx) => {
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
-  await ctx.editMessageText(`To celebrate the NEST Fi product upgrade, NEST DAO is offering over 5 million NEST tokens to cook 3 delicious meals and beers for everyone. The new upgrade is based entirely on suggestions from the community and we have increased the leverage multiplier to 20x and added candlesticks. The advantages we have always had are: no holding costs and using oracle to access price information.
-Hamburger（First Order Bonus）
-Conditions（50 NEST per person）
-1. 200 NEST accumulated on open futures positions
-2. Leverage greater than 5X
-3. Position opening time greater than 5 minutes
-*No need to close an order to receive
-Collection method: https://t.me/NEST_BABGiveaway/141868
-Futures website: https://finance.nestprotocol.org
-Product communication group: https://t.me/nestficommunity
-Pizza （Invitation Bonus）
-1. Invite one person to complete the hamburger reward 20 NEST
-2. For each person you invite, you will receive a bonus of 1% of the amount of each open position. (Bonus Pool: 200,000 NEST)
-Butter chicken （Volume Bonus）
-Requirements: 1. For every accumulated transaction of 500 NEST, you will get a lucky draw. 2. The order duration must be greater than 5 minutes and the leverage must be 5 times
-Reward: A minimum of 30 NEST and a maximum of 100 NEST for each draw.
-Beer（Whitelist Reward）
-Rules: Invite 5 people to complete the hamburger and have a total personal futures volume of 50,000 NEST or a total personal futures volume of 80,000 NEST. (All trading volumes must meet 5x leverage, 5 minutes)
-Reward:
-3% of the total monthly trading volume is awarded to the whitelist owners. Of this 3% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
-For example, if 2,000 people all complete 50,000 NEST of futures volume, then the total volume for that month is 100 million. 3% is used as a bonus, so that is a bonus pool of 3 million. 90% of this 3 million is distributed based on ranking and 10% is distributed equally to everyone.
-The ranking is based on the sum of the following additional points
-+5 points for invitations greater than 10 people, +2 points for invitees’ transactions greater than 100,000 NEST, +2 points for individual transactions greater than 50,000 NEST
-Total trading volume refers to the total trading volume of all those who participated in the event
-Trading volume only counts open NEST, not close NEST
-All delicious meals are done in our kitchen robot!
-https://t.me/NESTRedEnvelopesBot`, Markup.inlineKeyboard([
-    [Markup.button.url('🍔 Hamburger', 'https://t.me/NEST_BABGiveaway/182358'), Markup.button.callback('🍕 Pizza', 'pizza')],
-    [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🍺 Beer', 'beer')],
-    [Markup.button.callback('Settlement', 'settlement')],
-    [Markup.button.callback('« Back', 'menu')]
-  ]))
+  await ctx.editMessageText(`**Event Introduction**
+  
+🍔 Hamburger (New user First Order Bonus)
+Bonus: 50 NEST
+
+🍕 Pizza (Invitation Bonus)
+Bonus: 20 NEST
+
+🐣 Butter chicken (Volume Bonus)
+Bonus: Each time you accumulate or complete 500 NEST transactions, the maximum reward is 130 NEST
+
+🍺 Beer (Whitelist Reward)
+Bonus: 3% of the total trading volume as a bonus pool.
+
+With NEST black NFT all rewards X1.3, yellow NFT all rewards X1.15, red NFT all rewards X1.1
+https://finance.nestprotocol.org/#/NFTAuction
+Details：https://medium.com/@nest-protocol/new-nest-finance-event-food-festival-41933fda937c`, {
+    parse_mode: 'Markdown',
+    disable_web_page_preview: true,
+   ...Markup.inlineKeyboard([
+     [Markup.button.url('🍔 Hamburger', 'https://t.me/NEST_BABGiveaway/182358'), Markup.button.callback('🍕 Pizza', 'pizza')],
+     [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🍺 Beer', 'beer')],
+     [Markup.button.callback('Settlement', 'settlement')],
+     [Markup.button.callback('« Back', 'menu')]
+   ])
+  })
 })
 
 bot.action('pizza', async (ctx) => {
@@ -338,7 +307,7 @@ ${history.map((item) => item).join(',')}
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
         ...Markup.inlineKeyboard([
-          [Markup.button.callback(`Draw (${tickets})`, 'butterChickenDraw', tickets === 0)],
+          [Markup.button.callback(`Draw (${tickets})`, 'butterChickenDraw', tickets <= 0)],
           [Markup.button.callback('« Back', 'NESTFiEvents')]
         ])
       })
@@ -406,19 +375,11 @@ bot.action('beer', async (ctx) => {
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
-      await ctx.editMessageText(`Conditions
-
-1. Invite 5 people to complete the Hamburger and have a total personal futures volume of 50,000 NEST or a total personal futures volume of 80,000 NEST.
-2. You will receive a monthly fixed percentage bonus and ranking bonus
-(All trading volumes must meet 5x leverage, 5 minutes)
+      await ctx.editMessageText(`Complete Beer:
+Make a total personal transaction of more than 10,000 NEST. ${res.data.data?.txState ? '✅' : '❌'}
 
 Reward:
 3% of the total monthly trading volume is awarded to the whitelist owners. Of this 3% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
-
-Complete Beer:
-Invite 5 people to complete the Hamburger mission and make a total personal transaction of more than 50,000 NEST. ${res.data.data?.inviteState ? '✅' : '❌'}
-or
-make a total personal transaction of more than 80,000 NEST. ${res.data.data?.txState ? '✅' : '❌'}
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
@@ -585,6 +546,7 @@ My this month point: ${res.data.data.credit.total}
 1. Successful Invite ${res.data.data.invite.validCount} users: +${res.data.data.credit.detail.invite}
 2. Invitee: +${res.data.data.credit.detail.inviterTx}
 3. My transaction amount ${res.data.data?.myTx || '0'} NEST: +${res.data.data.credit.detail.myTx}
+4. invitee ${res.data.data.invite.validCount} completes a cumulative transaction volume of 10,000 NEST. +${res.data.data.credit.detail.inviteValid}
 
 My this month giveaway: ${res.data.data.balance.total} NEST
 1. Invite ${res.data.data.invite.validCount} users, get ${res.data.data.balance.detail.invite} NEST
