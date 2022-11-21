@@ -342,7 +342,7 @@ bot.action('butterChickenDraw', async (ctx) => {
 
 One lottery for each completion, no limit
 
-Reward: Minimum 30 NEST per draw, maximum 100 NEST.
+Reward: Minimum 50 NEST per draw, maximum 100 NEST.
 
 Complete Butter chicken: ${tickets}
 ${history.map((item) => item).join(',')}
