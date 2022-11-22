@@ -300,6 +300,7 @@ bot.action('butterChicken', async (ctx) => {
 One lottery for each completion, no limit
 
 Reward: Minimum 30 NEST per draw, maximum 100 NEST.
+Butter chicken updated every hour
 
 Complete Butter chicken: ${tickets}
 ${history.map((item) => item).join(',')}
@@ -343,6 +344,7 @@ bot.action('butterChickenDraw', async (ctx) => {
 One lottery for each completion, no limit
 
 Reward: Minimum 30 NEST per draw, maximum 100 NEST.
+Butter chicken updated every hour
 
 Complete Butter chicken: ${tickets}
 ${history.map((item) => item).join(',')}
