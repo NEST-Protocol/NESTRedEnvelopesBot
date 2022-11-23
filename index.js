@@ -233,10 +233,35 @@ Details：https://medium.com/@nest-protocol/new-nest-finance-event-food-festival
    ...Markup.inlineKeyboard([
      [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/21121'), Markup.button.callback('🍕 Pizza', 'pizza')],
      [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🍺 Beer', 'beer')],
-     [Markup.button.url('Rank', 'https://udisqjnf4uy2hpnmcbmcupenla0pcjuc.lambda-url.ap-northeast-1.on.aws/'), Markup.button.callback('Settlement', 'settlement')],
+     [Markup.button.callback('Rank', 'rank'), Markup.button.callback('Settlement', 'settlement')],
      [Markup.button.callback('« Back', 'menu')]
    ])
   })
+})
+
+bot.action('rank', async (ctx) => {
+  try {
+    const res = await axios({
+      method: 'get',
+      timeout: 3000,
+      url: `https://work.parasset.top/workbench-api/activity/info/integral/ranking`,
+      headers: {
+        "Authorization": `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
+    })
+    
+    if (res.data.data) {
+      ctx.editMessageText(`Rank
+      
+${res.data.data.map((item, index) => `${index + 1}. ${item.wallet.slice(0, 6)}...${item.wallet.slice(-4)} ${item.total}`).join('\n')}`, {
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback('« Back', 'NESTFiEvents')]
+        ])
+      })
+    }
+  } catch (e) {
+    console.log(e)
+  }
 })
 
 bot.action('pizza', async (ctx) => {
