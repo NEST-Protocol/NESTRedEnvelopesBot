@@ -17,7 +17,7 @@ exports.handler = async () => {
         body: `
 Ranking:
 
-${res.data.map((i, index) => `${index + 1}. ${i.wallet.slice(0, 4)}...${i.wallet.slice(-4, 0)} total: ${i.total}`).join("\n")}
+${res.data.data.map((i, index) => `${index + 1}. ${i.wallet.slice(0, 6)}...${i.wallet.slice(-4, -1)} total: ${i.total}`).join("\n")}
 `
       }
     } else {

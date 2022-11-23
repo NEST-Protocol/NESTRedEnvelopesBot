@@ -233,7 +233,7 @@ Details：https://medium.com/@nest-protocol/new-nest-finance-event-food-festival
    ...Markup.inlineKeyboard([
      [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/21121'), Markup.button.callback('🍕 Pizza', 'pizza')],
      [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🍺 Beer', 'beer')],
-     [Markup.button.callback('Settlement', 'settlement')],
+     [Markup.button.url('Rank', 'https://udisqjnf4uy2hpnmcbmcupenla0pcjuc.lambda-url.ap-northeast-1.on.aws/'), Markup.button.callback('Settlement', 'settlement')],
      [Markup.button.callback('« Back', 'menu')]
    ])
   })
