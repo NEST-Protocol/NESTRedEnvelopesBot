@@ -541,19 +541,13 @@ bot.action('settlement', async (ctx) => {
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
       ctx.answerCbQuery()
-      ctx.editMessageText(`Month’s giveaway pool: ${Number(res.data.data.pool).toLocaleString()} NEST
-Month's total transaction amount: ${Number(res.data.data.pool / 0.03).toLocaleString()} NEST
-
+      ctx.editMessageText(`Month’s reward pool: ${Number(res.data.data.pool).toLocaleString()} NEST
 My this month point: ${res.data.data.credit.total}
-1. Successful Invite ${res.data.data.invite.validCount} users: +${res.data.data.credit.detail.invite}
-2. Invitee: +${res.data.data.credit.detail.inviterTx}
-3. My transaction amount ${res.data.data?.myTx || '0'} NEST: +${res.data.data.credit.detail.myTx}
-4. invitee ${res.data.data.invite.validCount} completes a cumulative transaction volume of 10,000 NEST. +${res.data.data.credit.detail.inviteValid}
+1. My transaction amount ${res.data.data?.myTx || '0'} NEST: +${res.data.data.credit.detail.myTx}
+2. invitee ${res.data.data.invite.validCount} completes a cumulative transaction volume of 10,000 NEST. +${res.data.data.credit.detail.inviteValid}
 
-My this month giveaway: ${res.data.data.balance.total} NEST
-1. Invite ${res.data.data.invite.validCount} users, get ${res.data.data.balance.detail.invite} NEST
-2. Payback giveaway, get ${res.data.data.balance.detail.back} NEST
-3. White list giveaway, get ${res.data.data.balance.detail.whitelist} NEST ${res.data.data.whitelist ? '' : '(You are not whitelisted)'}
+90% point reward：${res.data.data.balance.total} NEST
+10% whitelist reward：${res.data.data.balance.detail.whitelist} NEST
 `, Markup.inlineKeyboard([
         [Markup.button.callback('« Back', 'NESTFiEvents')],
       ]))
