@@ -292,15 +292,14 @@ bot.action('butterChicken', async (ctx) => {
       
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
-      await ctx.editMessageText(`Conditions
+      await ctx.editMessageText(`Requirements:
+1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus
+2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
 
-1. 500 NEST accumulated on open futures positions
-2. Leverage greater than 5X
-3. Position opening time greater than 5 minutes
+Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
 
 One lottery for each completion, no limit
 
-Reward: Minimum 30 NEST per draw, maximum 100 NEST.
 Butter chicken updated every minute
 
 Complete Butter chicken: ${tickets}
@@ -336,15 +335,14 @@ bot.action('butterChickenDraw', async (ctx) => {
       
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
-      await ctx.editMessageText(`Conditions
+      await ctx.editMessageText(`Requirements:
+1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus
+2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
 
-1. 1000 NEST accumulated on open futures positions
-2. Leverage greater than 5X
-3. Position opening time greater than 5 minutes
+Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
 
 One lottery for each completion, no limit
 
-Reward: Minimum 30 NEST per draw, maximum 100 NEST.
 Butter chicken updated every minute
 
 Complete Butter chicken: ${tickets}
@@ -550,9 +548,9 @@ My this month point: ${res.data.data.credit.total}
 90% point reward：${res.data.data.balance.total} NEST
 10% whitelist reward：${res.data.data.balance.detail.whitelist} NEST
 
-500NEST futures 5x N times reward : (TBD) NEST
-500NEST futures 10x N times reward: (TBD) NEST
-500NEST futures 20x N times reward: (TBD) NEST
+500NEST futures 5x (TBD) times reward : (TBD) NEST
+500NEST futures 10x (TBD) times reward: (TBD) NEST
+500NEST futures 20x (TBD) times reward: (TBD) NEST
 `, Markup.inlineKeyboard([
         [Markup.button.callback('« Back', 'NESTFiEvents')],
       ]))
