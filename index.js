@@ -293,14 +293,13 @@ bot.action('butterChicken', async (ctx) => {
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
       await ctx.editMessageText(`Requirements:
-1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus
-2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
+1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus 2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
 
 Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
 
-One lottery for each completion, no limit
-
-Butter chicken updated every minute
+Time:
+Butter Chicken Time：Start at 9 am UTC on November 27th and end at 9 am UTC on November 30th
+Reward time: 9 am on December 1st
 
 Complete Butter chicken: ${tickets}
 ${history.map((item) => item).join(',')}
@@ -336,14 +335,13 @@ bot.action('butterChickenDraw', async (ctx) => {
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
       await ctx.editMessageText(`Requirements:
-1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus
-2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
+1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus 2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
 
 Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
 
-One lottery for each completion, no limit
-
-Butter chicken updated every minute
+Time:
+Butter Chicken Time：Start at 9 am UTC on November 27th and end at 9 am UTC on November 30th
+Reward time: 9 am on December 1st
 
 Complete Butter chicken: ${tickets}
 ${history.map((item) => item).join(',')}
