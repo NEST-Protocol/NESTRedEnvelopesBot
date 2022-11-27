@@ -233,7 +233,8 @@ Details：https://medium.com/@nest-protocol/new-nest-finance-event-food-festival
     disable_web_page_preview: true,
    ...Markup.inlineKeyboard([
      [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/21121'), Markup.button.callback('🍕 Pizza', 'pizza')],
-     [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🍺 Beer', 'beer')],
+     [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🐣 Butter chicken S2', 'butterChicken2')],
+     [Markup.button.callback('🍺 Beer', 'beer')],
      [Markup.button.webApp('Rank', 'https://nest-prize-webapp.on.fleek.co/rank/abcd.html'), Markup.button.callback('Settlement', 'settlement')],
      [Markup.button.callback('« Back', 'menu')]
    ])
@@ -274,6 +275,36 @@ ${res.data.data?.detail?.map((item) => (`@${item.username} ${item.state ? '✅' 
     }
   } catch (e) {
     await ctx.answerCbQuery('Some error occurred.')
+  }
+})
+
+bot.action('butterChicken2', async (ctx) => {
+  try {
+    const res = await axios({
+      method: 'get',
+      url: `https://work.parasset.top/workbench-api/activity/user/settle/detail?chatId=${ctx.update.callback_query.from.id}`,
+      headers: {
+        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
+    })
+    if (res.data.code === 0) {
+      await lmt.removeTokens(1)
+      await ctx.answerCbQuery()
+      await ctx.editMessageText(`500NEST futures 5x ${res.data.positions.positions5} times reward : ${res.data.positions.positions5Reward} NEST
+500NEST futures 10x ${res.data.positions.positions10} times reward: ${res.data.positions.positions10Reward} NEST
+500NEST futures 20x ${res.data.positions.positions20} times reward: ${res.data.positions.positions20Reward} NEST
+`, {
+        parse_mode: 'Markdown',
+        disable_web_page_preview: true,
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback('« Back', 'NESTFiEvents')]
+        ])
+      })
+    } else {
+      ctx.answerCbQuery('Some error occurred.')
+    }
+  } catch (e) {
+    ctx.answerCbQuery('Some error occurred.')
   }
 })
 
@@ -545,10 +576,6 @@ My this month point: ${res.data.data.credit.total}
 
 90% point reward：${res.data.data.balance.total} NEST
 10% whitelist reward：${res.data.data.balance.detail.whitelist} NEST
-
-500NEST futures 5x (TBD) times reward : (TBD) NEST
-500NEST futures 10x (TBD) times reward: (TBD) NEST
-500NEST futures 20x (TBD) times reward: (TBD) NEST
 `, Markup.inlineKeyboard([
         [Markup.button.callback('« Back', 'NESTFiEvents')],
       ]))
