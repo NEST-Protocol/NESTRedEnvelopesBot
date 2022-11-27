@@ -290,9 +290,9 @@ bot.action('butterChicken2', async (ctx) => {
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
-      await ctx.editMessageText(`500NEST futures 5x ${res.data.positions.positions5} times reward : ${res.data.positions.positions5Reward} NEST
-500NEST futures 10x ${res.data.positions.positions10} times reward: ${res.data.positions.positions10Reward} NEST
-500NEST futures 20x ${res.data.positions.positions20} times reward: ${res.data.positions.positions20Reward} NEST
+      await ctx.editMessageText(`500NEST futures 5x ${res.data.data.positions.positions5} times reward : ${res.data.data.positions.positions5Reward} NEST
+500NEST futures 10x ${res.data.data.positions.positions10} times reward: ${res.data.data.positions.positions10Reward} NEST
+500NEST futures 20x ${res.data.data.positions.positions20} times reward: ${res.data.data.positions.positions20Reward} NEST
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
