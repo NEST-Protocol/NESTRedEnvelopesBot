@@ -220,7 +220,8 @@ Bonus: 50 NEST+Snatch 10 NEST every day
 Bonus: 20 NEST
 
 🐣 Butter chicken (Volume Bonus)
-Bonus: Each time you accumulate or complete 500 NEST transactions, the maximum reward is 130 NEST
+Requirements: 1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus 2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
+Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
 
 🍺 Beer (Whitelist Reward)
 Bonus: 3% of the total trading volume as a bonus pool.
@@ -548,6 +549,10 @@ My this month point: ${res.data.data.credit.total}
 
 90% point reward：${res.data.data.balance.total} NEST
 10% whitelist reward：${res.data.data.balance.detail.whitelist} NEST
+
+500NEST futures 5x N times reward : (TBD) NEST
+500NEST futures 10x N times reward: (TBD) NEST
+500NEST futures 20x N times reward: (TBD) NEST
 `, Markup.inlineKeyboard([
         [Markup.button.callback('« Back', 'NESTFiEvents')],
       ]))
