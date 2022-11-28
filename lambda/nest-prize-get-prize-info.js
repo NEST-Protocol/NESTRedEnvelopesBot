@@ -35,7 +35,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       body: `id,username,wallet,amount
-${result.Item.record.map((i, index) => `${result.Item.record.length - index},@${i.username},${i.wallet},${i.amount},`).join("\n")}
+${result.Item.record.map((i, index) => `${index + 1},@${i.username},${i.wallet},${i.amount}`).join("\n")}
 `,
       headers: {
         'Content-Type': 'text/csv',
