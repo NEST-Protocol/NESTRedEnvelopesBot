@@ -103,7 +103,7 @@ Giveaway events, click on NESTFi Events.
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
         [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
-        [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet')],
+        [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
         [Markup.button.url('Star Github', 'https://github.com/NEST-Protocol/NEST-Oracle-V4.0')]
       ])
@@ -196,7 +196,7 @@ Giveaway events, click on NESTFi Events.
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
         [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
-        [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet')],
+        [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
         [Markup.button.url('Star Github', 'https://github.com/NEST-Protocol/NEST-Oracle-V4.0')]
       ])
