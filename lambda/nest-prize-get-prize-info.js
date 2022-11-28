@@ -31,15 +31,15 @@ exports.handler = async (event) => {
         body: "No prize found"
       }
     }
+    // return a csv file
     return {
       statusCode: 200,
-      body: `
-${result.Item.config.text}
-
-NEST Prize Result:
-
-${result.Item.record.reverse().map((i, index) => `${result.Item.record.length - index}. @${i.username} have got ${i.amount} NEST!`).join("\n")}
-`
+      body: `id,username,wallet,amount
+${result.Item.record.map((i, index) => `${result.Item.record.length - index},@${i.username},${i.wallet},${i.amount},`).join("\n")}
+`,
+      headers: {
+        'Content-Type': 'text/csv',
+      }
     }
   } catch (e) {
     return {
