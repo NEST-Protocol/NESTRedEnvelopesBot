@@ -105,7 +105,6 @@ Giveaway events, click on NESTFi Events.
         [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
-        [Markup.button.url('Star Github', 'https://github.com/NEST-Protocol/NEST-Oracle-V4.0')]
       ])
     })
   } catch (e) {
@@ -198,7 +197,6 @@ Giveaway events, click on NESTFi Events.
         [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
-        [Markup.button.url('Star Github', 'https://github.com/NEST-Protocol/NEST-Oracle-V4.0')]
       ])
     })
   } catch (e) {
@@ -224,7 +222,7 @@ Requirements: 1. For every 500 futures NEST volume accumulated, you can earn a f
 Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
 
 🍺 Beer (Whitelist Reward)
-Bonus: 3% of the total trading volume as a bonus pool.
+Bonus: 3% of the total number of participating futures NEST will be used as a bonus pool.
 
 With NEST black NFT all rewards X1.3, yellow NFT all rewards X1.15, red NFT all rewards X1.1
 https://finance.nestprotocol.org/#/NFTAuction
@@ -233,8 +231,7 @@ Details：https://medium.com/@nest-protocol/new-nest-finance-event-food-festival
     disable_web_page_preview: true,
    ...Markup.inlineKeyboard([
      [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/21121'), Markup.button.callback('🍕 Pizza', 'pizza')],
-     [Markup.button.callback('🐣 Butter chicken', 'butterChicken'), Markup.button.callback('🐣 Butter chicken S2', 'butterChicken2')],
-     [Markup.button.callback('🍺 Beer', 'beer')],
+     [Markup.button.callback('🐣 Butter chicken S2', 'butterChicken2'), Markup.button.callback('🍺 Beer', 'beer')],
      [Markup.button.webApp('Rank', 'https://nest-prize-webapp.on.fleek.co/rank/abcd.html'), Markup.button.callback('Settlement', 'settlement')],
      [Markup.button.callback('« Back', 'menu')]
    ])
@@ -290,97 +287,22 @@ bot.action('butterChicken2', async (ctx) => {
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
-      await ctx.editMessageText(`500NEST futures 5x ${res.data.data.positions.positions5} times reward : ${res.data.data.positions.positions5Reward} NEST
+      await ctx.editMessageText(`Requirements:
+1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus 2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
+
+Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
+
+Time:
+Butter Chicken Time：Start at 9 am UTC on November 27th and end at 9 am UTC on November 30th
+Reward time: 9 am on December 1st
+
+500NEST futures 5x ${res.data.data.positions.positions5} times reward : ${res.data.data.positions.positions5Reward} NEST
 500NEST futures 10x ${res.data.data.positions.positions10} times reward: ${res.data.data.positions.positions10Reward} NEST
 500NEST futures 20x ${res.data.data.positions.positions20} times reward: ${res.data.data.positions.positions20Reward} NEST
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
         ...Markup.inlineKeyboard([
-          [Markup.button.callback('« Back', 'NESTFiEvents')]
-        ])
-      })
-    } else {
-      ctx.answerCbQuery('Some error occurred.')
-    }
-  } catch (e) {
-    ctx.answerCbQuery('Some error occurred.')
-  }
-})
-
-bot.action('butterChicken', async (ctx) => {
-  try {
-    const res = await axios({
-      method: 'get',
-      url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}`,
-      headers: {
-        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
-      }
-    })
-    if (res.data.code === 0) {
-      const tickets = res.data.data?.tickets || 0
-      const history = res.data.data?.history || []
-      
-      await lmt.removeTokens(1)
-      await ctx.answerCbQuery()
-      await ctx.editMessageText(`Requirements:
-1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus 2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
-
-Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
-
-Time:
-Butter Chicken Time：Start at 9 am UTC on November 27th and end at 9 am UTC on November 30th
-Reward time: 9 am on December 1st
-
-Complete Butter chicken: ${tickets}
-${history.map((item) => item).join(',')}
-`, {
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true,
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback(`Draw (${tickets})`, 'butterChickenDraw', tickets <= 0)],
-          [Markup.button.callback('« Back', 'NESTFiEvents')]
-        ])
-      })
-    } else {
-      ctx.answerCbQuery('Some error occurred.')
-    }
-  } catch (e) {
-    ctx.answerCbQuery('Some error occurred.')
-  }
-})
-
-bot.action('butterChickenDraw', async (ctx) => {
-  try {
-    const res = await axios({
-      method: 'post',
-      url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}`,
-      headers: {
-        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
-      }
-    })
-    if (res.data.code === 0) {
-      const tickets = res.data.data?.tickets || 0
-      const history = res.data.data?.history || []
-      
-      await lmt.removeTokens(1)
-      await ctx.answerCbQuery()
-      await ctx.editMessageText(`Requirements:
-1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus 2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
-
-Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
-
-Time:
-Butter Chicken Time：Start at 9 am UTC on November 27th and end at 9 am UTC on November 30th
-Reward time: 9 am on December 1st
-
-Complete Butter chicken: ${tickets}
-${history.map((item) => item).join(',')}
-`, {
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true,
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback(`Draw (${tickets})`, 'butterChickenDraw', tickets === 0)],
           [Markup.button.callback('« Back', 'NESTFiEvents')]
         ])
       })
@@ -409,7 +331,10 @@ bot.action('beer', async (ctx) => {
 Make a total personal transaction of more than 10,000 NEST. ${res.data.data?.txState ? '✅' : '❌'}
 
 Reward:
-3% of the total monthly trading volume is awarded to the whitelist owners. Of this 3% bonus, 10% goes to the whitelist owners and 90% of the bonus is awarded according to the ranking system.
+Every month, all participants use NEST to complete 3% of the total amount of futures rewards as a reward. It does not count the number of futures, but only counts how many NEST wallet addresses participate in futures.
+
+90% of the 3% goes to the person with the highest rank
+10% of 3% is distributed to everyone
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
@@ -447,7 +372,6 @@ Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Orac
     ...Markup.inlineKeyboard([
       [Markup.button.url('Follow Github', 'https://github.com/NEST-Protocol'), Markup.button.url('Developer Doc', 'https://nestprotocol.org/docs/PVM-Technical-Reference/')],
       [Markup.button.url('New Issues', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues/new'), Markup.button.callback('« Back', 'menu')],
-      [Markup.button.url('Star Github', 'https://github.com/NEST-Protocol/NEST-Oracle-V4.0')]
     ])
   })
 })
@@ -692,7 +616,7 @@ bot.action('send', async (ctx) => {
             ...Markup.inlineKeyboard([
               [Markup.button.callback('Snatch!', 'snatch')],
               [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot'), Markup.button.url('🤩 Star', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-              [Markup.button.url(`Get 50 NEST`, 'https://t.me/nestficommunity/21121')]
+              [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`), Markup.button.url(`Get 50 NEST`, 'https://t.me/nestficommunity/21121')]
             ])
           })
         }
