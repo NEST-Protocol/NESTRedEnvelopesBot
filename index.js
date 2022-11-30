@@ -15,7 +15,7 @@ const lmt = new RateLimiter({
   interval: 'second',
 })
 
-const WHITELIST = [2130493951, 552791389, 1859030053, 5297563752, 5847057058]
+const WHITELIST = [2130493951, 552791389, 1859030053, 5297563752, 5847057058, 5938413739]
 
 const ddbClient = new DynamoDBClient({
   region: 'ap-northeast-1',
