@@ -940,7 +940,7 @@ auth: ${config.auth}
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`
             }
-          }).catch((e) => console.log(e))
+          })
           await lmt.removeTokens(1)
           ctx.reply(`Your wallet address has updated: ${input}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
