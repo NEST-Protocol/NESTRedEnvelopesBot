@@ -927,6 +927,20 @@ auth: ${config.auth}
               ':wallet': input,
             }
           }))
+          await axios({
+            method: 'POST',
+            url: `https://work.parasset.top/workbench-api/activity/user/update`,
+            data: JSON.stringify({
+              user_id: queryUserRes.Item.user_id,
+              invite_code: queryUserRes.Item?.invite_code ?? '',
+              username: queryUserRes.Item?.username ?? '',
+              wallet: input
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`
+            }
+          }).catch((e) => console.log(e))
           await lmt.removeTokens(1)
           ctx.reply(`Your wallet address has updated: ${input}`, Markup.inlineKeyboard([
             [Markup.button.callback('« Back', 'menu')],
