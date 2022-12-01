@@ -209,32 +209,27 @@ Giveaway events, click on NESTFi Events.
 bot.action('NESTFiEvents', async (ctx) => {
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
-  await ctx.editMessageText(`**Event Introduction**
+  await ctx.editMessageText(`Event Introduction
   
 🍔 Hamburger (New user First Order Bonus)
 Bonus: 50 NEST+Snatch 10 NEST every day
 
 🍕 Pizza (Invitation Bonus)
-Bonus: 20 NEST
+Fixed Bonus: 10 NEST.
+Ongoing Bonus:0.5% of the total transaction volume
 
 🐣 Butter chicken (Volume Bonus)
-Requirements: 1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus 2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
-Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
+Bonus: 10x leverage bonus 10–100 NEST.
+20x leverage bonus 20–200 NEST.
 
-🍺 Beer (Whitelist Reward)
-Bonus: 3% of the total number of participating futures NEST will be used as a bonus pool.
-
-With NEST black NFT all rewards X1.3, yellow NFT all rewards X1.15, red NFT all rewards X1.1
-https://finance.nestprotocol.org/#/NFTAuction
-Details：https://medium.com/@nest-protocol/new-nest-finance-event-food-festival-41933fda937c`, {
+Details：https://nest-protocol.medium.com/s3-nestfi-food-festival-1590987ed5fd`, {
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
-   ...Markup.inlineKeyboard([
-     [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/21121'), Markup.button.callback('🍕 Pizza', 'pizza')],
-     [Markup.button.callback('🐣 Butter chicken S2', 'butterChicken2'), Markup.button.callback('🍺 Beer', 'beer')],
-     [Markup.button.webApp('Rank', 'https://nest-prize-webapp.on.fleek.co/rank/abcd.html'), Markup.button.callback('Settlement', 'settlement')],
-     [Markup.button.callback('« Back', 'menu')]
-   ])
+    ...Markup.inlineKeyboard([
+      [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/21121'), Markup.button.callback('🍕 Pizza', 'pizza')],
+      [Markup.button.callback('🐣 Butter chicken', 'butterChicken')],
+      [Markup.button.callback('« Back', 'menu')]
+    ])
   })
 })
 
@@ -250,16 +245,15 @@ bot.action('pizza', async (ctx) => {
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
-      await ctx.editMessageText(`Invitees conditions
-  
-1. 200 NEST accumulated on open futures positions
-2. Leverage greater than 5X
+      await ctx.editMessageText(`**Invitees conditions**
+1. 500 NEST accumulated on open futures positions
+2. Leverage 10X or 20X
 3. Position opening time greater than 5 minutes
+0.5% of initial margin will be awarded to the inviter
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
-Complete pizza:
-${res.data.data?.detail?.map((item) => (`@${item.username} ${item.state ? '✅' : '❌'}`)).join('/n')}
+Complete hamburger: TBD
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
@@ -275,79 +269,56 @@ ${res.data.data?.detail?.map((item) => (`@${item.username} ${item.state ? '✅' 
   }
 })
 
-bot.action('butterChicken2', async (ctx) => {
+bot.action('butterChicken', async (ctx) => {
   try {
-    const res = await axios({
-      method: 'get',
-      url: `https://work.parasset.top/workbench-api/activity/user/settle/detail?chatId=${ctx.update.callback_query.from.id}`,
-      headers: {
-        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
-      }
-    })
-    if (res.data.code === 0) {
-      await lmt.removeTokens(1)
-      await ctx.answerCbQuery()
-      await ctx.editMessageText(`Requirements:
-1. For every 500 futures NEST volume accumulated, you can earn a fixed bonus 2. Order length must be greater than 5 minutes, leverage can choose 5x, 10x, 20x
+    await lmt.removeTokens(1)
+    ctx.answerCbQuery()
+    await ctx.editMessageText(`conditions
+Butter chicken （Trading bonus）
 
-Rewards: 5x leverage rewards 20 NEST, 10x leverage rewards 30 NEST, 20x leverage rewards 50 NEST.
+Requirements:
+1.random bonus for every 500 futures NEST volume accumulated
+2. Order length must be greater than 5 minutes, with leverage options of 10x, 20x（Unlimited times）
 
-Time:
-Butter Chicken Time：Start at 9 am UTC on November 27th and end at 9 am UTC on November 30th
-Reward time: 9 am on December 1st
+Bonus:
+10x leverage bonus 10–100 NEST.
+20x leverage bonus 20–200 NEST.
 
-500NEST futures 5x ${res.data.data.positions.positions5} times reward : ${res.data.data.positions.positions5Reward} NEST
-500NEST futures 10x ${res.data.data.positions.positions10} times reward: ${res.data.data.positions.positions10Reward} NEST
-500NEST futures 20x ${res.data.data.positions.positions20} times reward: ${res.data.data.positions.positions20Reward} NEST
+10x remaining butter chicken: TBD
+20x remaining butter chicken: TBD
 `, {
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true,
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback('« Back', 'NESTFiEvents')]
-        ])
-      })
-    } else {
-      ctx.answerCbQuery('Some error occurred.')
-    }
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true,
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('10x draw', 'draw10x'), Markup.button.callback('20x draw', 'draw20x')],
+        [Markup.button.callback('« Back', 'NESTFiEvents')]
+      ])
+    })
   } catch (e) {
     ctx.answerCbQuery('Some error occurred.')
   }
 })
 
-bot.action('beer', async (ctx) => {
-  try {
-    const res = await axios({
-      method: 'get',
-      url: `https://work.parasset.top/workbench-api/activity/user/whitelist/state?chatId=${ctx.update.callback_query.from.id}`,
-      headers: {
-        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
-      }
-    })
-    
-    if (res.data.code === 0) {
-      await lmt.removeTokens(1)
-      await ctx.answerCbQuery()
-      await ctx.editMessageText(`Complete Beer:
-Make a total personal transaction of more than 10,000 NEST. ${res.data.data?.txState ? '✅' : '❌'}
+bot.action('draw10x', async (ctx) => {
+  await lmt.removeTokens(1)
+  await ctx.answerCbQuery()
+  await ctx.editMessageText(`10x draw, TBD`, {
+    disable_web_page_preview: true,
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'butterChicken')]
+    ])
+  })
+})
 
-Reward:
-Every month, all participants use NEST to complete 3% of the total amount of futures rewards as a reward. It does not count the number of futures, but only counts how many NEST wallet addresses participate in futures.
-
-90% of the 3% goes to the person with the highest rank
-10% of 3% is distributed to everyone
-`, {
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true,
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback('« Back', 'NESTFiEvents')]
-        ])
-      })
-    } else {
-      await ctx.answerCbQuery('Some error occurred.')
-    }
-  } catch (e) {
-    ctx.answerCbQuery('Some error occurred.')
-  }
+bot.action('draw20x', async (ctx) => {
+  await lmt.removeTokens(1)
+  await ctx.answerCbQuery()
+  await ctx.editMessageText(`20x draw, TBD`, {
+    disable_web_page_preview: true,
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('« Back', 'butterChicken')]
+    ])
+  })
 })
 
 bot.action('forDeveloper', async (ctx) => {
@@ -478,37 +449,6 @@ bot.action('checkTwitter', async (ctx) => {
     }
   } catch (e) {
     ctx.answerCbQuery("Some error occurred.")
-  }
-})
-
-bot.action('settlement', async (ctx) => {
-  try {
-    const res = await axios({
-      method: 'get',
-      url: `https://work.parasset.top/workbench-api/activity/user/settle/detail?chatId=${ctx.update.callback_query.from.id}`,
-      headers: {
-        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
-      }
-    })
-    if (res.data.code === 0) {
-      await lmt.removeTokens(1)
-      ctx.answerCbQuery()
-      ctx.editMessageText(`Month’s reward pool: ${Number(res.data.data.pool).toLocaleString()} NEST
-My this month point: ${res.data.data.credit.total}
-1. My transaction amount ${res.data.data?.myTx || '0'} NEST: +${res.data.data.credit.detail.myTx}
-2. invitee ${res.data.data.invite.validCount} completes a cumulative transaction volume of 10,000 NEST. +${res.data.data.credit.detail.inviteValid}
-
-90% point reward：${res.data.data.balance.detail.credit} NEST
-10% whitelist reward：${res.data.data.balance.detail.whitelist} NEST
-`, Markup.inlineKeyboard([
-        [Markup.button.callback('« Back', 'NESTFiEvents')],
-      ]))
-    } else {
-      await ctx.answerCbQuery("Some error occurred.")
-    }
-  } catch (e) {
-    console.log(e)
-    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
