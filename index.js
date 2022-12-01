@@ -104,7 +104,7 @@ Giveaway events, click on NESTFi Events.
       ...Markup.inlineKeyboard([
         [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
-        [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
+        [Markup.button.callback('NESTFi S3 Food Festival', 'NESTFiEvents')],
       ])
     })
   } catch (e) {
@@ -196,7 +196,7 @@ Giveaway events, click on NESTFi Events.
       ...Markup.inlineKeyboard([
         [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
-        [Markup.button.callback('NESTFi Events', 'NESTFiEvents')],
+        [Markup.button.callback('NESTFi S3 Food Festival', 'NESTFiEvents')],
       ])
     })
   } catch (e) {
