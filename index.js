@@ -498,7 +498,7 @@ My this month point: ${res.data.data.credit.total}
 1. My transaction amount ${res.data.data?.myTx || '0'} NEST: +${res.data.data.credit.detail.myTx}
 2. invitee ${res.data.data.invite.validCount} completes a cumulative transaction volume of 10,000 NEST. +${res.data.data.credit.detail.inviteValid}
 
-90% point reward：${res.data.data.balance.total} NEST
+90% point reward：${res.data.data.balance.detail.credit} NEST
 10% whitelist reward：${res.data.data.balance.detail.whitelist} NEST
 `, Markup.inlineKeyboard([
         [Markup.button.callback('« Back', 'NESTFiEvents')],
