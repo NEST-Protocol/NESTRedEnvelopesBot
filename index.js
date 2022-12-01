@@ -254,7 +254,8 @@ bot.action('pizza', async (ctx) => {
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
 Complete pizza:
-Total: ${res.data.data.myTx} NEST , rewards: ${res.data.data.balance.detail.invite} NEST
+Total: ${res.data.data.positions.invite_positions10 + res.data.data.positions.invite_positions20} NEST , rewards: ${res.data.data.balance.detail.invite} NEST
+
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
@@ -307,10 +308,10 @@ Bonus:
 20x leverage bonus 20–200 NEST.
 
 10x remaining butter chicken: ${ticket10Count}
-${ticket10History.map((item, index) => `${index}. ${item} NEST`).join('\n')}
+${ticket10History.map((item) => `${item} NEST`).join('\n')}
 
 20x remaining butter chicken: ${ticket20Count}
-${ticket20History.map((item, index) => `${index}. ${item} NEST`).join('\n')}
+${ticket20History.map((item) => `${item} NEST`).join('\n')}
 `, {
       parse_mode: 'Markdown',
       disable_web_page_preview: true,
@@ -338,7 +339,7 @@ bot.action('draw10x', async (ctx) => {
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
   await ctx.editMessageText(`10x remaining butter chicken: ${ticketCount}
-${ticketHistory.map((item, index) => `${index}. ${item} NEST`).join('\n')}`, {
+${ticketHistory.map((item) => `${item} NEST`).join('\n')}`, {
     disable_web_page_preview: true,
     ...Markup.inlineKeyboard([
       [Markup.button.callback('10x draw', 'draw10x', ticketCount <= 0)],
@@ -361,7 +362,7 @@ bot.action('draw20x', async (ctx) => {
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
   await ctx.editMessageText(`10x remaining butter chicken: ${ticketCount}
-${ticketHistory.map((item, index) => `${index}. ${item} NEST`).join('\n')}`, {
+${ticketHistory.map((item) => `${item} NEST`).join('\n')}`, {
     disable_web_page_preview: true,
     ...Markup.inlineKeyboard([
       [Markup.button.callback('20x draw', 'draw20x', ticketCount <= 0)],
