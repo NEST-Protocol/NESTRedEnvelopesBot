@@ -272,6 +272,27 @@ Total: ${res.data.data.myTx} NEST , rewards: ${res.data.data.balance.detail.invi
 
 bot.action('butterChicken', async (ctx) => {
   try {
+    const [ticket10, ticket20] = await Promise.all([
+      axios({
+        method: 'get',
+        url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}&type=10`,
+        headers: {
+          'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+        }
+      }),
+      axios({
+        method: 'get',
+        url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}&type=20`,
+        headers: {
+          'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+        }
+      })
+    ])
+    const ticket10Count = ticket10.data.data?.tickets || 0
+    const ticket10History = ticket10.data.data?.history || []
+    const ticket20Count = ticket20.data.data?.tickets || 0
+    const ticket20History = ticket20.data.data?.history || []
+    
     await lmt.removeTokens(1)
     ctx.answerCbQuery()
     await ctx.editMessageText(`conditions
@@ -285,13 +306,16 @@ Bonus:
 10x leverage bonus 10–100 NEST.
 20x leverage bonus 20–200 NEST.
 
-10x remaining butter chicken: TBD
-20x remaining butter chicken: TBD
+10x remaining butter chicken: ${ticket10Count}
+${ticket10History.map((item, index) => `${index}. ${item} NEST`).join('\n')}
+
+20x remaining butter chicken: ${ticket20Count}
+${ticket20History.map((item, index) => `${index}. ${item} NEST`).join('\n')}
 `, {
       parse_mode: 'Markdown',
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('10x draw', 'draw10x'), Markup.button.callback('20x draw', 'draw20x')],
+        [Markup.button.callback('10x draw', 'draw10x', ticket10Count <= 0), Markup.button.callback('20x draw', 'draw20x', ticket20Count <= 0)],
         [Markup.button.callback('« Back', 'NESTFiEvents')]
       ])
     })
@@ -301,22 +325,46 @@ Bonus:
 })
 
 bot.action('draw10x', async (ctx) => {
+  const res = await axios({
+    method: 'post',
+    url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}&type=10`,
+    headers: {
+      'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+    }
+  })
+  const ticketCount = res.data.data?.tickets || 0
+  const ticketHistory = res.data.data?.history || []
+  
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
-  await ctx.editMessageText(`10x draw, TBD`, {
+  await ctx.editMessageText(`10x remaining butter chicken: ${ticketCount}
+${ticketHistory.map((item, index) => `${index}. ${item} NEST`).join('\n')}`, {
     disable_web_page_preview: true,
     ...Markup.inlineKeyboard([
+      [Markup.button.callback('10x draw', 'draw10x', ticketCount <= 0)],
       [Markup.button.callback('« Back', 'butterChicken')]
     ])
   })
 })
 
 bot.action('draw20x', async (ctx) => {
+  const res = await axios({
+    method: 'post',
+    url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}&type=20`,
+    headers: {
+      'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+    }
+  })
+  const ticketCount = res.data.data?.tickets || 0
+  const ticketHistory = res.data.data?.history || []
+  
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
-  await ctx.editMessageText(`20x draw, TBD`, {
+  await ctx.editMessageText(`10x remaining butter chicken: ${ticketCount}
+${ticketHistory.map((item, index) => `${index}. ${item} NEST`).join('\n')}`, {
     disable_web_page_preview: true,
     ...Markup.inlineKeyboard([
+      [Markup.button.callback('20x draw', 'draw20x', ticketCount <= 0)],
       [Markup.button.callback('« Back', 'butterChicken')]
     ])
   })
