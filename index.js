@@ -237,7 +237,7 @@ bot.action('pizza', async (ctx) => {
   try {
     const res = await axios({
       method: 'get',
-      url: `https://work.parasset.top/workbench-api/activity/user/invite/detail?chatId=${ctx.update.callback_query.from.id}`,
+      url: `https://work.parasset.top/workbench-api/activity/user/settle/detail?chatId=${ctx.update.callback_query.from.id}`,
       headers: {
         'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
       }
@@ -253,7 +253,8 @@ bot.action('pizza', async (ctx) => {
 
 Your ref link: https://t.me/NESTRedEnvelopesBot?start=${ctx.update.callback_query.from.id}
 
-Complete hamburger: TBD
+Complete pizza:
+Total: ${res.data.data.myTx} NEST , rewards: ${res.data.data.balance.detail.invite} NEST
 `, {
         parse_mode: 'Markdown',
         disable_web_page_preview: true,
