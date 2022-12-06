@@ -226,7 +226,7 @@ Details：https://nest-protocol.medium.com/s3-nestfi-food-festival-1590987ed5fd`
     parse_mode: 'Markdown',
     disable_web_page_preview: true,
     ...Markup.inlineKeyboard([
-      [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/21121'), Markup.button.callback('🍕 Pizza', 'pizza')],
+      [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/47530'), Markup.button.callback('🍕 Pizza', 'pizza')],
       [Markup.button.callback('🐣 Butter chicken', 'butterChicken')],
       [Markup.button.callback('« Back', 'menu')]
     ])
@@ -606,7 +606,7 @@ bot.action('send', async (ctx) => {
             ...Markup.inlineKeyboard([
               [Markup.button.callback('Snatch!', 'snatch')],
               [Markup.button.url('Newcomers', 'https://t.me/NESTRedEnvelopesBot'), Markup.button.url('🤩 Star', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot')],
-              [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`), Markup.button.url(`Get 50 NEST`, 'https://t.me/nestficommunity/21121')]
+              [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`), Markup.button.url(`Get 50 NEST`, 'https://t.me/nestficommunity/47530')]
             ])
           })
         }
@@ -786,7 +786,7 @@ bot.action('snatch', async (ctx) => {
 `,
               {
                 ...Markup.inlineKeyboard([
-                  [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`), Markup.button.url('Get 50 NEST', 'https://t.me/nestficommunity/21121')],
+                  [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`), Markup.button.url('Get 50 NEST', 'https://t.me/nestficommunity/47530')],
                   [Markup.button.url('Win everything with NEST', 'https://wineverything.on.fleek.co/')]
                 ]),
                 parse_mode: 'Markdown',
@@ -802,7 +802,7 @@ ${prize.record.slice(-9).map((record) => `@${record.username} have got ${record.
 @${ctx.update.callback_query.from.username} have got ${amount} NEST!
 `, {
             ...Markup.inlineKeyboard([
-              [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`), Markup.button.url('Get 50 NEST', 'https://t.me/nestficommunity/21121')],
+              [Markup.button.url('Full List', `https://y2qpo4q6i7wbwa4jio7mgvuhc40feltc.lambda-url.ap-northeast-1.on.aws/?chat_id=${ctx.update.callback_query.message.chat.id}&message_id=${ctx.update.callback_query.message.message_id}`), Markup.button.url('Get 50 NEST', 'https://t.me/nestficommunity/47530')],
               [Markup.button.url('Win everything with NEST', 'https://wineverything.on.fleek.co/')]
             ]),
             parse_mode: 'Markdown',
