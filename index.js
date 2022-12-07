@@ -203,7 +203,6 @@ Giveaway events, click on NESTFi Events.
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -455,7 +454,6 @@ ${result.Items.map((item) => {
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -482,7 +480,6 @@ bot.action('setUserWallet', async (ctx) => {
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -591,7 +588,6 @@ For example: {"token": "NEST", "quantity": 10, "amount": 20, "max": 10, "min": 1
     })
   } catch (e) {
     await lmt.removeTokens(1)
-    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -664,20 +660,19 @@ bot.action('send', async (ctx) => {
             ]))
           } catch (e) {
             console.log(e)
-            await ctx.answerCbQuery("Some error occurred.")
           }
         }
       } catch (e) {
         console.log(e)
         await ctx.answerCbQuery("Sorry, I cannot send message to target chat.")
+            .catch((e) => console.log(e))
       }
     } else {
       ctx.answerCbQuery('Sorry, I cannot understand your config. Please try again.')
+          .catch((e) => console.log(e))
     }
   } catch (e) {
     console.log(e)
-    await lmt.removeTokens(1)
-    await ctx.answerCbQuery("Some error occurred.")
   }
 })
 
@@ -697,14 +692,17 @@ bot.action('snatch', async (ctx) => {
     const user = queryUserRes?.Item || undefined
     if (user === undefined || user?.wallet === undefined) {
       await ctx.answerCbQuery('Please Update Wallet First!')
+          .catch((e) => console.log(e))
       return
     }
     if (user?.blocked) {
       await ctx.answerCbQuery('Sorry, you are blocked.')
+          .catch((e) => console.log(e))
       return
     }
     if (user?.twitter_name === undefined) {
       await ctx.answerCbQuery('Please input Twitter First!')
+          .catch((e) => console.log(e))
       return
     }
     try {
@@ -718,20 +716,24 @@ bot.action('snatch', async (ctx) => {
       }))
       if (queryPrizeRes.Item === undefined) {
         ctx.answerCbQuery("The NEST Prize has not found.")
+            .catch((e) => console.log(e))
         return
       }
       const prize = queryPrizeRes.Item
       if (prize.record.some(record => record.user_id === ctx.update.callback_query.from.id)) {
         await ctx.answerCbQuery('You have already snatched this Prize!')
+            .catch((e) => console.log(e))
         return
       }
       if (prize.record.some(record => record.wallet === user.wallet)) {
         await ctx.answerCbQuery('This wallet have already snatched this Prize!')
+            .catch((e) => console.log(e))
         return
       }
       // check if NEST Prize is open
       if (prize.status !== 'open' || prize.balance <= 0) {
         await ctx.answerCbQuery(`Sorry, you are late.`)
+            .catch((e) => console.log(e))
         if (prize.status === 'open') {
           ddbDocClient.send(new UpdateCommand({
             TableName: 'nest-prize',
@@ -763,10 +765,12 @@ bot.action('snatch', async (ctx) => {
           })
           if (!res.data) {
             await ctx.answerCbQuery(`Sorry, you can't. Please read this rule carefully.`)
+                .catch((e) => console.log(e))
             return
           }
         } catch (e) {
           await ctx.answerCbQuery(`Sorry, please try again later.`)
+              .catch((e) => console.log(e))
           return
         }
       }
@@ -810,6 +814,7 @@ bot.action('snatch', async (ctx) => {
         }))
         await lmt.removeTokens(1)
         await ctx.answerCbQuery(`You have got ${amount} NEST!`)
+            .catch((e) => console.log(e))
         if (prize.record.length === 0) {
           await ctx.reply(`🐑 *Here is the Leader Sheep*
 
