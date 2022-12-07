@@ -182,6 +182,7 @@ bot.action('menu', async (ctx) => {
     }))
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
     await ctx.editMessageText(`Welcome to NEST Prize
 
 You wallet: ${queryUserRes?.Item?.wallet || 'Not set yet'},
@@ -207,9 +208,11 @@ Giveaway events, click on NESTFi Events.
 })
 
 bot.action('NESTFiEvents', async (ctx) => {
-  await lmt.removeTokens(1)
-  await ctx.answerCbQuery()
-  await ctx.editMessageText(`Event Introduction
+  try {
+    await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
+    await ctx.editMessageText(`Event Introduction
   
 🍔 Hamburger (New user First Order Bonus)
 Bonus: 50 NEST+Snatch 10 NEST every day
@@ -223,14 +226,17 @@ Bonus: 10x leverage bonus 10–100 NEST.
 20x leverage bonus 20–200 NEST.
 
 Details：https://nest-protocol.medium.com/s3-nestfi-food-festival-1590987ed5fd`, {
-    parse_mode: 'Markdown',
-    disable_web_page_preview: true,
-    ...Markup.inlineKeyboard([
-      [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/47530'), Markup.button.callback('🍕 Pizza', 'pizza')],
-      [Markup.button.callback('🐣 Butter chicken', 'butterChicken')],
-      [Markup.button.callback('« Back', 'menu')]
-    ])
-  })
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true,
+      ...Markup.inlineKeyboard([
+        [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/47530'), Markup.button.callback('🍕 Pizza', 'pizza')],
+        [Markup.button.callback('🐣 Butter chicken', 'butterChicken')],
+        [Markup.button.callback('« Back', 'menu')]
+      ])
+    })
+  } catch (e) {
+    console.log(e)
+  }
 })
 
 bot.action('pizza', async (ctx) => {
@@ -245,6 +251,7 @@ bot.action('pizza', async (ctx) => {
     if (res.data.code === 0) {
       await lmt.removeTokens(1)
       await ctx.answerCbQuery()
+          .catch((e) => console.log(e))
       await ctx.editMessageText(`**Invitees conditions**
 1. 500 NEST accumulated on open futures positions
 2. Leverage 10X or 20X
@@ -326,49 +333,59 @@ ${ticket20History.map((item) => `${item} NEST`).join('\n')}
 })
 
 bot.action('draw10x', async (ctx) => {
-  const res = await axios({
-    method: 'post',
-    url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}&type=10`,
-    headers: {
-      'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
-    }
-  })
-  const ticketCount = res.data.data?.tickets || 0
-  const ticketHistory = res.data.data?.history || []
+  try {
+    const res = await axios({
+      method: 'post',
+      url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}&type=10`,
+      headers: {
+        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
+    })
+    const ticketCount = res.data.data?.tickets || 0
+    const ticketHistory = res.data.data?.history || []
   
-  await lmt.removeTokens(1)
-  await ctx.answerCbQuery()
-  await ctx.editMessageText(`10x remaining butter chicken: ${ticketCount}
+    await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
+    await ctx.editMessageText(`10x remaining butter chicken: ${ticketCount}
 ${ticketHistory.map((item) => `${item} NEST`).join('\n')}`, {
-    disable_web_page_preview: true,
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('10x draw', 'draw10x', ticketCount <= 0)],
-      [Markup.button.callback('« Back', 'butterChicken')]
-    ])
-  })
+      disable_web_page_preview: true,
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('10x draw', 'draw10x', ticketCount <= 0)],
+        [Markup.button.callback('« Back', 'butterChicken')]
+      ])
+    })
+  } catch (e) {
+    console.log(e)
+  }
 })
 
 bot.action('draw20x', async (ctx) => {
-  const res = await axios({
-    method: 'post',
-    url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}&type=20`,
-    headers: {
-      'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
-    }
-  })
-  const ticketCount = res.data.data?.tickets || 0
-  const ticketHistory = res.data.data?.history || []
+  try {
+    const res = await axios({
+      method: 'post',
+      url: `https://work.parasset.top/workbench-api/activity/tickets?chatId=${ctx.update.callback_query.from.id}&type=20`,
+      headers: {
+        'Authorization': `Bearer ${process.env.NEST_API_TOKEN}`,
+      }
+    })
+    const ticketCount = res.data.data?.tickets || 0
+    const ticketHistory = res.data.data?.history || []
   
-  await lmt.removeTokens(1)
-  await ctx.answerCbQuery()
-  await ctx.editMessageText(`10x remaining butter chicken: ${ticketCount}
+    await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
+    await ctx.editMessageText(`10x remaining butter chicken: ${ticketCount}
 ${ticketHistory.map((item) => `${item} NEST`).join('\n')}`, {
-    disable_web_page_preview: true,
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback('20x draw', 'draw20x', ticketCount <= 0)],
-      [Markup.button.callback('« Back', 'butterChicken')]
-    ])
-  })
+      disable_web_page_preview: true,
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('20x draw', 'draw20x', ticketCount <= 0)],
+        [Markup.button.callback('« Back', 'butterChicken')]
+      ])
+    })
+  } catch (e) {
+    console.log(e)
+  }
 })
 
 bot.action('forDeveloper', async (ctx) => {
@@ -376,9 +393,11 @@ bot.action('forDeveloper', async (ctx) => {
   if (isBot) {
     return
   }
-  await lmt.removeTokens(1)
-  await ctx.answerCbQuery()
-  await ctx.editMessageText(`*Another Revolution in Blockchain*
+  try {
+    await lmt.removeTokens(1)
+    await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
+    await ctx.editMessageText(`*Another Revolution in Blockchain*
 
 *NEST PVM*
 NEST Probability Virtual Machine (PVM) is a virtual machine-like structure based on the basic function library. Developers can develop various exciting applications based on the function library, similar to Ethereum virtual machine (EVM) programming.
@@ -388,13 +407,16 @@ Github repository: [NEST-PVM-V1.0](https://github.com/NEST-Protocol/NEST-PVM-V1.
 NEST oracle is the only truly decentralized oracle on the market today.
 Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Oracle-V4.0). [How to Mining](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-mining/), [How to Call Price](https://nestprotocol.org/docs/Technical-Reference-NEST-Oracle/#how-to-call-price)
 `, {
-    parse_mode: 'Markdown',
-    disable_web_page_preview: true,
-    ...Markup.inlineKeyboard([
-      [Markup.button.url('Follow Github', 'https://github.com/NEST-Protocol'), Markup.button.url('Developer Doc', 'https://nestprotocol.org/docs/PVM-Technical-Reference/')],
-      [Markup.button.url('New Issues', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues/new'), Markup.button.callback('« Back', 'menu')],
-    ])
-  })
+      parse_mode: 'Markdown',
+      disable_web_page_preview: true,
+      ...Markup.inlineKeyboard([
+        [Markup.button.url('Follow Github', 'https://github.com/NEST-Protocol'), Markup.button.url('Developer Doc', 'https://nestprotocol.org/docs/PVM-Technical-Reference/')],
+        [Markup.button.url('New Issues', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues/new'), Markup.button.callback('« Back', 'menu')],
+      ])
+    })
+  } catch (e) {
+    console.log(e)
+  }
 })
 
 bot.action('getUserReferrals', async (ctx) => {
@@ -417,6 +439,7 @@ bot.action('getUserReferrals', async (ctx) => {
     }
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
     await ctx.editMessageText(`My Referrals:
 
 ${result.Items.map((item) => {
@@ -454,6 +477,7 @@ bot.action('setUserWallet', async (ctx) => {
     }))
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
     await ctx.editMessageText('Please send your wallet address:')
   } catch (e) {
     console.log(e)
@@ -507,6 +531,7 @@ bot.action('admin', async (ctx) => {
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -514,6 +539,7 @@ bot.action('admin', async (ctx) => {
   }
   await lmt.removeTokens(1)
   await ctx.answerCbQuery()
+      .catch((e) => console.log(e))
   await ctx.editMessageText('NEST Prize Admin Portal', Markup.inlineKeyboard([
     [Markup.button.callback('Send', 'setConfig')],
   ]))
@@ -524,6 +550,7 @@ bot.action('setConfig', async (ctx) => {
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -542,6 +569,7 @@ bot.action('setConfig', async (ctx) => {
     }))
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
     await ctx.editMessageText(`Enter NEST Prize config with json format.
 
 *parameters:*
@@ -572,6 +600,7 @@ bot.action('send', async (ctx) => {
   if (WHITELIST.findIndex((id) => id === chat_id) === -1) {
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
+        .catch((e) => console.log(e))
     await ctx.reply(`Sorry, ${chat_id} are not allowed to use this command!`, Markup.inlineKeyboard([
       [Markup.button.url('New Issue', 'https://github.com/NEST-Protocol/NESTRedEnvelopesBot/issues')]
     ]))
@@ -601,6 +630,7 @@ bot.action('send', async (ctx) => {
         } else {
           await lmt.removeTokens(1)
           await ctx.answerCbQuery()
+              .catch((e) => console.log(e))
           res = await ctx.telegram.sendMessage(config.chatId, config.text, {
             parse_mode: 'Markdown',
             ...Markup.inlineKeyboard([
@@ -628,6 +658,7 @@ bot.action('send', async (ctx) => {
               },
             }))
             await ctx.answerCbQuery()
+                .catch((e) => console.log(e))
             await ctx.editMessageText('NEST Prize Sent Success!', Markup.inlineKeyboard([
               [Markup.button.callback('« Back', 'admin')],
             ]))
@@ -817,15 +848,12 @@ From: ${ctx.update.callback_query.message.chat.title} @${ctx.update.callback_que
         }).catch((e) => console.log(e))
       } catch (e) {
         console.log(e)
-        ctx.answerCbQuery("Some error occurred.")
       }
     } catch (e) {
       console.log(e)
-      ctx.answerCbQuery("Some error occurred.")
     }
   } catch (e) {
     console.log(e)
-    ctx.answerCbQuery("Some error occurred.")
   }
 })
 
