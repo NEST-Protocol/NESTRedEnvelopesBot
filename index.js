@@ -1,5 +1,5 @@
 const {Telegraf, Markup} = require('telegraf')
-const {PutCommand, DynamoDBDocumentClient, UpdateCommand, GetCommand, QueryCommand} = require('@aws-sdk/lib-dynamodb');
+const {PutCommand, DynamoDBDocumentClient, UpdateCommand, GetCommand} = require('@aws-sdk/lib-dynamodb');
 const {DynamoDBClient} = require('@aws-sdk/client-dynamodb');
 const {isAddress} = require("ethers/lib/utils");
 const axios = require('axios')
@@ -102,7 +102,7 @@ Giveaway events, click on NESTFi Events.
 /help`, {
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('🤩', 'forDeveloper')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi S3 Food Festival', 'NESTFiEvents')],
       ])
@@ -195,7 +195,7 @@ Giveaway events, click on NESTFi Events.
 /help`, {
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('My Referrals', 'getUserReferrals'), Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('🤩', 'forDeveloper')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi S3 Food Festival', 'NESTFiEvents')],
       ])
@@ -415,45 +415,6 @@ Github repository: [NEST-Oracle-V4.0](https://github.com/NEST-Protocol/NEST-Orac
     })
   } catch (e) {
     console.log(e)
-  }
-})
-
-bot.action('getUserReferrals', async (ctx) => {
-  const isBot = ctx.update.callback_query.from.is_bot
-  if (isBot) {
-    return
-  }
-  try {
-    const result = await ddbDocClient.send(new QueryCommand({
-      TableName: 'nest-prize-users',
-      IndexName: 'invite-code-index',
-      KeyConditionExpression: 'invite_code = :invite_code',
-      ExpressionAttributeValues: {
-        ':invite_code': ctx.update.callback_query.from.id,
-      }
-    }))
-    if (result.Count === 0) {
-      await ctx.answerCbQuery("You have no referrals yet.")
-      return
-    }
-    await lmt.removeTokens(1)
-    await ctx.answerCbQuery()
-        .catch((e) => console.log(e))
-    await ctx.editMessageText(`My Referrals:
-
-${result.Items.map((item) => {
-      if (item?.username) {
-        return `@${item.username}`
-      } else {
-        return item.user_id
-      }
-    }).join(',')
-    }`, Markup.inlineKeyboard([
-      [Markup.button.callback('« Back', 'menu')],
-    ]))
-  } catch (e) {
-    console.log(e)
-    await lmt.removeTokens(1)
   }
 })
 
