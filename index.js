@@ -24,6 +24,7 @@ const ddbClient = new DynamoDBClient({
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
 const token = process.env.BOT_TOKEN
+const nest_token = process.env.NEST_API_TOKEN
 if (token === undefined) {
   throw new Error('BOT_TOKEN must be provided!')
 }
@@ -102,9 +103,10 @@ Giveaway events, click on NESTFi Events.
 /help`, {
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('🤩', 'forDeveloper'), Markup.button.callback('Invite', 'invite')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi S3 Food Festival', 'NESTFiEvents')],
+        [Markup.button.callback('Share my Futures', 'shareMyFutures')],
       ])
     })
   } catch (e) {
@@ -112,6 +114,16 @@ Giveaway events, click on NESTFi Events.
     await ctx.reply("Some error occurred.", Markup.inlineKeyboard([
       [Markup.button.callback('« Back', 'menu')],
     ]))
+  }
+})
+
+bot.action('invite', async (ctx) => {
+  await lmt.removeTokens(1)
+  try {
+    await ctx.replyWithPhoto(`https://nest-prize-web-app.vercel.app/api/share?from=${ctx.update.callback_query.from.id}`)
+  } catch (e) {
+    console.log(e)
+    await ctx.reply(`https://nest-prize-web-app.vercel.app/api/share?from=${ctx.update.callback_query.from.id}`)
   }
 })
 
@@ -195,14 +207,42 @@ Giveaway events, click on NESTFi Events.
 /help`, {
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
-        [Markup.button.callback('🤩', 'forDeveloper')],
+        [Markup.button.callback('🤩', 'forDeveloper'), Markup.button.callback('Invite', 'invite')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi S3 Food Festival', 'NESTFiEvents')],
+        [Markup.button.callback('Share my Futures', 'shareMyFutures')],
       ])
     })
   } catch (e) {
     console.log(e)
     await lmt.removeTokens(1)
+  }
+})
+
+bot.action('shareMyFutures', async (ctx) => {
+  try {
+    const queryUserRes = await ddbDocClient.send(new GetCommand({
+      TableName: 'nest-prize-users',
+      Key: {
+        user_id: ctx.update.callback_query.from.id,
+      },
+    }))
+    
+    const res = await axios({
+      method: 'GET',
+      url: `https://cms.nestfi.net/bot-api/red-bot/user/future?wallet=${queryUserRes?.Item?.wallet}`,
+      headers: {
+        'Authorization': nest_token,
+      }
+    })
+    const orders = res.data.value
+    await ctx.answerCbQuery()
+    const keyboards = orders.map((order) => {
+      return [Markup.button.url(`${order.token} ${order.level}x ${order.orientation} ${order.rate}%`, `https://nest-prize-web-app.vercel.app/api/shareorder?from=${ctx.update.callback_query.from.id}&rate=${order.rate}&orientation=${order.orientation}&level=${order.level}&token=${order.token}&open_price=${order.open_price}&now_price=${order.now_price}`)]
+    })
+    await ctx.editMessageText(`Share your futures orders: `, Markup.inlineKeyboard(keyboards))
+  } catch (e) {
+    console.log(e)
   }
 })
 
@@ -342,7 +382,7 @@ bot.action('draw10x', async (ctx) => {
     })
     const ticketCount = res.data.data?.tickets || 0
     const ticketHistory = res.data.data?.history || []
-  
+    
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
         .catch((e) => console.log(e))
@@ -370,7 +410,7 @@ bot.action('draw20x', async (ctx) => {
     })
     const ticketCount = res.data.data?.tickets || 0
     const ticketHistory = res.data.data?.history || []
-  
+    
     await lmt.removeTokens(1)
     await ctx.answerCbQuery()
         .catch((e) => console.log(e))
