@@ -240,7 +240,9 @@ bot.action('shareMyFutures', async (ctx) => {
     const keyboards = orders.map((order) => {
       return [Markup.button.url(`${order.token} ${order.level}x ${order.orientation} ${order.rate}%`, `https://nest-prize-web-app.vercel.app/api/shareorder?from=${ctx.update.callback_query.from.id}&rate=${order.rate}&orientation=${order.orientation}&level=${order.level}&token=${order.token}&open_price=${order.open_price}&now_price=${order.now_price}`)]
     })
-    await ctx.editMessageText(`Share your futures orders: `, Markup.inlineKeyboard(keyboards))
+    // add back button to keyboards
+    keyboards.push([Markup.button.callback('« Back', 'menu')])
+    await ctx.editMessageText(`Share your futures orders:`, Markup.inlineKeyboard(keyboards))
   } catch (e) {
     console.log(e)
   }
