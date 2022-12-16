@@ -106,7 +106,7 @@ Giveaway events, click on NESTFi Events.
         [Markup.button.callback('🤩', 'forDeveloper'), Markup.button.callback('Invite', 'invite')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi S3 Food Festival', 'NESTFiEvents')],
-        [Markup.button.callback('Share my Futures', 'shareMyFutures')],
+        [Markup.button.callback('Share my Futures', 'shareMyFutures'), Markup.button.url('go to futures', 'https://finance.nestprotocol.org/#/futures')],
       ])
     })
   } catch (e) {
@@ -210,7 +210,7 @@ Giveaway events, click on NESTFi Events.
         [Markup.button.callback('🤩', 'forDeveloper'), Markup.button.callback('Invite', 'invite')],
         [Markup.button.callback('Set Twitter', 'inputUserTwitter'), Markup.button.callback('Set Wallet', 'setUserWallet', queryUserRes?.Item?.wallet)],
         [Markup.button.callback('NESTFi S3 Food Festival', 'NESTFiEvents')],
-        [Markup.button.callback('Share my Futures', 'shareMyFutures')],
+        [Markup.button.callback('Share my Futures', 'shareMyFutures'), Markup.button.url('go to futures', 'https://finance.nestprotocol.org/#/futures')],
       ])
     })
   } catch (e) {
