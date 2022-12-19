@@ -270,7 +270,7 @@ Details：https://nest-protocol.medium.com/s3-nestfi-food-festival-1590987ed5fd`
       parse_mode: 'Markdown',
       disable_web_page_preview: true,
       ...Markup.inlineKeyboard([
-        [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/47530'), Markup.button.callback('🍕 Pizza', 'pizza')],
+        [Markup.button.url('🍔 Hamburger', 'https://t.me/nestficommunity/63199'), Markup.button.callback('🍕 Pizza', 'pizza')],
         [Markup.button.callback('🐣 Butter chicken', 'butterChicken')],
         [Markup.button.callback('« Back', 'menu')]
       ])
